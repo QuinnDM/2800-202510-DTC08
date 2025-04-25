@@ -120,7 +120,7 @@ nature-nexus/
 
 - Ben Le - lechiben@gmail.com
 - Mason Young - masonyoung1997@gmail.com
-- Quinn Desforge Major - QuinnDesforgeMajor@gmail.com (Professional)
+- Quinn Desforge Major - QuinnDesforgeMajor@gmail.com
 - Andrei Chepakovich - andreichepakovich@gmail.com
 
 ## Acknowledgements
