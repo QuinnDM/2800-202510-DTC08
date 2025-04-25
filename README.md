@@ -118,8 +118,10 @@ nature-nexus/
 
 ## Contact
 
-- Emma Chen - echen@naturenexus.org
-- Noah Williams - nwilliams@naturenexus.org
+- Ben Le - lechiben@gmail.com
+- Mason Young - masonyoung1997@gmail.com
+- Quinn Desforge Major - QuinnDesforgeMajor@gmail.com (Professional)
+- Andrei Chepakovich - andreichepakovich@gmail.com
 
 ## Acknowledgements
 
