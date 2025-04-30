@@ -84,8 +84,9 @@ nature-nexus/
 
 ---
 
-## Contributors
-
+## About Us
+Team Name: DTC-08
+Team Members:
 - Hi, my name is **Ben Le**. I'm excited about this project because it combines my passion for technology and urban ecology. Fun fact: I've documented over 150 bird species in my city neighborhood.
 - **Mason** - Environmental science student with a focus on urban ecosystems. Fun fact: I maintain a native plant garden on my apartment balcony.
 - **Andrei** - Full-stack developer with experience in AI-powered applications. Fun fact: I once spotted a rare hawk species during my morning commute.
