@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let jawgStreetMap = L.tileLayer("/tiles/{z}/{x}/{y}", {
         attribution: 'Tiles &copy; <a href="https://jawg.io">Jawg</a>, &copy; OpenStreetMap contributors',
-        minZoom: 3, 
+        minZoom: 3,
         maxZoom: 22,
     }).addTo(map);
 
@@ -35,4 +35,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Add layer control to the map to enable toggling on and off of layer groups
     var layer_control = L.control.layers(baseMaps).addTo(map);
+
+    function styleDropDownLayers() {
+        const labels = document.querySelectorAll('.leaflet-control-layers label');
+
+        labels.forEach(label => {
+            const text = label.textContent.trim();
+
+            // Match the label by its name and apply custom background to represent layer
+            if (text === 'Satellite') {
+                label.style.backgroundImage = "url('../images/satellite.png')";
+            } else if (text === 'Street Map') {
+                label.style.backgroundImage = "url('../images/streetmap.png')";
+            }
+        });
+    }
+
+    styleDropDownLayers()
 });
