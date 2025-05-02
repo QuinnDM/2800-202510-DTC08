@@ -13,22 +13,22 @@ const port = 3000;
 
 // MongoDB Connection using .env
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect(process.env.MONGODB_URI) 
   .then(async () => {
-    console.log("Connected to MongoDB");
+    console.log("Connected to MongoDB"); 
   })
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // Middleware
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true })); 
 app.use(
   session({
-    secret: "your-secret-key",
+    secret: "your-secret-key", 
     resave: false,
     saveUninitialized: false,
   })
 );
-app.use(express.static("public"));
+app.use(express.static("public")); 
 app.set("views", "./views");
 app.set("view engine", "ejs");
 
@@ -39,6 +39,10 @@ app.get("/", (req, res) => {
 
 app.get("/index", (req, res) => {
   res.render("index", { error: null, title: "Nature Nexus - Home" });
+});
+
+app.get("/explore", (req, res) => {
+  res.render("explore", { error: null });
 });
 
 app.get("/login", (req, res) => {
