@@ -38,7 +38,7 @@
             ></path>
           </svg>
         </div>
-        <h1 class="text-xl font-bold">Nature Nexus</h1>
+        <h1 class="text-xl md:text-2xl lg:text-3xl font-bold">Nature Nexus</h1>
         <img src="../public/images/logo.png" alt="" />
       </div>
       <div>
@@ -49,15 +49,17 @@
     </header>
 
     <!-- Main Content (with padding to avoid overlap with header and nav) -->
-    <main class="flex-1 pt-16 pb-16 overflow-y-auto">
+    <main class="flex-1 pt-16 pb-16 overflow-y-auto px-4 md:px-8 max-w-screen-lg mx-auto">
       <!-- Home Section -->
       <section id="Home" class="tabcontent px-4 block">
-        <h2 class="text-2xl font-bold mb-4">
-          Welcome<% if (typeof user !== 'undefined' && user) { %>, <%=
-          user.email || user.username %><% } %>!
-        </h2>
-        <p class="text-lg mb-6">Discover the wonders of nature around you.</p>
-        <div class="bg-white rounded-lg shadow p-4 mb-6">
+        <div class="md:w-1/2"></div>
+          <h2 class="text-2xl md:text-3xl font-bold mb-4">
+            Welcome<% if (typeof user !== 'undefined' && user) { %>, <%=
+            user.email || user.username %><% } %>!
+          </h2>
+          <p class="text-lg mb-6">Discover the wonders of nature around you.</p>
+        </div>
+        <div class="md:w-1/2 bg-white rounded-lg shadow p-4 mb-6">
           <h3 class="text-xl font-semibold mb-2">Your Stats</h3>
           <p>
             Birds Identified: <span class="font-bold text-green-600">0</span>
@@ -162,7 +164,7 @@
 
     <!-- Bottom Navigation -->
     <nav
-      class="bg-white border-t fixed bottom-0 left-0 right-0 flex justify-around py-2 z-10 footer-safe-area"
+      class="bg-white border-t fixed bottom-0 left-0 right-0 flex justify-around py-2 z-10 footer-safe-area md:hidden"
     >
       <button
         class="flex flex-col items-center text-green-600 tablink active"
