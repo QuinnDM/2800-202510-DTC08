@@ -1,0 +1,72 @@
+body {
+    padding: 0;
+    margin: 0;
+}
+
+html,
+body,
+#map {
+    height: 100%;
+    width: 100vw
+}
+
+#layer_button {
+    width: 34px;
+    height: 34px;
+    background-color: rgb(255, 254, 254);
+    /* position: absolute */
+    position: fixed;
+    top: 100px;
+    right: 10px;
+    /* bring your own prefixes */
+    z-index: 1000;
+    border-radius: 5px;
+    border-style: solid;
+    border-width: 2px;
+    border-color: rgb(169, 169, 169);
+}
+
+#layer_button:hover {
+    background-color: lightblue;
+}
+
+#layers {
+    padding-left: 2em;
+    padding-right: 2em;
+    visibility: none;
+    /* width: 200px;
+    height: 100px; */
+    background-color: rgb(255, 254, 254);
+    /* position: absolute */
+    position: fixed;
+    top: 150px;
+    right: 13px;
+    /* bring your own prefixes */
+    z-index: 1000;
+    border-radius: 5px;
+    border-style: solid;
+    border-width: 2px;
+    border-color: rgb(169, 169, 169);
+}
+
+#satellite_layer {
+    /* background-color: green; */
+}
+
+/* Style all labels inside the layer control */
+.leaflet-control-layers label {
+    background-color: #f0f0f0;
+    /* light gray background */
+    padding: 4px 6px;
+    margin: 2px 0;
+    border-radius: 4px;
+    display: block;
+    /* ensures background covers full label */
+    transition: background-color 0.3s;
+}
+
+/* Optional: hover effect */
+.leaflet-control-layers label:hover {
+    background-color: #d0e6ff;
+    /* light blue on hover */
+}
