@@ -16,40 +16,10 @@
   </head>
   <body class="bg-green-50 text-gray-800 flex flex-col min-h-screen">
     <!-- Fixed Header -->
-    <header
-      class="bg-gradient-to-r from-green-600 to-blue-500 text-white py-4 px-4 flex items-center justify-between fixed top-0 left-0 right-0 z-10"
-    >
-      <div class="flex items-center space-x-3">
-        <div
-          class="w-8 h-8 bg-white rounded-full flex items-center justify-center"
-        >
-          <svg
-            class="w-6 h-6 text-green-600"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
-            ></path>
-          </svg>
-        </div>
-        <h1 class="text-xl md:text-2xl lg:text-3xl font-bold">Nature Nexus</h1>
-        <img src="../public/images/logo.png" alt="" />
-      </div>
-      <div>
-        <% if (typeof user !== 'undefined' && user) { %>
-        <span><%= user.email || user.username %></span>
-        <% } %>
-      </div>
-    </header>
+    <%- include('partials/header') %>
 
     <!-- Main Content (with padding to avoid overlap with header and nav) -->
-    <main class="flex-1 pt-16 pb-16 overflow-y-auto px-4 md:px-8 max-w-screen-lg mx-auto">
+    <main class="flex-1 mt-10 pt-16 pb-16 overflow-y-auto px-4 md:px-8 max-w-screen-lg mx-auto">
       <!-- Home Section -->
       <section id="Home" class="tabcontent px-4 block">
         <div class="md:w-1/2"></div>
