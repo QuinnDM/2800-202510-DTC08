@@ -1,6 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
     var map = L.map("map").fitWorld();
 
+    map.zoomControl.setPosition('topright');
+
     L.tileLayer("/tiles/{z}/{x}/{y}", {
         attribution: 'Tiles &copy; <a href="https://jawg.io">Jawg</a>, &copy; OpenStreetMap contributors',
         minZoom: 3, 
