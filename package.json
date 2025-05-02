@@ -1,0 +1,28 @@
+{
+  "name": "nature-nexus",
+  "version": "1.0.0",
+  "description": "Nature Nexus connects urban dwellers with the biodiversity around them by simplifying species identification and observation. This app helps users document and share wildlife sightings in cities, creating valuable data for conservation efforts while building community around urban nature appreciation. Key features include:",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "connect-flash": "^0.1.1",
+    "connect-mongo": "^5.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-session": "^1.18.1",
+    "mongodb": "^6.16.0",
+    "mongoose": "^8.14.1",
+    "session-file-store": "^1.5.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
