@@ -16,9 +16,23 @@ document.addEventListener("DOMContentLoaded", function () {
         map.panInsideBounds(bounds, { animate: false });
     })
 
-    L.tileLayer("/tiles/{z}/{x}/{y}", {
+    let jawgStreetMap = L.tileLayer("/tiles/{z}/{x}/{y}", {
         attribution: 'Tiles &copy; <a href="https://jawg.io">Jawg</a>, &copy; OpenStreetMap contributors',
         minZoom: 3, 
         maxZoom: 22,
     }).addTo(map);
+
+    // Esri world imagery base map
+    let esriWorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    });
+
+    // creating layer groups
+    var baseMaps = {
+        "Street Map": jawgStreetMap,
+        "Satellite": esriWorldImagery
+    };
+
+    // Add layer control to the map to enable toggling on and off of layer groups
+    var layer_control = L.control.layers(baseMaps).addTo(map);
 });
