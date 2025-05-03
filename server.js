@@ -120,7 +120,104 @@ app.post("/identify", async (req, res) => {
   }
 });
 
+// API to fetch bird details
+app.post("/bird-details", async (req, res) => {
+  const {
+    scientificName,
+    latitude = 49.299999,
+    longitude = -123.139999,
+  } = req.body; // Default to Stanley Park
+  const EBIRD_API_KEY = process.env.EBIRD_API_KEY;
+  const TAXONOMY_URL =
+    "https://api.ebird.org/v2/ref/taxonomy/ebird?fmt=json&locale=en&cat=species";
 
+  try {
+    // Get species code from taxonomy
+    const taxonomyResponse = await fetch(TAXONOMY_URL, {
+      headers: { "x-ebirdapitoken": EBIRD_API_KEY },
+    });
+    if (!taxonomyResponse.ok) {
+      throw new Error("eBird Taxonomy Error");
+    }
+
+    const taxonomy = await taxonomyResponse.json();
+    const species = taxonomy.find(
+      (s) => s.sciName.toLowerCase() === scientificName.toLowerCase()
+    );
+    if (!species) {
+      return res
+        .status(404)
+        .json({ error: `Species ${scientificName} not found` });
+    }
+
+    // Get recent sightings
+    const sightingsUrl = `https://api.ebird.org/v2/data/obs/geo/recent/${species.speciesCode}?lat=${latitude}&lng=${longitude}`;
+    const sightingsResponse = await fetch(sightingsUrl, {
+      headers: { "x-ebirdapitoken": EBIRD_API_KEY },
+    });
+    const sightings = sightingsResponse.ok
+      ? await sightingsResponse.json()
+      : [];
+
+    // Construct response (habitat inferred from sightings)
+    res.json({
+      commonName: species.comName,
+      scientificName: species.sciName,
+      family: species.familyComName,
+      sightings: sightings.slice(0, 5).map((obs) => ({
+        location: obs.locName,
+        date: obs.obsDt,
+        count: obs.howMany || "N/A",
+      })),
+      habitat:
+        "Inferred from sightings; check external sources for detailed habitat data",
+    });
+  } catch (error) {
+    console.error("eBird Error:", error);
+    res.status(500).json({ error: "Failed to fetch bird details" });
+  }
+});
+
+// fetch plantnet API
+app.post("/plant-details", async (req, res) => {
+  const { imageUrl, scientificName } = req.body; // Use Gemini's scientific name as fallback
+  const PLANTNET_API_KEY = process.env.PLANTNET_API_KEY;
+  const PLANTNET_URL = "https://my-api.plantnet.org/v2/identify/all";
+
+  try {
+    // Call PlantNet API
+    const plantnetResponse = await fetch(PLANTNET_URL, {
+      method: "POST",
+      headers: { "Content-Type": "multipart/form-data" }, // Note: Requires form-data handling
+      body: JSON.stringify({
+        "api-key": PLANTNET_API_KEY,
+        images: [imageUrl],
+        lang: "en",
+      }),
+    });
+
+    if (!plantnetResponse.ok) {
+      throw new Error("PlantNet Error");
+    }
+
+    const plantnetData = await plantnetResponse.json();
+    const topResult = plantnetData.results[0]?.species || {};
+
+    res.json({
+      commonName: topResult.commonNames?.[0] || "N/A",
+      scientificName: topResult.scientificName || scientificName,
+      family: topResult.family?.scientificName || "N/A",
+      confidence: plantnetData.results[0]?.score || "N/A",
+      metadata: {
+        distribution: "Check external sources for detailed distribution", // PlantNet metadata is limited
+        note: "PlantNet provides basic metadata; use Trefle for detailed care info",
+      },
+    });
+  } catch (error) {
+    console.error("PlantNet Error:", error);
+    res.status(500).json({ error: "Failed to fetch plant details" });
+  }
+});
 
 // Routes
 app.get("/", (req, res) => {
