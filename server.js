@@ -59,6 +59,69 @@ app.post("/upload", upload.single("image"), async (req, res) => {
     res.status(500).json({ error: "Failed to upload image" });
   }
 });
+
+
+// Use Gemini to identify the birds or plant
+app.post("/identify", async (req, res) => {
+  const { imageUrl } = req.body; // Get Cloudinary URL from request
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+  // Create Gemini request
+  const geminiRequest = {
+    contents: [
+      {
+        parts: [
+          {
+            text: "Identify whether this is a bird or plant. If a bird, provide its common name, scientific name, and confirm it's a bird. If a plant, provide its common name, scientific name, and confirm it's a plant.",
+          },
+          { text: `Image URL: ${imageUrl}` },
+        ],
+      },
+    ],
+  };
+
+  try {
+    // Call Gemini API
+    const geminiResponse = await fetch(GEMINI_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(geminiRequest),
+    });
+
+    if (!geminiResponse.ok) {
+      throw new Error(`Gemini Error: ${geminiResponse.statusText}`);
+    }
+
+    const geminiData = await geminiResponse.json();
+    const speciesInfo = geminiData.candidates[0].content.parts[0].text;
+
+    // Parse response (simple parsing; use regex for robustness)
+    const isBird = speciesInfo.toLowerCase().includes("bird");
+    const isPlant = speciesInfo.toLowerCase().includes("plant");
+    let commonName, scientificName;
+
+    if (isBird || isPlant) {
+      commonName = speciesInfo.match(/Common Name: ([^\n,]+)/)?.[1]?.trim();
+      scientificName = speciesInfo
+        .match(/Scientific Name: ([^\n]+)/)?.[1]
+        ?.trim();
+    }
+
+    res.json({
+      type: isBird ? "bird" : isPlant ? "plant" : "unknown",
+      commonName,
+      scientificName,
+      rawResponse: speciesInfo,
+    });
+  } catch (error) {
+    console.error("Gemini Error:", error);
+    res.status(500).json({ error: "Failed to identify species" });
+  }
+});
+
+
+
 // Routes
 app.get("/", (req, res) => {
   res.redirect("/index");
