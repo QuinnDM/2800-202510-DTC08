@@ -14,8 +14,22 @@ document.addEventListener("DOMContentLoaded", function () {
         // resetButton: '🔍',
     });
 
-    // Update geosearch reset button style. Cannot seem to get it to work using css.
+
     map.addControl(searchControl);
+
+    // Update geosearch reset button style. Cannot seem to get it to work using css.
+    function updateGeosearchResetButtonStyle() {
+        const resetButton = document.querySelector('.leaflet-control-geosearch .reset');
+        if (resetButton) {
+            resetButton.style.position = 'absolute';
+            resetButton.style.top = '4px';
+            resetButton.style.right = '10px';
+            resetButton.style.backgroundColor = 'white';
+            resetButton.style.border = 'none';
+        }
+    }
+
+    map.on("load", updateGeosearchResetButtonStyle())
 
     // Set the map bounds
     const south_west = L.latLng(-90, -200)
