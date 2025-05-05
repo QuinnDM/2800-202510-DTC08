@@ -81,3 +81,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     styleDropDownLayers()
 });
+
+// Implement toggle for the location information popup
+const locationInformationButton = document.getElementById("locationInformationButton");
+const locationInformationContainer = document.getElementById("locationInformationContainer");
+
+locationInformationButton.addEventListener("click", () => {
+    if (locationInformationContainer.style.display === "none" || locationInformationContainer.style.display === "") {
+        locationInformationContainer.style.display = "block";
+    } else {
+        locationInformationContainer.style.display = "none";
+    }
+});
