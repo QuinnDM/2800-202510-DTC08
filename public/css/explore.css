@@ -13,6 +13,7 @@ body,
 #map {
     z-index: 1;
 }
+
 .leaflet-control-container {
     margin-top: 75px !important;
 }
@@ -37,4 +38,20 @@ body,
 .leaflet-control-layers label:hover {
     background-color: #d0e6ff;
     /* light blue on hover */
+}
+
+#locationInformationButton {
+    width: 45px;
+    height: 45px;
+    background-color: rgb(255, 254, 254);
+    /* position: absolute */
+    position: fixed;
+    bottom: 100px;
+    left: 10px;
+    /* bring your own prefixes */
+    z-index: 1000;
+    border-radius: 5px;
+    border-style: solid;
+    border-width: 2px;
+    border-color: rgb(169, 169, 169);
 }
