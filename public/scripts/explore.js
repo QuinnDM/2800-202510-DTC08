@@ -80,6 +80,49 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     styleDropDownLayers()
+
+    // Retrieve and display current location information
+    const x = document.getElementById("demo");
+    const apiKey = "19a6232696617ab3c94fab8259f33fe7"
+    window.getLocation = function () {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(success, error);
+            console.log("hello")
+        } else {
+            x.innerHTML = "Geolocation is not supported by this browser.";
+        }
+    };
+
+    function success(position) {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const place = data.name;
+                const weatherData = {
+                    temperature: (data.main.temp - 273.15).toFixed(1),
+                    description: data.weather[0].description,
+                    icon: data.weather[0].icon,
+                }
+                document.getElementById("output").innerHTML =
+                    `Lat: ${lat}, Lon: ${lon}, Location: ${place}, temperature: ${weatherData.temperature}°C`;
+            })
+            .catch(err => {
+                document.getElementById("output").innerText = "Failed to fetch weather data.";
+                console.error(err);
+            });
+    }
+
+    function error(err) {
+        document.getElementById("output").innerText = "Error getting location.";
+        console.warn(`ERROR(${err.code}): ${err.message}`);
+    }
+
+    getLocation()
 });
 
 // Implement toggle for the location information popup
