@@ -3,6 +3,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     map.zoomControl.setPosition('topright');
 
+    const provider = new window.GeoSearch.OpenStreetMapProvider();
+
+    const searchControl = new window.GeoSearch.GeoSearchControl({
+        provider: provider,
+        style: 'bar',
+        showMarker: false,
+        notFoundMessage: 'No results found',
+        resetButton: '×' // Optional: message when no results
+        // resetButton: '🔍',
+    });
+
+    // Update geosearch reset button style. Cannot seem to get it to work using css.
+    map.addControl(searchControl);
+
     // Set the map bounds
     const south_west = L.latLng(-90, -200)
     const north_east = L.latLng(90, 200)
