@@ -18,11 +18,11 @@
     <!-- Fixed Header -->
     <%- include('partials/header') %>
 
-    <!-- Main Content (with padding to avoid overlap with header and nav) -->
+    <!-- Main Content -->
     <main class="flex-1 mt-10 pt-16 pb-16 overflow-y-auto px-4 md:px-8 max-w-screen-lg mx-auto">
       <!-- Home Section -->
       <section id="Home" class="tabcontent px-4 block">
-        <div class="md:w-1/2"></div>
+        <div class="md:w-1/2">
           <h2 class="text-2xl md:text-3xl font-bold mb-4">
             Welcome<% if (typeof user !== 'undefined' && user) { %>, <%=
             user.email || user.username %><% } %>!
@@ -32,10 +32,10 @@
         <div class="md:w-1/2 bg-white rounded-lg shadow p-4 mb-6">
           <h3 class="text-xl font-semibold mb-2">Your Stats</h3>
           <p>
-            Birds Identified: <span class="font-bold text-green-600">0</span>
+            Birds Identified: <span class="font-bold text-green-600" id="birdStats">0</span>
           </p>
           <p>
-            Plants Identified: <span class="font-bold text-blue-500">0</span>
+            Plants Identified: <span class="font-bold text-blue-500" id="plantStats">0</span>
           </p>
         </div>
         <button
@@ -46,10 +46,10 @@
         </button>
       </section>
 
-      <!-- Identify Section (Hidden initially) -->
+      <!-- Identify Section -->
       <section id="Identify" class="tabcontent px-4 hidden">
         <h2 class="text-2xl font-bold mb-4">Identify Birds & Plants</h2>
-        <p class="text-lg mb-6">Snap a photo to identify species in seconds!</p>
+        <p class="text-lg mb-6">Upload a photo to identify species in seconds!</p>
         <div class="bg-white rounded-lg shadow p-4 mb-6 text-center">
           <svg
             class="w-16 h-16 mx-auto mb-4 text-green-600"
@@ -71,33 +71,47 @@
               d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
             ></path>
           </svg>
-          <p class="mb-4">Upload a photo to identify a bird or plant.</p>
+          <input
+            type="file"
+            id="imageInput"
+            accept="image/*"
+            class="mb-4 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          />
+          <img id="imagePreview" class="hidden max-w-xs mx-auto mb-4" />
           <button
+            onclick="identifySpecies()"
             class="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition"
           >
-            Take a Photo
+            Identify
           </button>
         </div>
-        <p class="text-center text-gray-600">
+        <div id="identificationResult" class="text-center text-gray-600">
           Results will appear here after identification.
-        </p>
+        </div>
       </section>
 
-      <!-- Collections Section (Hidden initially) -->
+      <!-- Collections Section -->
       <section id="Collections" class="tabcontent px-4 hidden">
         <h2 class="text-2xl font-bold mb-4">Your Collections</h2>
         <p class="text-lg mb-6">Create and manage your nature collections.</p>
-        <div class="bg-white rounded-lg shadow p-4 mb-6 text-center">
-          <p>You don't have any collections yet.</p>
+        <div class="bg-white rounded-lg shadow p-4 mb-6">
+          <input
+            type="text"
+            id="collectionName"
+            placeholder="New collection name"
+            class="border rounded-lg p-2 mb-4 w-full"
+          />
           <button
-            class="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition mt-4"
+            onclick="createCollection()"
+            class="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition"
           >
             Create Collection
           </button>
+          <div id="collectionsList" class="mt-4"></div>
         </div>
       </section>
 
-      <!-- Explore Section (Hidden initially) -->
+      <!-- Explore Section -->
       <section id="Explore" class="tabcontent px-4 hidden">
         <h2 class="text-2xl font-bold mb-4">Explore Biodiversity</h2>
         <p class="text-lg mb-6">Discover wildlife in your area.</p>
@@ -113,7 +127,7 @@
         </div>
       </section>
 
-      <!-- Settings Section (Hidden initially) -->
+      <!-- Settings Section -->
       <section id="Settings" class="tabcontent px-4 hidden">
         <h2 class="text-2xl font-bold mb-4">Settings</h2>
         <div class="bg-white rounded-lg shadow p-4 mb-6">
@@ -137,23 +151,16 @@
 
     <script>
       function openTab(tabName) {
-        // Hide all tab content
         const tabcontent = document.getElementsByClassName("tabcontent");
         for (let i = 0; i < tabcontent.length; i++) {
           tabcontent[i].style.display = "none";
         }
-
-        // Remove active class from all tab links
         const tablinks = document.getElementsByClassName("tablink");
         for (let i = 0; i < tablinks.length; i++) {
           tablinks[i].classList.remove("active", "text-green-600");
           tablinks[i].classList.add("text-gray-600");
         }
-
-        // Show the selected tab and add active class to the button
         document.getElementById(tabName).style.display = "block";
-
-        // Find and activate the correct tab button
         const activeTab = document.querySelector(
           `.tablink[onclick*="openTab('${tabName}')"]`
         );
@@ -163,8 +170,188 @@
         }
       }
 
-      // Show the Home tab by default
-      document.getElementById("Home").style.display = "block";
+      async function identifySpecies() {
+        const file = document.getElementById('imageInput').files[0];
+        const resultDiv = document.getElementById('identificationResult');
+        if (!file) {
+          resultDiv.innerText = 'Please select an image.';
+          return;
+        }
+
+        resultDiv.innerHTML = `<div class="flex justify-center"><div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-600"></div></div>`;
+
+        try {
+          // Step 1: Upload image to Cloudinary
+          const formData = new FormData();
+          formData.append('image', file);
+          console.log('Uploading image...');
+          const uploadResponse = await fetch('/upload', {
+            method: 'POST',
+            body: formData
+          });
+          if (!uploadResponse.ok) {
+            const errorData = await uploadResponse.json();
+            throw new Error(errorData.error || 'Failed to upload image');
+          }
+          const { imageUrl } = await uploadResponse.json();
+          console.log('Image URL:', imageUrl);
+
+          // Step 2: Identify species with Gemini
+          console.log('Identifying species...');
+          const identifyResponse = await fetch('/identify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageUrl })
+          });
+          if (!identifyResponse.ok) {
+            const errorData = await identifyResponse.json();
+            console.error('Identify error:', errorData);
+            throw new Error(errorData.error || 'Failed to identify species');
+          }
+          const { type, commonName, scientificName } = await identifyResponse.json();
+          console.log('Identification result:', { type, commonName, scientificName });
+
+          if (type === 'unknown') {
+            resultDiv.innerText = 'Could not identify as a bird or plant.';
+            return;
+          }
+
+          // Step 3/4: Fetch details based on type
+          let detailsResponse;
+          if (type === 'bird') {
+            detailsResponse = await fetch('/bird-details', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ scientificName })
+            });
+          } else if (type === 'plant') {
+            detailsResponse = await fetch('/plant-details', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ imageUrl, scientificName })
+            });
+          }
+          if (!detailsResponse.ok) {
+            const errorData = await detailsResponse.json();
+            throw new Error(errorData.error || `Failed to fetch ${type} details`);
+          }
+          const details = await detailsResponse.json();
+
+          // Update stats and add to collection
+          await fetch('/update-stats', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type, commonName, scientificName, imageUrl, details })
+          });
+
+          // Refresh stats
+          loadStats();
+
+          // Display results
+          resultDiv.innerHTML = `
+            <div class="bg-white rounded-lg shadow p-4">
+              <h3 class="text-xl font-semibold mb-2">${type.charAt(0).toUpperCase() + type.slice(1)} Identified</h3>
+              <p><strong>Common Name:</strong> ${details.commonName || 'N/A'}</p>
+              <p><strong>Scientific Name:</strong> ${details.scientificName || 'N/A'}</p>
+              ${type === 'bird' ? `
+                <p><strong>Family:</strong> ${details.family || 'N/A'}</p>
+                <p><strong>Habitat:</strong> ${details.habitat || 'Inferred from sightings'}</p>
+                <p><strong>Recent Sightings:</strong></p>
+                <ul class="list-disc pl-5">
+                  ${details.sightings?.map(s => `<li>${s.location} on ${s.date} (${s.count} observed)</li>`).join('') || 'No sightings found'}
+                </ul>
+              ` : `
+                <p><strong>Family:</strong> ${details.family || 'N/A'}</p>
+                <p><strong>Confidence:</strong> ${(details.confidence * 100).toFixed(2)}%</p>
+                <p><strong>Metadata:</strong> ${details.metadata?.note || 'N/A'}</p>
+              `}
+            </div>
+          `;
+        } catch (error) {
+          console.error('Error:', error);
+          resultDiv.innerText = `Error: ${error.message}`;
+        }
+      }
+
+      // Image preview
+      document.getElementById('imageInput').addEventListener('change', () => {
+        const file = document.getElementById('imageInput').files[0];
+        const imagePreview = document.getElementById('imagePreview');
+        if (file) {
+          imagePreview.src = URL.createObjectURL(file);
+          imagePreview.classList.remove('hidden');
+        } else {
+          imagePreview.classList.add('hidden');
+        }
+      });
+
+      // Load stats
+      async function loadStats() {
+        try {
+          const response = await fetch('/stats');
+          if (!response.ok) throw new Error('Failed to fetch stats');
+          const { birds, plants } = await response.json();
+          document.getElementById('birdStats').innerText = birds;
+          document.getElementById('plantStats').innerText = plants;
+        } catch (error) {
+          console.error('Load Stats Error:', error);
+        }
+      }
+
+      // Load collections
+      async function loadCollections() {
+        try {
+          const response = await fetch('/collections');
+          if (!response.ok) throw new Error('Failed to fetch collections');
+          const collections = await response.json();
+          const collectionsList = document.getElementById('collectionsList');
+          collectionsList.innerHTML = collections.length ? `
+            <ul class="space-y-4">
+              ${collections.map(c => `
+                <li class="border p-4 rounded-lg">
+                  <h3 class="font-semibold">${c.name}</h3>
+                  <ul class="list-disc pl-5">
+                    ${c.items.map(i => `
+                      <li>
+                        ${i.type.charAt(0).toUpperCase() + i.type.slice(1)}: ${i.commonName} (${i.scientificName})
+                        <img src="${i.imageUrl}" class="w-16 h-16 inline-block" />
+                      </li>
+                    `).join('')}
+                  </ul>
+                </li>
+              `).join('')}
+            </ul>
+          ` : '<p>You don\'t have any collections yet.</p>';
+        } catch (error) {
+          console.error('Load Collections Error:', error);
+        }
+      }
+
+      // Create collection
+      async function createCollection() {
+        const name = document.getElementById('collectionName').value;
+        if (!name) return alert('Please enter a collection name');
+        try {
+          const response = await fetch('/collections', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name })
+          });
+          if (!response.ok) throw new Error('Failed to create collection');
+          document.getElementById('collectionName').value = '';
+          loadCollections();
+        } catch (error) {
+          console.error('Create Collection Error:', error);
+          alert('Error creating collection: ' + error.message);
+        }
+      }
+
+      // Initialize
+      document.addEventListener('DOMContentLoaded', () => {
+        loadStats();
+        document.getElementById("Home").style.display = "block";
+        document.querySelector('.tablink[onclick*="Collections"]').addEventListener('click', loadCollections);
+      });
     </script>
   </body>
 </html>
