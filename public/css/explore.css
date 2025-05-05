@@ -55,3 +55,22 @@ body,
     border-width: 2px;
     border-color: rgb(169, 169, 169);
 }
+
+#locationInformationContainer {
+    padding-left: 2em;
+    padding-right: 2em;
+    display: none;
+    /* width: 200px;
+            height: 100px; */
+    background-color: rgb(255, 254, 254);
+    /* position: absolute */
+    position: fixed;
+    bottom: 150px;
+    left: 13px;
+    /* bring your own prefixes */
+    z-index: 1000;
+    border-radius: 5px;
+    border-style: solid;
+    border-width: 2px;
+    border-color: rgb(169, 169, 169);
+}
