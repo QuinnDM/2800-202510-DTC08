@@ -10,6 +10,10 @@ body,
     width: 100vw
 }
 
+#map {
+    z-index: -1;
+}
+
 /* Style all labels inside the layer control */
 .leaflet-control-layers label {
     background-color: #f0f0f0;
