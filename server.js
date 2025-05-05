@@ -7,6 +7,8 @@ const bcrypt = require("bcrypt");
 const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
 const fetch = require("node-fetch");
+const fs = require("fs");
+const path = require("path");
 
 // Import User model
 const User = require("./models/user");
@@ -24,6 +26,7 @@ mongoose
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json()); // Added JSON parser for API endpoints
 app.use(
   session({
     secret: "your-secret-key",
@@ -45,7 +48,7 @@ cloudinary.config({
 // Set up Multer for file uploads
 const upload = multer({ dest: "uploads/" });
 
-// Express route for image upload
+// Step 1: Upload image to cloudinary and get imageURL in return
 app.post("/upload", upload.single("image"), async (req, res) => {
   try {
     // Upload image to Cloudinary
@@ -60,172 +63,17 @@ app.post("/upload", upload.single("image"), async (req, res) => {
   }
 });
 
-
-// Use Gemini to identify the birds or plant
-app.post("/identify", async (req, res) => {
-  const { imageUrl } = req.body; // Get Cloudinary URL from request
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-
-  // Create Gemini request
-  const geminiRequest = {
-    contents: [
-      {
-        parts: [
-          {
-            text: "Identify whether this is a bird or plant. If a bird, provide its common name, scientific name, and confirm it's a bird. If a plant, provide its common name, scientific name, and confirm it's a plant.",
-          },
-          { text: `Image URL: ${imageUrl}` },
-        ],
-      },
-    ],
-  };
-
-  try {
-    // Call Gemini API
-    const geminiResponse = await fetch(GEMINI_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(geminiRequest),
-    });
-
-    if (!geminiResponse.ok) {
-      throw new Error(`Gemini Error: ${geminiResponse.statusText}`);
-    }
-
-    const geminiData = await geminiResponse.json();
-    const speciesInfo = geminiData.candidates[0].content.parts[0].text;
-
-    // Parse response (simple parsing; use regex for robustness)
-    const isBird = speciesInfo.toLowerCase().includes("bird");
-    const isPlant = speciesInfo.toLowerCase().includes("plant");
-    let commonName, scientificName;
-
-    if (isBird || isPlant) {
-      commonName = speciesInfo.match(/Common Name: ([^\n,]+)/)?.[1]?.trim();
-      scientificName = speciesInfo
-        .match(/Scientific Name: ([^\n]+)/)?.[1]
-        ?.trim();
-    }
-
-    res.json({
-      type: isBird ? "bird" : isPlant ? "plant" : "unknown",
-      commonName,
-      scientificName,
-      rawResponse: speciesInfo,
-    });
-  } catch (error) {
-    console.error("Gemini Error:", error);
-    res.status(500).json({ error: "Failed to identify species" });
-  }
-});
-
-// API to fetch bird details
-app.post("/bird-details", async (req, res) => {
-  const {
-    scientificName,
-    latitude = 49.299999,
-    longitude = -123.139999,
-  } = req.body; // Default to Stanley Park
-  const EBIRD_API_KEY = process.env.EBIRD_API_KEY;
-  const TAXONOMY_URL =
-    "https://api.ebird.org/v2/ref/taxonomy/ebird?fmt=json&locale=en&cat=species";
-
-  try {
-    // Get species code from taxonomy
-    const taxonomyResponse = await fetch(TAXONOMY_URL, {
-      headers: { "x-ebirdapitoken": EBIRD_API_KEY },
-    });
-    if (!taxonomyResponse.ok) {
-      throw new Error("eBird Taxonomy Error");
-    }
-
-    const taxonomy = await taxonomyResponse.json();
-    const species = taxonomy.find(
-      (s) => s.sciName.toLowerCase() === scientificName.toLowerCase()
-    );
-    if (!species) {
-      return res
-        .status(404)
-        .json({ error: `Species ${scientificName} not found` });
-    }
-
-    // Get recent sightings
-    const sightingsUrl = `https://api.ebird.org/v2/data/obs/geo/recent/${species.speciesCode}?lat=${latitude}&lng=${longitude}`;
-    const sightingsResponse = await fetch(sightingsUrl, {
-      headers: { "x-ebirdapitoken": EBIRD_API_KEY },
-    });
-    const sightings = sightingsResponse.ok
-      ? await sightingsResponse.json()
-      : [];
-
-    // Construct response (habitat inferred from sightings)
-    res.json({
-      commonName: species.comName,
-      scientificName: species.sciName,
-      family: species.familyComName,
-      sightings: sightings.slice(0, 5).map((obs) => ({
-        location: obs.locName,
-        date: obs.obsDt,
-        count: obs.howMany || "N/A",
-      })),
-      habitat:
-        "Inferred from sightings; check external sources for detailed habitat data",
-    });
-  } catch (error) {
-    console.error("eBird Error:", error);
-    res.status(500).json({ error: "Failed to fetch bird details" });
-  }
-});
-
-// fetch plantnet API
-app.post("/plant-details", async (req, res) => {
-  const { imageUrl, scientificName } = req.body; // Use Gemini's scientific name as fallback
-  const PLANTNET_API_KEY = process.env.PLANTNET_API_KEY;
-  const PLANTNET_URL = "https://my-api.plantnet.org/v2/identify/all";
-
-  try {
-    // Call PlantNet API
-    const plantnetResponse = await fetch(PLANTNET_URL, {
-      method: "POST",
-      headers: { "Content-Type": "multipart/form-data" }, // Note: Requires form-data handling
-      body: JSON.stringify({
-        "api-key": PLANTNET_API_KEY,
-        images: [imageUrl],
-        lang: "en",
-      }),
-    });
-
-    if (!plantnetResponse.ok) {
-      throw new Error("PlantNet Error");
-    }
-
-    const plantnetData = await plantnetResponse.json();
-    const topResult = plantnetData.results[0]?.species || {};
-
-    res.json({
-      commonName: topResult.commonNames?.[0] || "N/A",
-      scientificName: topResult.scientificName || scientificName,
-      family: topResult.family?.scientificName || "N/A",
-      confidence: plantnetData.results[0]?.score || "N/A",
-      metadata: {
-        distribution: "Check external sources for detailed distribution", // PlantNet metadata is limited
-        note: "PlantNet provides basic metadata; use Trefle for detailed care info",
-      },
-    });
-  } catch (error) {
-    console.error("PlantNet Error:", error);
-    res.status(500).json({ error: "Failed to fetch plant details" });
-  }
-});
-
 // Routes
 app.get("/", (req, res) => {
   res.redirect("/index");
 });
 
 app.get("/index", (req, res) => {
-  res.render("index", { error: null, title: "Nature Nexus - Home" });
+  res.render("index", {
+    error: null,
+    title: "Nature Nexus - Home",
+    user: req.session.user || null,
+  });
 });
 
 app.get("/explore", (req, res) => {
@@ -270,7 +118,7 @@ app.post("/login", async (req, res) => {
     const user = await User.findOne({ email });
     if (user && (await bcrypt.compare(password, user.password))) {
       req.session.user = user;
-      res.redirect("/collection");
+      res.redirect("/index");
     } else {
       res.render("login", { error: "Invalid email or password" });
     }
@@ -286,7 +134,7 @@ app.get("/register", (req, res) => {
 
 app.post("/register", async (req, res) => {
   const { email, password } = req.body;
-  console.log("Registration attempt:", { email, password });
+  console.log("Registration attempt:", { email, password: "***" });
   if (!email || !password) {
     console.log("Missing email or password");
     return res.render("login", { error: "Email and password are required" });
@@ -301,10 +149,15 @@ app.post("/register", async (req, res) => {
         ? parseInt(process.env.SALT_ROUND)
         : 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
-      console.log("Hashed password:", hashedPassword);
-      const newUser = new User({ email, password: hashedPassword });
+      console.log("Password hashed successfully");
+      const newUser = new User({
+        email,
+        password: hashedPassword,
+        stats: { birds: 0, plants: 0 },
+        collections: [],
+      });
       const savedUser = await newUser.save();
-      console.log("User saved to MongoDB:", savedUser);
+      console.log("User saved to MongoDB:", savedUser._id);
       res.redirect("/login");
     }
   } catch (err) {
@@ -315,9 +168,7 @@ app.post("/register", async (req, res) => {
 
 app.get("/collection", (req, res) => {
   if (req.session.user) {
-    res.send(
-      'This is your personalized collection! <a href="/logout">Logout</a>'
-    );
+    res.render("collection", { user: req.session.user });
   } else {
     res.redirect("/login");
   }
@@ -327,6 +178,183 @@ app.get("/logout", (req, res) => {
   req.session.destroy(() => {
     res.redirect("/login");
   });
+});
+
+// Step 2: Identify species using Gemini API endpoint
+app.post("/identify", async (req, res) => {
+  try {
+    const { imageUrl } = req.body;
+    if (!imageUrl) {
+      return res.status(400).json({ error: "Image URL is required" });
+    }
+
+    // For now, let's return a mock result
+    const mockIdentification = {
+      type: Math.random() > 0.5 ? "bird" : "plant",
+      commonName: Math.random() > 0.5 ? "American Robin" : "Oak Tree",
+      scientificName:
+        Math.random() > 0.5 ? "Turdus migratorius" : "Quercus robur",
+    };
+
+    res.json(mockIdentification);
+  } catch (error) {
+    console.error("Identification error:", error);
+    res.status(500).json({ error: "Failed to identify species" });
+  }
+});
+
+// Bird details API endpoint
+app.post("/bird-details", async (req, res) => {
+  try {
+    const { scientificName } = req.body;
+    // Mock bird details
+    const birdDetails = {
+      commonName: "American Robin",
+      scientificName: scientificName || "Turdus migratorius",
+      family: "Turdidae",
+      habitat: "Woodland, urban gardens, parks",
+      sightings: [
+        { location: "City Park", date: "2025-04-28", count: 3 },
+        { location: "Backyard", date: "2025-05-01", count: 1 },
+      ],
+    };
+
+    res.json(birdDetails);
+  } catch (error) {
+    console.error("Bird details error:", error);
+    res.status(500).json({ error: "Failed to fetch bird details" });
+  }
+});
+
+// Plant details API endpoint
+app.post("/plant-details", async (req, res) => {
+  try {
+    const { scientificName } = req.body;
+    // Mock plant details
+    const plantDetails = {
+      commonName: "English Oak",
+      scientificName: scientificName || "Quercus robur",
+      family: "Fagaceae",
+      confidence: 0.95,
+      metadata: { note: "Deciduous tree native to Europe" },
+    };
+
+    res.json(plantDetails);
+  } catch (error) {
+    console.error("Plant details error:", error);
+    res.status(500).json({ error: "Failed to fetch plant details" });
+  }
+});
+
+// Get user stats
+app.get("/stats", async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.json({ birds: 0, plants: 0 });
+    }
+
+    const user = await User.findById(req.session.user._id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(user.stats || { birds: 0, plants: 0 });
+  } catch (error) {
+    console.error("Stats error:", error);
+    res.status(500).json({ error: "Failed to fetch stats" });
+  }
+});
+
+// Update user stats
+app.post("/update-stats", async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const { type } = req.body;
+    if (!type || (type !== "bird" && type !== "plant")) {
+      return res.status(400).json({ error: "Invalid species type" });
+    }
+
+    const user = await User.findById(req.session.user._id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Initialize stats if they don't exist
+    if (!user.stats) {
+      user.stats = { birds: 0, plants: 0 };
+    }
+
+    // Increment the appropriate counter
+    if (type === "bird") {
+      user.stats.birds += 1;
+    } else {
+      user.stats.plants += 1;
+    }
+
+    await user.save();
+    res.json(user.stats);
+  } catch (error) {
+    console.error("Update stats error:", error);
+    res.status(500).json({ error: "Failed to update stats" });
+  }
+});
+
+// Get user collections
+app.get("/collections", async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const user = await User.findById(req.session.user._id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(user.collections || []);
+  } catch (error) {
+    console.error("Collections error:", error);
+    res.status(500).json({ error: "Failed to fetch collections" });
+  }
+});
+
+// Create a new collection
+app.post("/collections", async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const { name } = req.body;
+    if (!name) {
+      return res.status(400).json({ error: "Collection name is required" });
+    }
+
+    const user = await User.findById(req.session.user._id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Initialize collections if they don't exist
+    if (!user.collections) {
+      user.collections = [];
+    }
+
+    // Add the new collection
+    user.collections.push({
+      name,
+      items: [],
+    });
+
+    await user.save();
+    res.json(user.collections);
+  } catch (error) {
+    console.error("Create collection error:", error);
+    res.status(500).json({ error: "Failed to create collection" });
+  }
 });
 
 // Start Server
