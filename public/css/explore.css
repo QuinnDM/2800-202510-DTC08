@@ -13,6 +13,13 @@ body,
 #map {
     z-index: 1;
 }
+.leaflet-control-container {
+    margin-top: 75px !important;
+}
+
+.leaflet-control-zoom {
+    margin-top: 75px !important;
+}
 
 /* Style all labels inside the layer control */
 .leaflet-control-layers label {
