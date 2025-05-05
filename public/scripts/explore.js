@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Retrieve and display current location information
     const x = document.getElementById("demo");
-    const apiKey = "19a6232696617ab3c94fab8259f33fe7"
+
     window.getLocation = function () {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(success, error);
