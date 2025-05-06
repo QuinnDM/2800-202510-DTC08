@@ -1,8 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    var map = L.map("map").fitWorld();
-
-    // Move the map view to the user's location on open and refresh
-    map.locate({ setView: true, maxZoom: 16 });
+    var map = L.map("map");
 
     map.zoomControl.setPosition('topright');
 
@@ -15,14 +12,14 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Wait until user location is found to load tiles
-    map.on("locationfound", function () {
-        jawgStreetMap.addTo(map)
-    })
+    // map.on("locationfound", function () {
+       jawgStreetMap.addTo(map)
+    // })
 
     // If location fails, load the tiles
-    map.on("locationerror", function () {
-        jawgStreetMap.addTo(map)
-    })
+    // map.on("locationerror", function () {
+    //     jawgStreetMap.addTo(map)
+    // })
 
     // Esri world imagery base map
     let esriWorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -39,6 +36,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Add layer control to the map to enable toggling on and off of layer groups
     var layer_control = L.control.layers(baseMaps).addTo(map);
+
+    function styleDropDownLayers() {
+        const labels = document.querySelectorAll('.leaflet-control-layers label');
+
+        labels.forEach(label => {
+            const text = label.textContent.trim();
+
+            // Match the label by its name and apply custom background to represent layer
+            if (text === 'Satellite') {
+                label.style.backgroundImage = "url('../images/satellite.png')";
+            } else if (text === 'Street Map') {
+                label.style.backgroundImage = "url('../images/streetmap.png')";
+            }
+        });
+    }
+
+    map.on("locationfound", function() {
+        styleDropDownLayers()     
+    })
+
+    // Move the map view to the user's location on open and refresh
+    map.locate({ setView: true, maxZoom: 16 });
 
     const provider = new window.GeoSearch.OpenStreetMapProvider();
 
@@ -79,26 +98,7 @@ document.addEventListener("DOMContentLoaded", function () {
         map.panInsideBounds(bounds, { animate: false });
     })
 
-    function styleDropDownLayers() {
-        const labels = document.querySelectorAll('.leaflet-control-layers label');
-
-        labels.forEach(label => {
-            const text = label.textContent.trim();
-
-            // Match the label by its name and apply custom background to represent layer
-            if (text === 'Satellite') {
-                label.style.backgroundImage = "url('../images/satellite.png')";
-            } else if (text === 'Street Map') {
-                label.style.backgroundImage = "url('../images/streetmap.png')";
-            }
-        });
-    }
-
-    styleDropDownLayers()
-
     // Retrieve and display current location information
-    // const x = document.getElementById("demo");
-
     window.getLocation = function () {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(success, error);
