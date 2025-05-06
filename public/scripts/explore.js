@@ -6,6 +6,40 @@ document.addEventListener("DOMContentLoaded", function () {
 
     map.zoomControl.setPosition('topright');
 
+    let jawgStreetMap = L.tileLayer("/tiles/{z}/{x}/{y}", {
+        attribution: 'Tiles &copy; <a href="https://jawg.io">Jawg</a>, &copy; OpenStreetMap contributors',
+        minZoom: 3,
+        maxZoom: 22,
+        // Add tile caching to store tiles locally and improve load speed
+        crossOrigin: true,
+    });
+
+    // Wait until user location is found to load tiles
+    map.on("locationfound", function () {
+        jawgStreetMap.addTo(map)
+    })
+
+    // If location fails, load the tiles
+    map.on("locationerror", function () {
+        jawgStreetMap.addTo(map)
+    })
+
+    // Esri world imagery base map
+    let esriWorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+        // Add tile caching to store tiles locally and improve load speed
+        crossOrigin: true,
+    });
+
+    // creating layer groups
+    var baseMaps = {
+        "Street Map": jawgStreetMap,
+        "Satellite": esriWorldImagery
+    };
+
+    // Add layer control to the map to enable toggling on and off of layer groups
+    var layer_control = L.control.layers(baseMaps).addTo(map);
+
     const provider = new window.GeoSearch.OpenStreetMapProvider();
 
     const searchControl = new window.GeoSearch.GeoSearchControl({
@@ -13,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
         style: 'bar',
         showMarker: false,
         notFoundMessage: 'No results found',
-        resetButton: '×' 
+        resetButton: '×'
     });
 
     map.addControl(searchControl);
@@ -44,30 +78,6 @@ document.addEventListener("DOMContentLoaded", function () {
     map.on('drag', function () {
         map.panInsideBounds(bounds, { animate: false });
     })
-
-    let jawgStreetMap = L.tileLayer("/tiles/{z}/{x}/{y}", {
-        attribution: 'Tiles &copy; <a href="https://jawg.io">Jawg</a>, &copy; OpenStreetMap contributors',
-        minZoom: 3,
-        maxZoom: 22,
-        // Add tile caching to store tiles locally and improve load speed
-        crossOrigin: true,
-    }).addTo(map);
-
-    // Esri world imagery base map
-    let esriWorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
-        // Add tile caching to store tiles locally and improve load speed
-        crossOrigin: true,
-    });
-
-    // creating layer groups
-    var baseMaps = {
-        "Street Map": jawgStreetMap,
-        "Satellite": esriWorldImagery
-    };
-
-    // Add layer control to the map to enable toggling on and off of layer groups
-    var layer_control = L.control.layers(baseMaps).addTo(map);
 
     function styleDropDownLayers() {
         const labels = document.querySelectorAll('.leaflet-control-layers label');
@@ -115,7 +125,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     + `<div class='infoContainer'><h3 class='bold'>Latitude: </h3><p> ${lat}</p></div>`
                     + `<div class='infoContainer'><h3 class='bold'>Longitude: </h3><p> ${lon}</p></div>`
                     + `<div class='infoContainer'><h3 class='bold'>Temperature: </h3><p> ${weatherData.temperature}°C</p></div>`
-                + `<div class='infoContainer'><h3 class='bold'>Weather: </h3><p> ${weatherData.description}</p></div>`;
+                    + `<div class='infoContainer'><h3 class='bold'>Weather: </h3><p> ${weatherData.description}</p></div>`;
             })
             .catch(err => {
                 document.getElementById("output").innerText = "Failed to fetch weather data.";
