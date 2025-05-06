@@ -84,11 +84,22 @@ app.get("/login", (req, res) => {
   res.render("login", { error: null });
 });
 
+app.get("/openweathermap/:lat/:lon", async (req, res) => {
+  try {
+    const { lat, lon } = req.params;
+    const openweathermapAPI = process.env.OPENWEATHERMAP_API_KEY;
+    const openweathermapUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.OPENWEATHERMAP_API_KEY}`;
+    const weatherRes = await fetch(openweathermapUrl);
+    const weatherData = await weatherRes.json();
+    res.json(weatherData)
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch weather data"})
+  }
+});
+
 app.get("/tiles/:z/:x/:y", async (req, res) => {
   const { z, x, y } = req.params;
-  const r = "";
-  const tileUrl = `https://tile.jawg.io/jawg-streets/${z}/${x}/${y}${r}.png?access-token=${process.env.JAWG_API}`;
-
+  const tileUrl = `https://tile.jawg.io/jawg-streets/${z}/${x}/${y}.png?access-token=${process.env.JAWG_API}`;
   try {
     const tileRes = await fetch(tileUrl);
 

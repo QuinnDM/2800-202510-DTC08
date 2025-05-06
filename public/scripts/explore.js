@@ -82,26 +82,21 @@ document.addEventListener("DOMContentLoaded", function () {
     styleDropDownLayers()
 
     // Retrieve and display current location information
-    const x = document.getElementById("demo");
+    // const x = document.getElementById("demo");
 
     window.getLocation = function () {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(success, error);
-            console.log("hello")
         } else {
             x.innerHTML = "Geolocation is not supported by this browser.";
         }
     };
-
-    function success(position) {
+    // if position retrieval is successful, use info to pull location information using openweathermaps api
+    async function success(position) {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
-
-        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}`;
-
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
+        fetch(`/openweathermap/${lat}/${lon}`)
+            .then((response) => response.json()).then((data) => {
                 const place = data.name;
                 const weatherData = {
                     temperature: (data.main.temp - 273.15).toFixed(1),
@@ -117,12 +112,12 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    function error(err) {
-        document.getElementById("output").innerText = "Error getting location.";
-        console.warn(`ERROR(${err.code}): ${err.message}`);
-    }
+function error(err) {
+    document.getElementById("output").innerText = "Error getting location.";
+    console.warn(`ERROR(${err.code}): ${err.message}`);
+}
 
-    getLocation()
+getLocation()
 });
 
 // Implement toggle for the location information popup
