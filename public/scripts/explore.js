@@ -100,11 +100,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 const place = data.name;
                 const weatherData = {
                     temperature: (data.main.temp - 273.15).toFixed(1),
-                    description: data.weather[0].description,
+                    description: (data.weather[0].description),
                     icon: data.weather[0].icon,
                 }
+                let iconUrl = "http://openweathermap.org/img/w/" + weatherData.icon + ".png"
+                document.getElementById("locationInformationButton").innerHTML = `<img src=${iconUrl}></img>`
                 document.getElementById("output").innerHTML =
-                    `Lat: ${lat}, Lon: ${lon}, Location: ${place}, temperature: ${weatherData.temperature}°C`;
+                    `<div class='infoContainer'><h3 class='bold'>Location: </h3><p> ${place}</p></div>`
+                    + `<div class='infoContainer'><h3 class='bold'>Latitude: </h3><p> ${lat}</p></div>`
+                    + `<div class='infoContainer'><h3 class='bold'>Longitude: </h3><p> ${lon}</p></div>`
+                    + `<div class='infoContainer'><h3 class='bold'>Temperature: </h3><p> ${weatherData.temperature}°C</p></div>`
+                + `<div class='infoContainer'><h3 class='bold'>Weather: </h3><p> ${weatherData.description}</p></div>`;
             })
             .catch(err => {
                 document.getElementById("output").innerText = "Failed to fetch weather data.";
@@ -112,12 +118,12 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-function error(err) {
-    document.getElementById("output").innerText = "Error getting location.";
-    console.warn(`ERROR(${err.code}): ${err.message}`);
-}
+    function error(err) {
+        document.getElementById("output").innerText = "Error getting location.";
+        console.warn(`ERROR(${err.code}): ${err.message}`);
+    }
 
-getLocation()
+    getLocation()
 });
 
 // Implement toggle for the location information popup
