@@ -1,5 +1,8 @@
+var map = L.map("map").fitWorld();
+map.locate({ setView: true, maxZoom: 16 });
+
 document.addEventListener("DOMContentLoaded", function () {
-    var map = L.map("map").fitWorld();
+    // var map = L.map("map").fitWorld();
 
     map.zoomControl.setPosition('topright');
 
@@ -10,10 +13,11 @@ document.addEventListener("DOMContentLoaded", function () {
         style: 'bar',
         showMarker: false,
         notFoundMessage: 'No results found',
-        resetButton: '×' // Optional: message when no results
-        // resetButton: '🔍',
+        resetButton: '×' 
     });
 
+    // Move the map view to the user's location on open and refresh
+    // map.locate({ setView: true, maxZoom: 16 });
 
     map.addControl(searchControl);
 
@@ -48,11 +52,15 @@ document.addEventListener("DOMContentLoaded", function () {
         attribution: 'Tiles &copy; <a href="https://jawg.io">Jawg</a>, &copy; OpenStreetMap contributors',
         minZoom: 3,
         maxZoom: 22,
+        // Add tile caching to store tiles locally and improve load speed
+        crossOrigin: true,
     }).addTo(map);
 
     // Esri world imagery base map
     let esriWorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+        // Add tile caching to store tiles locally and improve load speed
+        crossOrigin: true,
     });
 
     // creating layer groups
