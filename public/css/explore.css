@@ -65,8 +65,8 @@ body,
     background-color: rgb(255, 254, 254);
     /* position: absolute */
     position: fixed;
-    bottom: 150px;
-    left: 13px;
+    bottom: 170px;
+    left: 10px;
     /* bring your own prefixes */
     z-index: 1000;
     border-radius: 5px;
