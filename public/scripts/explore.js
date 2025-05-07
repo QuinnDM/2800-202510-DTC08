@@ -26,6 +26,8 @@ document.addEventListener("DOMContentLoaded", function () {
         attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
         // Add tile caching to store tiles locally and improve load speed
         crossOrigin: true,
+        minZoom: 3,
+        maxZoom: 22,
     });
 
     // creating layer groups
