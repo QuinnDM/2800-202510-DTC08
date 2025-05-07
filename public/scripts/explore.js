@@ -103,7 +103,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(success, error);
         } else {
-            x.innerHTML = "Geolocation is not supported by this browser.";
+            alert("Geolocation is not supported by this browser.");
         }
     };
     // if position retrieval is successful, use info to pull location information using openweathermaps api
@@ -138,7 +138,8 @@ document.addEventListener("DOMContentLoaded", function () {
         console.warn(`ERROR(${err.code}): ${err.message}`);
     }
 
-    getLocation()
+    // retrieve user's location information every 5 minutes
+    setInterval(getLocation, 300000);
 
     // fetch all sightings in database and add them to the map as markers
     function loadSightings() {
