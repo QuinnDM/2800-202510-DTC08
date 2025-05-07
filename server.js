@@ -12,6 +12,7 @@ const path = require("path");
 
 // Import User model
 const User = require("./models/user");
+const Sighting = require("./models/sighting")
 
 const app = express();
 const port = 3000;
@@ -366,6 +367,12 @@ app.post("/collections", async (req, res) => {
     console.error("Create collection error:", error);
     res.status(500).json({ error: "Failed to create collection" });
   }
+});
+
+// Get sightings
+app.get("/sightings", async (req, res) => {
+  const sightings = await Sighting.find({});
+  res.json(sightings);
 });
 
 // Start Server
