@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
     var map = L.map("map");
 
     map.zoomControl.setPosition('topright');
@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return null;
     }};
 
-loadSightings();
+await loadSightings();
 
 // Zoom to extent of sitings
 async function zoomToYourSightings() {
