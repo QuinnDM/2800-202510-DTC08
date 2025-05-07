@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // retrieve user's location information every 5 minutes
-    setInterval(getLocation, 300000);
+    setInterval(getLocation(), 300000);
 
     // fetch all sightings in database and add them to the map as markers
     function loadSightings() {
