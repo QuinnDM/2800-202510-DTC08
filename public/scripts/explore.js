@@ -34,8 +34,11 @@ document.addEventListener("DOMContentLoaded", function () {
         "Satellite": esriWorldImagery
     };
 
-    // Add layer control to the map to enable toggling on and off of layer groups
-    var layer_control = L.control.layers(baseMaps).addTo(map);
+    var overlayMaps = {
+    };
+
+    // // Add layer control to the map to enable toggling on and off of layer groups
+    // var layer_control = L.control.layers(baseMaps).addTo(map);
 
     function styleDropDownLayers() {
         const labels = document.querySelectorAll('.leaflet-control-layers label');
@@ -153,9 +156,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     sightingsLayer.addLayer(sightingMarker)
                 });
                 sightingsLayer.addTo(map);
+                // Add sightings layer to the overlay map and update the control
+                overlayMaps["Sightings"] = sightingsLayer;
+                L.control.layers(baseMaps, overlayMaps).addTo(map);
+                return sightingsLayer
             }).catch(err => console.error('Failed to load sightings:', err));
     }
-
+    // Add layer control to the map to enable toggling on and off of layer groups
+    // var layer_control = L.control.layers(baseMaps, overlayMaps).addTo(map);
     loadSightings();
 });
 
