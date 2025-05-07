@@ -135,25 +135,50 @@ document.addEventListener("DOMContentLoaded", function () {
     // retrieve user's location information every 5 minutes
     setInterval(getLocation(), 300000);
 
+    let sightingsLayer = null;
+
     // fetch all sightings in database and add them to the map as markers
     function loadSightings() {
-        fetch("/sightings")
-            .then(response => response.json())
-            .then(data => {
-                const sightingsLayer = L.layerGroup();
-                data.forEach(sighting => {
-                    const [lat, lng] = sighting.location.coordinates;
-                    const sightingMarker = L.marker([lat, lng]);
-                    sightingsLayer.addLayer(sightingMarker)
+        return new Promise((resolve, reject) => { //updated to return a promise
+            fetch("/sightings")
+                .then(response => response.json())
+                .then(data => {
+                    sightingsLayer = L.featureGroup();
+                    data.forEach(sighting => {
+                        const [lat, lng] = sighting.location.coordinates;
+                        const sightingMarker = L.marker([lat, lng]);
+                        sightingsLayer.addLayer(sightingMarker)
+                    });
+                    sightingsLayer.addTo(map);
+
+                    // Add sightings layer to the overlay map and update the control
+                    overlayMaps["Sightings"] = sightingsLayer;
+                    L.control.layers(baseMaps, overlayMaps).addTo(map);
+                    resolve(sightingsLayer); // Resolve instead of return here
+                }).catch(err => {
+                    console.error('Failed to load sightings:', err)
+                    reject(err); // Reject the promise if an error occurs
                 });
-                sightingsLayer.addTo(map);
-                // Add sightings layer to the overlay map and update the control
-                overlayMaps["Sightings"] = sightingsLayer;
-                L.control.layers(baseMaps, overlayMaps).addTo(map);
-                return sightingsLayer
-            }).catch(err => console.error('Failed to load sightings:', err));
+        });
     }
-    loadSightings();
+
+    // Zoom to the extent of all of your sightings on the map
+    function zoomToYourSightings() {
+        let yourSightingsButton = document.getElementById("yourSightings");
+        yourSightingsButton.addEventListener("click", function () {
+            loadSightings().then(sightingsLayer => {
+                if (sightingsLayer) {
+                    console.log("Sightings layer loaded:", sightingsLayer);
+                    // Now you can work with sightingsLayer (e.g., zoom to its bounds)
+                    map.fitBounds(sightingsLayer.getBounds());
+                    console.log("Sightings layer loaded:", sightingsLayer);
+                } else {
+                    console.log("Failed to load sightings layer.");
+                }
+            });
+        })
+    }
+    zoomToYourSightings();
 });
 
 // Implement toggle for the location information popup
