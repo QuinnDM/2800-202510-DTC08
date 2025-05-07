@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Wait until user location is found to load tiles
     // map.on("locationfound", function () {
-       jawgStreetMap.addTo(map)
+    jawgStreetMap.addTo(map)
     // })
 
     // If location fails, load the tiles
@@ -52,8 +52,8 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    map.on("locationfound", function() {
-        styleDropDownLayers()     
+    map.on("locationfound", function () {
+        styleDropDownLayers()
     })
 
     // Move the map view to the user's location on open and refresh
@@ -139,6 +139,23 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     getLocation()
+
+    // fetch all sightings in database and add them to the map as markers
+    function loadSightings() {
+        fetch("/sightings")
+            .then(response => response.json())
+            .then(data => {
+                const sightingsLayer = L.layerGroup();
+                data.forEach(sighting => {
+                    const [lat, lng] = sighting.location.coordinates;
+                    const sightingMarker = L.marker([lat, lng]);
+                    sightingsLayer.addLayer(sightingMarker)
+                });
+                sightingsLayer.addTo(map);
+            }).catch(err => console.error('Failed to load sightings:', err));
+    }
+
+    loadSightings();
 });
 
 // Implement toggle for the location information popup
