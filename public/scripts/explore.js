@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 sightingsLayer = L.featureGroup();
                 data.forEach(sighting => {
                     const [lng, lat] = sighting.location.coordinates;
-                    const sightingMarker = L.marker([lat, lng]);
+                    const sightingMarker = L.marker([lat, lng]).bindPopup("").openPopup();;
                     sightingsLayer.addLayer(sightingMarker)
                 });
                 sightingsLayer.addTo(map);
