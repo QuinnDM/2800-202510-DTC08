@@ -138,41 +138,48 @@ document.addEventListener("DOMContentLoaded", function () {
     let sightingsLayer = null;
 
     // fetch all sightings in database and add them to the map as markers
-    function loadSightings() {
-        fetch("/sightings")
-            .then(response => response.json())
-            .then(data => {
-                sightingsLayer = L.featureGroup();
-                data.forEach(sighting => {
-                    const [lng, lat] = sighting.location.coordinates;
-                    const sightingMarker = L.marker([lat, lng]).bindPopup("").openPopup();;
-                    sightingsLayer.addLayer(sightingMarker)
-                });
-                sightingsLayer.addTo(map);
-
-                // Add sightings layer to the overlay map and update the control
-                overlayMaps["Sightings"] = sightingsLayer;
-                L.control.layers(baseMaps, overlayMaps).addTo(map);
-                return sightingsLayer;
-            }).catch(err => {
-                console.error('Failed to load sightings:', err);
-                return null;
+    async function loadSightings() {
+        try{
+            response = await fetch("/sightings");
+            data = await response.json();
+            sightingsLayer = L.featureGroup();
+            data.forEach(sighting => {
+                const [lng, lat] = sighting.location.coordinates;
+                const sightingMarker = L.marker([lat, lng]).bindPopup("").openPopup();;
+                sightingsLayer.addLayer(sightingMarker)
             });
-    }
-    loadSightings();
+            sightingsLayer.addTo(map);
 
-    // Zoom to extent of sitings
-    function zoomToYourSightings() {
-        const yourSightingsButton = document.getElementById("yourSightings");
-        yourSightingsButton.addEventListener("click", function () {
-            if (sightingsLayer && sightingsLayer.getLayers().length > 0) {
-                map.fitBounds(sightingsLayer.getBounds());
-            } else {
-                console.warn("Sightings layer is not loaded or empty.");
-            }
-        });
-    }
-    zoomToYourSightings();
+            // Add sightings layer to the overlay map and update the control
+            overlayMaps["Sightings"] = sightingsLayer;
+            L.control.layers(baseMaps, overlayMaps).addTo(map);
+            return sightingsLayer;
+        } catch(err) {
+        console.error('Failed to load sightings:', err);
+        return null;
+    }};
+
+loadSightings();
+
+// Zoom to extent of sitings
+async function zoomToYourSightings() {
+    const yourSightingsButton = document.getElementById("yourSightings");
+    yourSightingsButton.addEventListener("click", function () {
+        if (sightingsLayer && sightingsLayer.getLayers().length > 0) {
+            map.fitBounds(sightingsLayer.getBounds());
+        } else {
+            console.warn("Sightings layer is not loaded or empty.");
+        }
+    });
+}
+zoomToYourSightings();
+
+async function displaySightingsCounts() {
+    let totalSightings = document.getElementById("totalSightingsCount");
+    totalSightings.innerText = sightingsLayer.getLayers().length;
+}
+
+displaySightingsCounts();
 });
 
 // Implement toggle for the location information popup
