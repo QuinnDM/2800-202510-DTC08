@@ -11,15 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
         crossOrigin: true,
     });
 
-    // Wait until user location is found to load tiles
-    // map.on("locationfound", function () {
     jawgStreetMap.addTo(map)
-    // })
-
-    // If location fails, load the tiles
-    // map.on("locationerror", function () {
-    //     jawgStreetMap.addTo(map)
-    // })
 
     // Esri world imagery base map
     let esriWorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -38,9 +30,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var overlayMaps = {
     };
-
-    // // Add layer control to the map to enable toggling on and off of layer groups
-    // var layer_control = L.control.layers(baseMaps).addTo(map);
 
     function styleDropDownLayers() {
         const labels = document.querySelectorAll('.leaflet-control-layers label');
@@ -164,8 +153,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 return sightingsLayer
             }).catch(err => console.error('Failed to load sightings:', err));
     }
-    // Add layer control to the map to enable toggling on and off of layer groups
-    // var layer_control = L.control.layers(baseMaps, overlayMaps).addTo(map);
     loadSightings();
 });
 
