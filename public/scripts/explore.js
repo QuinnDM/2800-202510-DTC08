@@ -145,7 +145,9 @@ document.addEventListener("DOMContentLoaded", async function () {
             sightingsLayer = L.featureGroup();
             data.forEach(sighting => {
                 const [lng, lat] = sighting.location.coordinates;
-                const sightingMarker = L.marker([lat, lng]).bindPopup("").openPopup();;
+                let sightingPopupContent = `<img src=${sighting.photoUrl}><h1 class="species">${sighting.species}</h1><p>Spotted at (${lat}, ${lng})</p>
+                <p>${convertTimeStampToDate(sighting.timestamp)}</p><p class="speciesDescription">${sighting.description}</p>`
+                const sightingMarker = L.marker([lat, lng]).bindPopup(sightingPopupContent).openPopup();;
                 sightingsLayer.addLayer(sightingMarker)
             });
             sightingsLayer.addTo(map);
@@ -159,6 +161,17 @@ document.addEventListener("DOMContentLoaded", async function () {
             return null;
         }
     };
+
+    function convertTimeStampToDate(timestamp) {
+        let date = new Date(timestamp);
+        let dateString = date.toDateString();
+        let hours = date.getHours();
+        if (hours < 10) { hours = "0" + hours; }
+        let minutes = date.getMinutes();
+        let seconds = date.getSeconds();
+        let fullDate = `On ${dateString} at ${hours}:${minutes}:${seconds}`;
+        return fullDate;
+    }
 
     await loadSightings();
 
