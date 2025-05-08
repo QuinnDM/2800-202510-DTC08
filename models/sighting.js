@@ -33,6 +33,10 @@ const sightingSchema = new mongoose.Schema({
   timestamp: {
     type: Date,
     default: Date.now
+  },
+  taxonomicGroup: {
+    type: String,
+    required: true
   }
 });
 
