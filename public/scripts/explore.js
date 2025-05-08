@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // fetch all sightings in database and add them to the map as markers
     async function loadSightings() {
-        try{
+        try {
             response = await fetch("/sightings");
             data = await response.json();
             sightingsLayer = L.featureGroup();
@@ -154,32 +154,60 @@ document.addEventListener("DOMContentLoaded", async function () {
             overlayMaps["Sightings"] = sightingsLayer;
             L.control.layers(baseMaps, overlayMaps).addTo(map);
             return sightingsLayer;
-        } catch(err) {
-        console.error('Failed to load sightings:', err);
-        return null;
-    }};
-
-await loadSightings();
-
-// Zoom to extent of sitings
-async function zoomToYourSightings() {
-    const yourSightingsButton = document.getElementById("yourSightings");
-    yourSightingsButton.addEventListener("click", function () {
-        if (sightingsLayer && sightingsLayer.getLayers().length > 0) {
-            map.fitBounds(sightingsLayer.getBounds());
-        } else {
-            console.warn("Sightings layer is not loaded or empty.");
+        } catch (err) {
+            console.error('Failed to load sightings:', err);
+            return null;
         }
+    };
+
+    await loadSightings();
+
+    // Zoom to extent of sitings
+    async function zoomToYourSightings() {
+        const yourSightingsButton = document.getElementById("yourSightings");
+        yourSightingsButton.addEventListener("click", function () {
+            if (sightingsLayer && sightingsLayer.getLayers().length > 0) {
+                map.fitBounds(sightingsLayer.getBounds());
+            } else {
+                console.warn("Sightings layer is not loaded or empty.");
+            }
+        });
+    }
+    zoomToYourSightings();
+
+    async function displaySightingsCounts() {
+        let totalSightings = document.getElementById("totalSightingsCount");
+        totalSightings.innerText = sightingsLayer.getLayers().length;
+    }
+
+    displaySightingsCounts();
+
+    // populates the visible marker count
+    function countVisibleMarkers(map) {
+        let visibleMarkersCount = document.getElementById("visibleSightings");
+        const bounds = map.getBounds();
+        let count = 0;
+        map.eachLayer(function (layer) {
+            if (layer instanceof L.Marker) {
+                if (bounds.contains(layer.getLatLng())) {
+                    count++;
+                    visibleMarkersCount.innerText = count;
+                }
+                else {
+                    visibleMarkersCount.innerText = 0;
+                }
+            }
+        });
+        return count;
+    }
+    // populate visible markers of map load
+    map.on("load", function () {
+        countVisibleMarkers(map)
+    })
+    // refresh visible marker count on pan
+    map.on("move", function () {
+        countVisibleMarkers(map);
     });
-}
-zoomToYourSightings();
-
-async function displaySightingsCounts() {
-    let totalSightings = document.getElementById("totalSightingsCount");
-    totalSightings.innerText = sightingsLayer.getLayers().length;
-}
-
-displaySightingsCounts();
 });
 
 // Implement toggle for the location information popup
