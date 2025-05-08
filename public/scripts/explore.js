@@ -228,19 +228,25 @@ document.addEventListener("DOMContentLoaded", async function () {
     function countVisibleMarkers(map) {
         let visibleMarkersCount = document.getElementById("visibleSightings");
         const bounds = map.getBounds();
-        let count = 0;
+        let sightingsCount = 0;
         map.eachLayer(function (layer) {
-            if (layer instanceof L.Marker) {
-                if (bounds.contains(layer.getLatLng())) {
-                    count++;
-                    visibleMarkersCount.innerText = count;
-                }
-                else {
-                    visibleMarkersCount.innerText = 0;
-                }
+            if (layer instanceof L.LayerGroup) {
+                layer.eachLayer(groupLayer => {
+                    if (groupLayer instanceof L.Marker && bounds.contains(groupLayer.getLatLng())) {
+                        sightingsCount++;
+                    }
+                })
+                // if (bounds.contains(layer.getLatLng())) {
+                //     count++;
+                //     visibleMarkersCount.innerText = count;
+                // }
+                // else {
+                //     visibleMarkersCount.innerText = 0;
+                // }
             }
         });
-        return count;
+        visibleMarkersCount.innerText = sightingsCount;
+        return sightingsCount;
     }
 
     // populate visible markers of map load
