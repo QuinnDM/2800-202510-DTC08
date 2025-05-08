@@ -151,3 +151,8 @@ body,
 #yourSightings:active {
     transform: scale(0.97);
 }
+
+.species {
+    font-weight: 1000;
+    font-size: 18px;
+}
