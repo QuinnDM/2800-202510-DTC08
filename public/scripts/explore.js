@@ -153,26 +153,12 @@ document.addEventListener("DOMContentLoaded", async function () {
                 let sightingMarker = L.marker([lat, lng], { icon: markerIcon}).bindPopup(sightingPopupContent).openPopup();
                 switch (sighting.taxonomicGroup) {
                     case "plant":
-                        markerIcon = L.icon({
-                            iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
-                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                            iconSize: [25, 41],
-                            iconAnchor: [12, 41],
-                            popupAnchor: [1, -34],
-                            shadowSize: [41, 41]
-                        });
+                        markerIcon = colourMarkerIcon("marker-icon-2x-green")
                         sightingMarker = L.marker([lat, lng], { icon: markerIcon }).bindPopup(sightingPopupContent).openPopup();
                         plantLayer.addLayer(sightingMarker);
                         break;
                     case "bird":
-                        markerIcon = L.icon({
-                            iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
-                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                            iconSize: [25, 41],
-                            iconAnchor: [12, 41],
-                            popupAnchor: [1, -34],
-                            shadowSize: [41, 41]
-                        });
+                        markerIcon = colourMarkerIcon("marker-icon-2x-blue")
                         sightingMarker = L.marker([lat, lng], { icon: markerIcon }).bindPopup(sightingPopupContent).openPopup();
                         birdLayer.addLayer(sightingMarker);
                         break;
@@ -192,6 +178,18 @@ document.addEventListener("DOMContentLoaded", async function () {
             return null;
         }
     };
+
+    // must use colour codes from https://github.com/pointhi/leaflet-color-markers
+    function colourMarkerIcon(colour) {
+        markerIcon = L.icon({
+            iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/${colour}.png`,
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]});
+        return markerIcon;
+    }
 
     function convertTimeStampToDate(timestamp) {
         let date = new Date(timestamp);
@@ -244,6 +242,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
         return count;
     }
+
     // populate visible markers of map load
     map.on("load", function () {
         countVisibleMarkers(map)
