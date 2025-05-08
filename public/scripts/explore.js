@@ -42,6 +42,10 @@ document.addEventListener("DOMContentLoaded", async function () {
                 label.style.backgroundImage = "url('../images/satellite.png')";
             } else if (text === 'Street Map') {
                 label.style.backgroundImage = "url('../images/streetmap.png')";
+            } else if (text === 'Birds') {
+                label.style.backgroundColor = "#2A81CB";
+            } else if (text === 'Plants') {
+                label.style.backgroundColor = "#2AAD27";
             }
         });
     }
@@ -150,7 +154,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 let sightingPopupContent = `<img src=${sighting.photoUrl}><h1 class="species">${sighting.species}</h1><p>Spotted at (${lat}, ${lng})</p>
                 <p>${convertTimeStampToDate(sighting.timestamp)}</p><p class="speciesDescription">${sighting.description}</p>`
                 let markerIcon = L.icon({})
-                let sightingMarker = L.marker([lat, lng], { icon: markerIcon}).bindPopup(sightingPopupContent).openPopup();
+                let sightingMarker = L.marker([lat, lng], { icon: markerIcon }).bindPopup(sightingPopupContent).openPopup();
                 switch (sighting.taxonomicGroup) {
                     case "plant":
                         markerIcon = colourMarkerIcon("marker-icon-2x-green")
@@ -169,7 +173,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             birdLayer.addTo(map);
 
             // Add sightings layer to the overlay map and update the control
-            overlayMaps["Bird"] = birdLayer;
+            overlayMaps["Birds"] = birdLayer;
             overlayMaps["Plants"] = plantLayer;
             L.control.layers(baseMaps, overlayMaps).addTo(map);
             return birdLayer;
@@ -187,7 +191,8 @@ document.addEventListener("DOMContentLoaded", async function () {
             iconSize: [25, 41],
             iconAnchor: [12, 41],
             popupAnchor: [1, -34],
-            shadowSize: [41, 41]});
+            shadowSize: [41, 41]
+        });
         return markerIcon;
     }
 
