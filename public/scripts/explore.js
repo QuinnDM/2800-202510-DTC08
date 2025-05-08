@@ -135,27 +135,58 @@ document.addEventListener("DOMContentLoaded", async function () {
     // retrieve user's location information every 5 minutes
     setInterval(getLocation(), 300000);
 
-    let sightingsLayer = null;
+    let birdLayer = null;
+    let plantLayer = null;
 
     // fetch all sightings in database and add them to the map as markers
     async function loadSightings() {
         try {
             response = await fetch("/sightings");
             data = await response.json();
-            sightingsLayer = L.featureGroup();
+            birdLayer = L.featureGroup();
+            plantLayer = L.featureGroup();
             data.forEach(sighting => {
                 const [lng, lat] = sighting.location.coordinates;
                 let sightingPopupContent = `<img src=${sighting.photoUrl}><h1 class="species">${sighting.species}</h1><p>Spotted at (${lat}, ${lng})</p>
                 <p>${convertTimeStampToDate(sighting.timestamp)}</p><p class="speciesDescription">${sighting.description}</p>`
-                const sightingMarker = L.marker([lat, lng]).bindPopup(sightingPopupContent).openPopup();;
-                sightingsLayer.addLayer(sightingMarker)
+                let markerIcon = L.icon({})
+                let sightingMarker = L.marker([lat, lng], { icon: markerIcon}).bindPopup(sightingPopupContent).openPopup();
+                switch (sighting.taxonomicGroup) {
+                    case "plant":
+                        markerIcon = L.icon({
+                            iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
+                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41],
+                            popupAnchor: [1, -34],
+                            shadowSize: [41, 41]
+                        });
+                        sightingMarker = L.marker([lat, lng], { icon: markerIcon }).bindPopup(sightingPopupContent).openPopup();
+                        plantLayer.addLayer(sightingMarker);
+                        break;
+                    case "bird":
+                        markerIcon = L.icon({
+                            iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
+                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41],
+                            popupAnchor: [1, -34],
+                            shadowSize: [41, 41]
+                        });
+                        sightingMarker = L.marker([lat, lng], { icon: markerIcon }).bindPopup(sightingPopupContent).openPopup();
+                        birdLayer.addLayer(sightingMarker);
+                        break;
+                }
+                // sightingsLayer.addLayer(sightingMarker);
             });
-            sightingsLayer.addTo(map);
+            plantLayer.addTo(map)
+            birdLayer.addTo(map);
 
             // Add sightings layer to the overlay map and update the control
-            overlayMaps["Sightings"] = sightingsLayer;
+            overlayMaps["Bird"] = birdLayer;
+            overlayMaps["Plants"] = plantLayer;
             L.control.layers(baseMaps, overlayMaps).addTo(map);
-            return sightingsLayer;
+            return birdLayer;
         } catch (err) {
             console.error('Failed to load sightings:', err);
             return null;
@@ -179,8 +210,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     async function zoomToYourSightings() {
         const yourSightingsButton = document.getElementById("yourSightings");
         yourSightingsButton.addEventListener("click", function () {
-            if (sightingsLayer && sightingsLayer.getLayers().length > 0) {
-                map.fitBounds(sightingsLayer.getBounds());
+            if (birdLayer && birdLayer.getLayers().length > 0) {
+                map.fitBounds(birdLayer.getBounds());
             } else {
                 console.warn("Sightings layer is not loaded or empty.");
             }
@@ -190,7 +221,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     async function displaySightingsCounts() {
         let totalSightings = document.getElementById("totalSightingsCount");
-        totalSightings.innerText = sightingsLayer.getLayers().length;
+        totalSightings.innerText = birdLayer.getLayers().length;
     }
 
     displaySightingsCounts();
