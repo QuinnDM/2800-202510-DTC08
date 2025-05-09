@@ -223,8 +223,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     zoomToYourSightings();
 
     async function displaySightingsCounts() {
-        let totalSightings = document.getElementById("totalSightingsCount");
-        totalSightings.innerText = birdLayer.getLayers().length;
+        let totalSightingsElement = document.getElementById("totalSightingsCount");
+        let totalSightingsCount = birdLayer.getLayers().length + plantLayer.getLayers().length;
+        totalSightingsElement.innerText = totalSightingsCount;
     }
 
     displaySightingsCounts();
@@ -255,7 +256,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     // populate visible markers of map load
-    map.on("load", function () {
+    jawgStreetMap.on("load", function () {
         countVisibleMarkers(map)
     })
     // refresh visible marker count on pan
