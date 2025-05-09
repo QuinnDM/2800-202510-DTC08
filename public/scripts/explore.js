@@ -1,5 +1,8 @@
 document.addEventListener("DOMContentLoaded", async function () {
-    var map = L.map("map");
+    var map = L.map("map", {
+        minZoom: 3,
+        maxZoom: 21
+    });
 
     map.zoomControl.setPosition('topright');
 
