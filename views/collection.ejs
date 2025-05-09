@@ -1,160 +1,174 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Your Collection - Nature Nexus</title>
     <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="bg-green-50 text-gray-800 flex flex-col min-h-screen">
+</head>
+
+<body class="bg-green-50 text-gray-800 flex flex-col min-h-screen">
     <!-- Fixed Header -->
     <%- include('partials/header') %>
 
-    <!-- Main Content -->
-    <main class="flex-1 mt-10 pt-20 pb-16 px-4 md:px-8 max-w-screen-lg mx-auto space-y-12">
+        <!-- Main Content -->
+        <main class="flex-1 mt-10 pt-20 pb-16 px-4 md:px-8 max-w-screen-lg mx-auto space-y-12">
 
-      <h1 class="text-4xl font-bold text-green-800">Your Collection</h1>
+            <h1 class="text-4xl font-bold text-green-800">Your Collection</h1>
 
-      <% if (!user) { %>
-        <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-5 rounded-lg shadow-md">
-          <p class="text-sm">
-            Please <a href="/login" class="underline font-medium hover:text-yellow-600">log in</a> to view your collection.
-          </p>
-        </div>
-      <% } else { %>
-
-        <% if (!user.collections || user.collections.length === 0) { %>
-          <div class="bg-white rounded-2xl shadow-lg p-10 text-center space-y-6">
-            <svg class="w-20 h-20 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-            </svg>
-            <h2 class="text-2xl font-semibold">Your collection is empty</h2>
-            <p class="text-gray-600">Start identifying birds and plants to build your collection!</p>
-            <a href="/index" onclick="openTab('Identify')"
-              class="inline-block bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-5 rounded-lg transition">
-              Identify Something
-            </a>
-          </div>
-        <% } else { %>
-
-          <!-- Collections Grid -->
-          <div class="grid gap-8 sm:grid-cols-1 md:grid-cols-2">
-            <% user.collections.forEach(collection => { %>
-              <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden">
-                <div class="bg-green-700 text-white p-5">
-                  <h2 class="text-xl font-semibold"><%= collection.name %></h2>
-                  <p class="text-green-100 text-sm">
-                    <%= collection.items.length %> item<%= collection.items.length !== 1 ? 's' : '' %>
-                  </p>
+            <% if (!user) { %>
+                <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-5 rounded-lg shadow-md">
+                    <p class="text-sm">
+                        Please <a href="/login" class="underline font-medium hover:text-yellow-600">log in</a> to view
+                        your collection.
+                    </p>
                 </div>
-
-                <% if (collection.items.length === 0) { %>
-                  <div class="p-6 text-center text-gray-500">
-                    <p>No items in this collection yet.</p>
-                  </div>
                 <% } else { %>
-                  <ul class="divide-y p-4 space-y-2">
-                    <% collection.items.forEach(item => { %>
-                      <li class="flex items-center gap-4 py-2">
-                        <div class="h-16 w-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0 shadow-sm">
-                          <img src="<%= item.imageUrl %>" alt="<%= item.commonName %>" class="h-full w-full object-cover">
-                        </div>
-                        <div class="flex-1">
-                          <h3 class="font-semibold text-gray-800"><%= item.commonName %></h3>
-                          <p class="text-sm text-gray-500 italic"><%= item.scientificName %></p>
-                          <p class="text-xs text-gray-400 mt-1 flex items-center gap-1">
-                            <% if (item.type === 'bird') { %>
-                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                    <% if (!user.collections || user.collections.length===0) { %>
+                        <div class="bg-white rounded-2xl shadow-lg p-10 text-center space-y-6">
+                            <svg class="w-20 h-20 mx-auto text-gray-300" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
-                              </svg>
-                              Bird
-                            <% } else { %>
-                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
-                              </svg>
-                              Plant
-                            <% } %> • <%= new Date(item.identifiedOn).toLocaleDateString() %>
-                          </p>
+                                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                            </svg>
+                            <h2 class="text-2xl font-semibold">Your collection is empty</h2>
+                            <p class="text-gray-600">Start identifying birds and plants to build your collection!</p>
+                            <a href="/index" onclick="openTab('Identify')"
+                                class="inline-block bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-5 rounded-lg transition">
+                                Identify Something
+                            </a>
                         </div>
-                      </li>
-                    <% }) %>
-                  </ul>
-                <% } %>
-              </div>
-            <% }) %>
-          </div>
+                        <% } else { %>
 
-          <!-- Create New Collection -->
-          <div class="mt-12">
-            <h2 class="text-2xl font-semibold text-green-800 mb-4">Create New Collection</h2>
-            <div class="bg-white rounded-lg shadow-md p-6">
-              <form id="newCollectionForm" class="flex flex-col md:flex-row items-stretch md:items-center gap-4">
-                <input
-                  type="text"
-                  id="collectionName"
-                  placeholder="Collection name"
-                  class="flex-1 border border-gray-300 rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-                <button
-                  type="submit"
-                  class="bg-green-600 text-white py-2 px-6 rounded-lg hover:bg-green-700 transition font-medium"
-                >
-                  Create
-                </button>
-              </form>
-            </div>
-          </div>
-        <% } %>
-      <% } %>
-    </main>
+                            <!-- Collections Grid -->
+                            <div class="grid gap-8 sm:grid-cols-1 md:grid-cols-2">
+                                <% user.collections.forEach(collection=> { %>
+                                    <div
+                                        class="bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden">
+                                        <div class="bg-green-700 text-white p-5">
+                                            <h2 class="text-xl font-semibold">
+                                                <%= collection.name %>
+                                            </h2>
+                                            <p class="text-green-100 text-sm">
+                                                <%= collection.items.length %> item<%= collection.items.length !==1
+                                                        ? 's' : '' %>
+                                            </p>
+                                        </div>
 
-    <!-- Bottom Navigation -->
-    <%- include('partials/footer') %>
+                                        <% if (collection.items.length===0) { %>
+                                            <div class="p-6 text-center text-gray-500">
+                                                <p>No items in this collection yet.</p>
+                                            </div>
+                                            <% } else { %>
+                                                <ul class="divide-y p-4 space-y-2">
+                                                    <% collection.items.forEach(item=> { %>
+                                                        <li class="flex items-center gap-4 py-2">
+                                                            <div
+                                                                class="h-16 w-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0 shadow-sm">
+                                                                <img src="<%= item.imageUrl %>"
+                                                                    alt="<%= item.commonName %>"
+                                                                    class="h-full w-full object-cover">
+                                                            </div>
+                                                            <div class="flex-1">
+                                                                <h3 class="font-semibold text-gray-800">
+                                                                    <%= item.commonName %>
+                                                                </h3>
+                                                                <p class="text-sm text-gray-500 italic">
+                                                                    <%= item.scientificName %>
+                                                                </p>
+                                                                <p
+                                                                    class="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                                                                    <% if (item.type==='bird' ) { %>
+                                                                        <svg class="w-4 h-4" fill="none"
+                                                                            stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path stroke-linecap="round"
+                                                                                stroke-linejoin="round" stroke-width="2"
+                                                                                d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+                                                                        </svg>
+                                                                        Bird
+                                                                        <% } else { %>
+                                                                            <svg class="w-4 h-4" fill="none"
+                                                                                stroke="currentColor"
+                                                                                viewBox="0 0 24 24">
+                                                                                <path stroke-linecap="round"
+                                                                                    stroke-linejoin="round"
+                                                                                    stroke-width="2"
+                                                                                    d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                                                                            </svg>
+                                                                            Plant
+                                                                            <% } %> • <%= new
+                                                                                    Date(item.identifiedOn).toLocaleDateString()
+                                                                                    %>
+                                                                </p>
+                                                            </div>
+                                                        </li>
+                                                        <% }) %>
+                                                </ul>
+                                                <% } %>
+                                    </div>
+                                    <% }) %>
+                            </div>
 
-    <script>
-      // New collection form submission
-      document
-        .getElementById("newCollectionForm")
-        ?.addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const nameInput = document.getElementById("collectionName");
-          const name = nameInput.value.trim();
+                            <!-- Create New Collection -->
+                            <div class="mt-12">
+                                <h2 class="text-2xl font-semibold text-green-800 mb-4">Create New Collection</h2>
+                                <div class="bg-white rounded-lg shadow-md p-6">
+                                    <form id="newCollectionForm"
+                                        class="flex flex-col md:flex-row items-stretch md:items-center gap-4">
+                                        <input type="text" id="collectionName" placeholder="Collection name"
+                                            class="flex-1 border border-gray-300 rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-green-500" />
+                                        <button type="submit"
+                                            class="bg-green-600 text-white py-2 px-6 rounded-lg hover:bg-green-700 transition font-medium">
+                                            Create
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <% } %>
+                                <% } %>
+        </main>
 
-          if (!name) {
-            alert("Please enter a collection name");
-            return;
-          }
+        <!-- Bottom Navigation -->
+        <%- include('partials/footer') %>
 
-          try {
-            const response = await fetch("/collections", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ name }),
-            });
+            <script>
+                // New collection form submission
+                document
+                    .getElementById("newCollectionForm")
+                    ?.addEventListener("submit", async (e) => {
+                        e.preventDefault();
+                        const nameInput = document.getElementById("collectionName");
+                        const name = nameInput.value.trim();
 
-            if (!response.ok) {
-              const errorData = await response.json();
-              throw new Error(errorData.error || "Failed to create collection");
-            }
+                        if (!name) {
+                            alert("Please enter a collection name");
+                            return;
+                        }
 
-            // Reload the page to show the new collection
-            window.location.reload();
-          } catch (error) {
-            console.error("Create collection error:", error);
-            alert(`Error: ${error.message}`);
-          }
-        });
-    </script>
-  </body>
+                        try {
+                            const response = await fetch("/collections", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ name }),
+                            });
+
+                            if (!response.ok) {
+                                const errorData = await response.json();
+                                throw new Error(errorData.error || "Failed to create collection");
+                            }
+
+                            // Reload the page to show the new collection
+                            window.location.reload();
+                        } catch (error) {
+                            console.error("Create collection error:", error);
+                            alert(`Error: ${error.message}`);
+                        }
+                    });
+            </script>
+</body>
+
 </html>
