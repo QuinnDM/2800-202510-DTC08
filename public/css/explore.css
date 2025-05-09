@@ -32,6 +32,19 @@ body,
     display: block;
     /* ensures background covers full label */
     transition: background-color 0.3s;
+    color: white;
+    font-weight: 900;
+    /* Very bold */
+    font-size: 1.2rem;
+    /* Adjust size as needed */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    /* Black text outline using text-shadow */
+    text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000;
 }
 
 /* Optional: hover effect */
