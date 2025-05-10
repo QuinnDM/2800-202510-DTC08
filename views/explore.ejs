@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore</title>
+    <link rel="stylesheet" href="css/explore.css">
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet style sheet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.1.0/assets/css/leaflet.css" />
+    <!-- Leaflet Geosearch CDN -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.0.0/dist/geosearch.css" />
+</head>
+
+<body>
+
+
+    <div id="map"></div>
+    <%- include('partials/header') %>
+        <div id="locationInformationButton"></div>
+        <div id="locationInformationContainer" style="display: none;">
+            <p id="output"></p>
+        </div>
+        <div id="sightingsCountBar">
+            <div id="observationHeader">
+                <p>Sightings:</p>
+            </div>
+            <div class="sightings">
+                <p>In View: </p>
+                <p id="visibleSightings"></p>
+            </div>
+            <div id="yourSightings">
+                <p>Yours: </p>
+                <p>50</p>
+            </div>
+            <div class="sightings">
+                <p>Total: </p>
+                <p id="totalSightingsCount"></p>
+            </div>
+        </div>
+        <%- include('partials/footer') %>
+
+            <!-- Leaflet library -->
+            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+                integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+            <!-- Leaflet Geosearch -->
+            <script src="https://unpkg.com/leaflet-geosearch@latest/dist/bundle.min.js"></script>
+            <script src="scripts/explore.js"></script>
+</body>
+
+</html>
