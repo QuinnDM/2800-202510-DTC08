@@ -225,6 +225,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     zoomToYourSightings();
 
+    // Displays the total count of total sighting contributions from all user
     async function displaySightingsCounts() {
         let totalSightingsElement = document.getElementById("totalSightingsCount");
         let totalSightingsCount = birdLayer.getLayers().length + plantLayer.getLayers().length;
@@ -233,7 +234,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     displaySightingsCounts();
 
-    // populates the visible marker count
+    // Populates the visible sightings counts (number of sightings within the current map view)
     function countVisibleMarkers(map) {
         let visibleMarkersCount = document.getElementById("visibleSightings");
         const bounds = map.getBounds();
