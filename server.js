@@ -379,7 +379,6 @@ app.get("/sightings", async (req, res) => {
 app.get("/yourSightings", async (req, res) => {
   console.log(req.session.user)
   if (req.session.user) {
-    const userId3 = mongoose.Types.ObjectId.createFromHexString(req.session.user._id);
     const sightings = await Sighting.find({ userId: req.session.user._id });
     res.json(sightings);
   } else {
