@@ -273,7 +273,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             return null;
         }
     }
-
     displayYourSightingsCount();
 });
 
