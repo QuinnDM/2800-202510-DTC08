@@ -269,3 +269,45 @@ body,
     font-weight: 1000;
     font-size: 18px;
 }
+
+.filterControl {
+    position: fixed;
+    bottom: 110px;
+    right: 20px;
+    background: white;
+    overflow: hidden;
+    font-family: sans-serif;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 5000;
+    border-radius: 5px;
+    border-style: solid;
+    border-width: 2px;
+    border-color: rgb(169, 169, 169);
+}
+
+.filterButton {
+    padding: 10px 15px;
+    background: #f4f4f4;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.filterOptions {
+    display: none;
+    background: white;
+    border-top: 1px solid #ccc;
+}
+
+.filterOptions label {
+    display: block;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.filterControl:hover .filterOptions {
+    display: block;
+}
+
+.filterOptions label:hover {
+    background-color: #eee;
+}
