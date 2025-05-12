@@ -1,10 +1,9 @@
 require("dotenv").config();
-const fetch = require("node-fetch");
 
 async function testGemini() {
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
   const imageUrl =
-    "https://png.pngtree.com/png-clipart/20230927/original/pngtree-red-mushroom-png-png-image_13144538.png";
+    "https://res.cloudinary.com/dr4sceokg/image/upload/v1747075829/gemini/temp_output.png";
   const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
   const geminiRequest = {
@@ -12,7 +11,7 @@ async function testGemini() {
       {
         parts: [
           {
-            text: "Identify this image. Give answer in this format: bird or plant and its common name",
+            text: "Identify this bird, its not a northern cardinal",
           },
           { text: `Image URL: ${imageUrl}` },
         ],

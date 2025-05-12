@@ -2,7 +2,7 @@ const fs = require("fs");
 const { exec } = require("child_process");
 const path = require("path");
 
-const imageUrl = "https://png.pngtree.com/png-clipart/20230927/original/pngtree-red-mushroom-png-png-image_13144538.png";
+const imageUrl = "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQbPZkYuUTb29CHnSVREtoFdbyEslmzsOLoUHua4Oz8isxRZ1TZXiF7qO19zdFBMkyRIGoNU1nZZXUpYGa1yvfEEw";
 const inputPath = path.join(__dirname, "input.png");
 const outputPath = path.join(__dirname, "output.png");
 
