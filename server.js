@@ -94,7 +94,7 @@ app.get("/openweathermap/:lat/:lon", async (req, res) => {
     const weatherData = await weatherRes.json();
     res.json(weatherData)
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch weather data"})
+    res.status(500).json({ error: "Failed to fetch weather data" })
   }
 });
 
@@ -373,6 +373,16 @@ app.post("/collections", async (req, res) => {
 app.get("/sightings", async (req, res) => {
   const sightings = await Sighting.find({});
   res.json(sightings);
+});
+
+// Get your sightings
+app.get("/yourSightings", async (req, res) => {
+  if (req.session.user) {
+    const sightings = await Sighting.find({ userId: req.session.user._id });
+    res.json(sightings);
+  } else {
+    return res.status(404).json({ error: "User not found" });
+  }
 });
 
 // Start Server

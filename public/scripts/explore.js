@@ -251,7 +251,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         visibleMarkersCount.innerText = sightingsCount;
         return sightingsCount;
     }
-    // populate visible markers of map load
+    // populate visible markers on map load
     jawgStreetMap.on("load", function () {
         countVisibleMarkers(map)
     })
@@ -259,6 +259,22 @@ document.addEventListener("DOMContentLoaded", async function () {
     map.on("move", function () {
         countVisibleMarkers(map);
     });
+
+    // Get the count of your sightings on the explore page
+    async function displayYourSightingsCount() {
+        try {
+            const response = await fetch("/yourSightings");
+            const data = await response.json();
+            let yourSightingsCount = data.length;
+            let yourSightingsElement = document.getElementById("yourSightingsCount");
+            yourSightingsElement.innerText = yourSightingsCount;
+        } catch(err) {
+            console.error('Failed to load your sightings:', err);
+            return null;
+        }
+    }
+
+    displayYourSightingsCount();
 });
 
 // Implement toggle for the location information popup
