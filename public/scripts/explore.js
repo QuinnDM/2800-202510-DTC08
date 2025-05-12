@@ -246,19 +246,11 @@ document.addEventListener("DOMContentLoaded", async function () {
                         sightingsCount++;
                     }
                 })
-                // if (bounds.contains(layer.getLatLng())) {
-                //     count++;
-                //     visibleMarkersCount.innerText = count;
-                // }
-                // else {
-                //     visibleMarkersCount.innerText = 0;
-                // }
             }
         });
         visibleMarkersCount.innerText = sightingsCount;
         return sightingsCount;
     }
-
     // populate visible markers of map load
     jawgStreetMap.on("load", function () {
         countVisibleMarkers(map)
