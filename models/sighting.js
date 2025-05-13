@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const sightingSchema = new mongoose.Schema({
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     ref: 'User', // assumes you have a User model
     required: true
   },

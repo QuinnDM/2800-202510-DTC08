@@ -1,5 +1,8 @@
 document.addEventListener("DOMContentLoaded", async function () {
-    var map = L.map("map");
+    var map = L.map("map", {
+        minZoom: 3,
+        maxZoom: 21
+    });
 
     map.zoomControl.setPosition('topright');
 
@@ -22,6 +25,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         maxZoom: 22,
     });
 
+    // Dummy layer just for the header label
+    const dummyHeader = L.layerGroup();
+
     // creating layer groups
     var baseMaps = {
         "Street Map": jawgStreetMap,
@@ -29,6 +35,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
 
     var overlayMaps = {
+        "Taxonomic Groups": dummyHeader, 
+        "Birds": L.featureGroup(),
+        "Plants": L.featureGroup(),
+        "Heatmaps": dummyHeader, 
+        "Bird Heat": L.featureGroup()
     };
 
     function styleDropDownLayers() {
@@ -139,16 +150,22 @@ document.addEventListener("DOMContentLoaded", async function () {
     // retrieve user's location information every 5 minutes
     setInterval(getLocation(), 300000);
 
-    let birdLayer = null;
-    let plantLayer = null;
+    const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 
-    // fetch all sightings in database and add them to the map as markers
-    async function loadSightings() {
+    // Add the initial empty layers to the map
+    overlayMaps["Birds"].addTo(map);
+    overlayMaps["Plants"].addTo(map);
+    overlayMaps["Bird Heat"].addTo(map)
+
+    async function loadSightings(route) {
         try {
-            response = await fetch("/sightings");
+            response = await fetch(route);
             data = await response.json();
-            birdLayer = L.featureGroup();
-            plantLayer = L.featureGroup();
+
+            overlayMaps["Birds"].clearLayers();
+            overlayMaps["Plants"].clearLayers();
+            coordinateArray = []; // for building heat map
+
             data.forEach(sighting => {
                 const [lng, lat] = sighting.location.coordinates;
                 let sightingPopupContent = `<img src=${sighting.photoUrl}><h1 class="species">${sighting.species}</h1><p>Spotted at (${lat}, ${lng})</p>
@@ -159,24 +176,23 @@ document.addEventListener("DOMContentLoaded", async function () {
                     case "plant":
                         markerIcon = colourMarkerIcon("marker-icon-2x-green")
                         sightingMarker = L.marker([lat, lng], { icon: markerIcon }).bindPopup(sightingPopupContent).openPopup();
-                        plantLayer.addLayer(sightingMarker);
+                        overlayMaps["Plants"].addLayer(sightingMarker);
+                        coordinateArray.push([lat, lng])
                         break;
                     case "bird":
                         markerIcon = colourMarkerIcon("marker-icon-2x-blue")
                         sightingMarker = L.marker([lat, lng], { icon: markerIcon }).bindPopup(sightingPopupContent).openPopup();
-                        birdLayer.addLayer(sightingMarker);
+                        overlayMaps["Birds"].addLayer(sightingMarker);
                         break;
                 }
-                // sightingsLayer.addLayer(sightingMarker);
             });
-            plantLayer.addTo(map)
-            birdLayer.addTo(map);
-
-            // Add sightings layer to the overlay map and update the control
-            overlayMaps["Birds"] = birdLayer;
-            overlayMaps["Plants"] = plantLayer;
-            L.control.layers(baseMaps, overlayMaps).addTo(map);
-            return birdLayer;
+            // Create heat maps for the various layers. 
+            // Leaflet plugin from https://github.com/Leaflet/Leaflet.heat?tab=readme-ov-file maintained by Vladimir Agafonkin.
+            let heatLayerBirds = L.heatLayer(
+                coordinateArray
+                , { radius: 100 })
+            overlayMaps["Bird Heat"].addLayer(heatLayerBirds)
+            return overlayMaps["Birds"];
         } catch (err) {
             console.error('Failed to load sightings:', err);
             return null;
@@ -207,14 +223,32 @@ document.addEventListener("DOMContentLoaded", async function () {
         return fullDate;
     }
 
-    await loadSightings();
+    await loadSightings("/sightings");
+
+    const yoursOnly = document.getElementById("onlyShowYourSightings");
+    yoursOnly.addEventListener("change", () => {
+        applySightingsFilter();
+    });
+
+    // apply sighting filters by adding query parameters when fetching the sighting data
+    async function applySightingsFilter() {
+        let filterQuery = "/sightings?"
+        const showOnlyYourSightingsFilterElement = document.getElementById("onlyShowYourSightings");
+        if (showOnlyYourSightingsFilterElement.checked) {
+            filterQuery = filterQuery + "onlyYours=true"
+            await loadSightings(filterQuery);
+        } else {
+            await loadSightings(filterQuery); // load sighting without any filters
+        }
+        return null;
+    }
 
     // Zoom to extent of sitings
     async function zoomToYourSightings() {
         const yourSightingsButton = document.getElementById("yourSightings");
         yourSightingsButton.addEventListener("click", function () {
-            if (birdLayer && birdLayer.getLayers().length > 0) {
-                map.fitBounds(birdLayer.getBounds());
+            if (overlayMaps["Birds"] && overlayMaps["Birds"].getLayers().length > 0) {
+                map.fitBounds(overlayMaps["Birds"].getBounds());
             } else {
                 console.warn("Sightings layer is not loaded or empty.");
             }
@@ -222,14 +256,16 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     zoomToYourSightings();
 
+    // Displays the total count of total sighting contributions from all user
     async function displaySightingsCounts() {
-        let totalSightings = document.getElementById("totalSightingsCount");
-        totalSightings.innerText = birdLayer.getLayers().length;
+        let totalSightingsElement = document.getElementById("totalSightingsCount");
+        let totalSightingsCount = overlayMaps["Birds"].getLayers().length + overlayMaps["Plants"].getLayers().length;
+        totalSightingsElement.innerText = totalSightingsCount;
     }
 
     displaySightingsCounts();
 
-    // populates the visible marker count
+    // Populates the visible sightings counts (number of sightings within the current map view)
     function countVisibleMarkers(map) {
         let visibleMarkersCount = document.getElementById("visibleSightings");
         const bounds = map.getBounds();
@@ -241,27 +277,45 @@ document.addEventListener("DOMContentLoaded", async function () {
                         sightingsCount++;
                     }
                 })
-                // if (bounds.contains(layer.getLatLng())) {
-                //     count++;
-                //     visibleMarkersCount.innerText = count;
-                // }
-                // else {
-                //     visibleMarkersCount.innerText = 0;
-                // }
             }
         });
         visibleMarkersCount.innerText = sightingsCount;
         return sightingsCount;
     }
-
-    // populate visible markers of map load
-    map.on("load", function () {
+    // populate visible markers on map load
+    jawgStreetMap.on("load", function () {
         countVisibleMarkers(map)
     })
     // refresh visible marker count on pan
     map.on("move", function () {
         countVisibleMarkers(map);
     });
+
+    // Get the count of your sightings on the explore page
+    async function displayYourSightingsCount() {
+        try {
+            const response = await fetch("/sightings");
+            const data = await response.json();
+            let yourSightingsCount = data.length;
+            let yourSightingsElement = document.getElementById("yourSightingsCount");
+            yourSightingsElement.innerText = yourSightingsCount;
+        } catch (err) {
+            console.error('Failed to load your sightings:', err);
+            return null;
+        }
+    }
+    displayYourSightingsCount();
+
+    // Add separator to the leaflet layer control group
+    setTimeout(() => {
+        const controlContainer = document.querySelector('.leaflet-control-layers-overlays');
+        if (controlContainer) {
+            const separator = document.createElement('div');
+            separator.className = 'leaflet-control-layers-separator';
+            controlContainer.insertBefore(separator, controlContainer.children[3]);
+        }
+    }, 1000);
+
 });
 
 // Implement toggle for the location information popup

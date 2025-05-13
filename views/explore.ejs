@@ -2,73 +2,81 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Explore</title>
-
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Leaflet styles -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.1.0/assets/css/leaflet.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.0.0/dist/geosearch.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore</title>
+    <link rel="stylesheet" href="css/explore.css">
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet style sheet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.1.0/assets/css/leaflet.css" />
+    <!-- Leaflet Geosearch CDN -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.0.0/dist/geosearch.css" />
 </head>
 
-<body class="bg-gray-100 text-gray-800">
+<body>
 
-  <%- include('partials/header') %>
 
-  <div class="container mx-auto pt-24 px-4 py-6 space-y-6">
+    <div id="map"></div>
+    <%- include('partials/header') %>
+        <div id="locationInformationButton"></div>
+        <div id="locationInformationContainer" style="display: none;">
+            <p id="output"></p>
+        </div>
 
-    <!-- Map Container -->
-    <div id="map" class="relative z-0 w-full h-[500px] rounded-lg shadow-md"></div>
+        <div class="filterControl">
+            <div class="filterButton"><svg width="25px" height="25px" viewBox="0 0 128 128" data-name="Слой 1"
+                    id="Слой_1" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <style>
+                            .cls-1 {
+                                fill: #bdbdbd;
+                            }
 
-    <!-- Location Info Toggle Button -->
-    <div id="locationInformationButton" class="text-center">
-      <!-- You can add a button if needed -->
-    </div>
+                            .cls-2 {
+                                fill: #404040;
+                            }
+                        </style>
+                    </defs>
+                    <title />
+                    <polygon class="cls-1" points="126 2 2 2 50 49.76 50 125.69 78 98.22 78 50 126 2" />
+                    <path class="cls-2"
+                        d="M50,127.69a2,2,0,0,1-2-2V50.59L.59,3.42A2,2,0,0,1,2,0H126a2,2,0,0,1,1.41,3.41L80,50.83V98.22a2,2,0,0,1-.6,1.43l-28,27.47A2,2,0,0,1,50,127.69ZM6.85,4,51.41,48.35A2,2,0,0,1,52,49.76v71.16L76,97.38V50a2,2,0,0,1,.59-1.41L121.17,4Z" />
+                </svg></div>
+            <div class="filterOptions">
+                <label><input id="onlyShowYourSightings" type="checkbox"> Only Show Your Sightings</label>
+            </div>
+        </div>
 
-    <!-- Location Information Output -->
-    <div id="locationInformationContainer" class="bg-white rounded-lg shadow p-4" style="display: none;">
-      <p id="output" class="text-sm text-gray-600"></p>
-    </div>
+        <div id="sightingsCountBar">
+            <div id="observationHeader">
+                <p>Sightings:</p>
+            </div>
+            <div class="sightings">
+                <p>In View: </p>
+                <p id="visibleSightings"></p>
+            </div>
+            <div id="yourSightings">
+                <p>Yours: </p>
+                <p id="yourSightingsCount"></p>
+            </div>
+            <div class="sightings">
+                <p>Total: </p>
+                <p id="totalSightingsCount"></p>
+            </div>
+        </div>
+        <%- include('partials/footer') %>
 
-    <!-- Sightings Info Bar -->
-    <div id="sightingsCountBar" class="bg-white rounded-lg shadow p-6 flex flex-col md:flex-row justify-between gap-4">
-      <!-- Header -->
-      <div id="observationHeader" class="text-lg font-semibold text-green-700">
-        <p>Sightings</p>
-      </div>
-
-      <!-- Visible Sightings -->
-      <div class="sightings flex items-center gap-2 text-sm">
-        <p class="font-medium">Visible:</p>
-        <p id="visibleSightings" class="text-gray-700"></p>
-      </div>
-
-      <!-- Your Sightings -->
-      <div id="yourSightings" class="flex items-center gap-2 text-sm">
-        <p class="font-medium">Yours:</p>
-        <p>50</p>
-      </div>
-
-      <!-- Total Sightings -->
-      <div class="sightings flex items-center gap-2 text-sm">
-        <p class="font-medium">Total:</p>
-        <p id="totalSightingsCount" class="text-gray-700"></p>
-      </div>
-    </div>
-  </div>
-
-  <%- include('partials/footer') %>
-
-  <!-- Scripts -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <script src="https://unpkg.com/leaflet-geosearch@latest/dist/bundle.min.js"></script>
-  <script src="scripts/explore.js"></script>
+            <!-- Leaflet library -->
+            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+                integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+            <!-- Leaflet Geosearch -->
+            <script src="https://unpkg.com/leaflet-geosearch@latest/dist/bundle.min.js"></script>
+            <!-- Leaflet.heat CDN -->
+            <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+            <script src="scripts/explore.js"></script>
 </body>
 
 </html>

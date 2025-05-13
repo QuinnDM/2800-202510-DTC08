@@ -94,7 +94,7 @@ app.get("/openweathermap/:lat/:lon", async (req, res) => {
     const weatherData = await weatherRes.json();
     res.json(weatherData)
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch weather data"})
+    res.status(500).json({ error: "Failed to fetch weather data" })
   }
 });
 
@@ -369,9 +369,19 @@ app.post("/collections", async (req, res) => {
   }
 });
 
+// Build filter helper function
+function sightingsFilters(query, userIdString) { 
+  const filters = {}
+  if (query.onlyYours == "true") {
+    filters.userId = userIdString;
+  }
+  return filters;
+}
+
 // Get sightings
 app.get("/sightings", async (req, res) => {
-  const sightings = await Sighting.find({});
+  const filter = sightingsFilters(req.query, req.session.user._id); 
+  const sightings = await Sighting.find(filter);
   res.json(sightings);
 });
 
