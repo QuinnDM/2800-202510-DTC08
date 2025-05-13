@@ -1,5 +1,4 @@
 require("dotenv").config();
-const fetch = require("node-fetch");
 
 async function testEBird() {
   const EBIRD_API_KEY = process.env.EBIRD_API_KEY;
