@@ -380,10 +380,26 @@ function sightingsFilters(query, userIdString) {
 
 // Get sightings
 app.get("/sightings", async (req, res) => {
-  const filter = sightingsFilters(req.query, req.session.user._id); 
-  const sightings = await Sighting.find(filter);
-  res.json(sightings);
+  if (req.session.user) {
+    const filter = sightingsFilters(req.query, req.session.user._id);
+    const sightings = await Sighting.find(filter);
+    res.json(sightings);
+  } else {
+    const sightings = await Sighting.find({});
+    res.json(sightings);
+  }
 });
+
+// Get your sightings
+app.get("/yourSightings", async (req, res) => {
+  if (req.session.user) {
+    const sightings = await Sighting.find({ userId: req.session.user._id });
+    res.json(sightings);
+  } else {
+    return res.status(404).json({ error: "User not found" });
+  }
+});
+
 
 // Start Server
 app.listen(port, () => {
