@@ -25,6 +25,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         maxZoom: 22,
     });
 
+    // Dummy layer just for the header label
+    const dummyHeader = L.layerGroup();
+
     // creating layer groups
     var baseMaps = {
         "Street Map": jawgStreetMap,
@@ -32,8 +35,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
 
     var overlayMaps = {
+        "Taxonomic Groups": dummyHeader, 
         "Birds": L.featureGroup(),
-        "Plants": L.featureGroup()
+        "Plants": L.featureGroup(),
+        "Heatmaps": dummyHeader, 
+        "Bird Heat": L.featureGroup()
     };
 
     function styleDropDownLayers() {
@@ -149,6 +155,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     // Add the initial empty layers to the map
     overlayMaps["Birds"].addTo(map);
     overlayMaps["Plants"].addTo(map);
+    overlayMaps["Bird Heat"].addTo(map)
 
     async function loadSightings(route) {
         try {
@@ -157,6 +164,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
             overlayMaps["Birds"].clearLayers();
             overlayMaps["Plants"].clearLayers();
+            coordinateArray = []; // for building heat map
 
             data.forEach(sighting => {
                 const [lng, lat] = sighting.location.coordinates;
@@ -169,6 +177,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                         markerIcon = colourMarkerIcon("marker-icon-2x-green")
                         sightingMarker = L.marker([lat, lng], { icon: markerIcon }).bindPopup(sightingPopupContent).openPopup();
                         overlayMaps["Plants"].addLayer(sightingMarker);
+                        coordinateArray.push([lat, lng])
                         break;
                     case "bird":
                         markerIcon = colourMarkerIcon("marker-icon-2x-blue")
@@ -177,6 +186,12 @@ document.addEventListener("DOMContentLoaded", async function () {
                         break;
                 }
             });
+            // Create heat maps for the various layers. 
+            // Leaflet plugin from https://github.com/Leaflet/Leaflet.heat?tab=readme-ov-file maintained by Vladimir Agafonkin.
+            let heatLayerBirds = L.heatLayer(
+                coordinateArray
+                , { radius: 100 })
+            overlayMaps["Bird Heat"].addLayer(heatLayerBirds)
             return overlayMaps["Birds"];
         } catch (err) {
             console.error('Failed to load sightings:', err);
@@ -290,6 +305,17 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
     displayYourSightingsCount();
+
+    // Add separator to the leaflet layer control group
+    setTimeout(() => {
+        const controlContainer = document.querySelector('.leaflet-control-layers-overlays');
+        if (controlContainer) {
+            const separator = document.createElement('div');
+            separator.className = 'leaflet-control-layers-separator';
+            controlContainer.insertBefore(separator, controlContainer.children[3]);
+        }
+    }, 1000);
+
 });
 
 // Implement toggle for the location information popup

@@ -47,10 +47,65 @@ body,
         1px 1px 0 #000;
 }
 
-/* Optional: hover effect */
 .leaflet-control-layers label:hover {
     background-color: #d0e6ff;
-    /* light blue on hover */
+}
+
+/* hide the input portion of the layer header in the leaflet layer control */
+.leaflet-control-layers-overlays label:first-child input {
+    display: none;
+}
+
+/* override the stylings for the layer header label in the leaflet layer control */
+.leaflet-control-layers-overlays label:first-child {
+    background-color: white;
+    /* light gray background */
+    padding: 4px 6px;
+    margin: 2px 0;
+    border-radius: 4px;
+    display: block;
+    /* ensures background covers full label */
+    transition: background-color 0.3s;
+    color: black;
+    font-weight: 800;
+    /* Very bold */
+    font-size: 1.0rem;
+    /* Adjust size as needed */
+    text-transform: none;
+    letter-spacing: 0px;
+    /* Black text outline using text-shadow */
+    text-shadow: none;
+    text-align: center;
+}
+
+.leaflet-control-layers-overlays label:first-child:hover {
+    background-color: white;
+}
+
+/* hide the input portion of the layer header in the leaflet layer control */
+.leaflet-control-layers-overlays label:nth-child(5) input {
+    display: none;
+}
+
+/* override the stylings for the layer header label in the leaflet layer control */
+.leaflet-control-layers-overlays label:nth-child(5) {
+    background-color: white;
+    padding: 4px 6px;
+    margin: 2px 0;
+    border-radius: 4px;
+    display: block;
+    transition: background-color 0.3s;
+    color: black;
+    font-weight: 800;
+    font-size: 1.0rem;
+    text-transform: none;
+    letter-spacing: 0px;
+    text-shadow: none;
+    text-align: center;
+}
+
+.leaflet-control-layers-overlays label:nth-child(5):hover {
+    background-color: white;
 }
 
 .bold {
