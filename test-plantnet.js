@@ -1,11 +1,13 @@
 require("dotenv").config();
-const fetch = require("node-fetch");
+// const fetch = require("node-fetch");
 const FormData = require("form-data");
 
 async function testPlantNet() {
   const PLANTNET_API_KEY = process.env.PLANTNET_API_KEY;
-  const imageUrl = "https://res.cloudinary.com/demo/image/upload/sample.jpg";
-  const PLANTNET_URL = "https://my-api.plantnet.org/v2/identify/all";
+  const imageUrl =
+    "https://images.unsplash.com/photo-1471899236350-e3016bf1e69e?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Zmxvd2VyfGVufDB8fDB8fHww";
+  const PLANTNET_URL =
+    "https://my-api.plantnet.org/v2/species?api-key=${PLANTNET_API_KEY}&images=https://images.unsplash.com/photo-1471899236350-e3016bf1e69e?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Zmxvd2VyfGVufDB8fDB8fHww";
 
   if (!PLANTNET_API_KEY) {
     console.error("Missing PLANTNET_API_KEY");
