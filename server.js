@@ -369,21 +369,20 @@ app.post("/collections", async (req, res) => {
   }
 });
 
+// Build filter helper function
+function sightingsFilters(query, userIdString) { 
+  const filters = {}
+  if (query.onlyYours == "true") {
+    filters.userId = userIdString;
+  }
+  return filters;
+}
+
 // Get sightings
 app.get("/sightings", async (req, res) => {
-  const sightings = await Sighting.find({});
+  const filter = sightingsFilters(req.query, req.session.user._id); 
+  const sightings = await Sighting.find(filter);
   res.json(sightings);
-});
-
-// Get your sightings
-app.get("/yourSightings", async (req, res) => {
-  console.log(req.session.user)
-  if (req.session.user) {
-    const sightings = await Sighting.find({ userId: req.session.user._id });
-    res.json(sightings);
-  } else {
-    return res.status(404).json({ error: "User not found" });
-  }
 });
 
 // Start Server
