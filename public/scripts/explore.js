@@ -35,11 +35,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
 
     var overlayMaps = {
-        "Taxonomic Groups": dummyHeader, 
+        "Taxonomic Groups": dummyHeader,
         "Birds": L.featureGroup(),
         "Plants": L.featureGroup(),
-        "Heatmaps": dummyHeader, 
-        "Bird Heat": L.featureGroup()
+        "Heatmaps": dummyHeader,
+        "Birds HM": L.featureGroup(),
+        "Plants HM": L.featureGroup()
     };
 
     function styleDropDownLayers() {
@@ -155,7 +156,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     // Add the initial empty layers to the map
     overlayMaps["Birds"].addTo(map);
     overlayMaps["Plants"].addTo(map);
-    overlayMaps["Bird Heat"].addTo(map)
+    overlayMaps["Birds HM"].addTo(map);
+    overlayMaps["Plants HM"].addTo(map)
 
     async function loadSightings(route) {
         try {
@@ -164,7 +166,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
             overlayMaps["Birds"].clearLayers();
             overlayMaps["Plants"].clearLayers();
-            coordinateArray = []; // for building heat map
+            // for building heat maps
+            coordinateArrayBirds = [];
+            coordinateArrayPlants = [];
 
             data.forEach(sighting => {
                 const [lng, lat] = sighting.location.coordinates;
@@ -177,27 +181,34 @@ document.addEventListener("DOMContentLoaded", async function () {
                         markerIcon = colourMarkerIcon("marker-icon-2x-green")
                         sightingMarker = L.marker([lat, lng], { icon: markerIcon }).bindPopup(sightingPopupContent).openPopup();
                         overlayMaps["Plants"].addLayer(sightingMarker);
-                        coordinateArray.push([lat, lng])
+                        coordinateArrayPlants.push([lat, lng])
                         break;
                     case "bird":
                         markerIcon = colourMarkerIcon("marker-icon-2x-blue")
                         sightingMarker = L.marker([lat, lng], { icon: markerIcon }).bindPopup(sightingPopupContent).openPopup();
                         overlayMaps["Birds"].addLayer(sightingMarker);
+                        coordinateArrayBirds.push([lat, lng])
                         break;
                 }
             });
             // Create heat maps for the various layers. 
-            // Leaflet plugin from https://github.com/Leaflet/Leaflet.heat?tab=readme-ov-file maintained by Vladimir Agafonkin.
-            let heatLayerBirds = L.heatLayer(
-                coordinateArray
-                , { radius: 100 })
-            overlayMaps["Bird Heat"].addLayer(heatLayerBirds)
+            addHeatMap(coordinateArrayBirds, "Birds HM");
+            addHeatMap(coordinateArrayPlants, "Plants HM");
+            
             return overlayMaps["Birds"];
         } catch (err) {
             console.error('Failed to load sightings:', err);
             return null;
         }
     };
+
+    // Create and add a heat map to the overlay layers group
+    // L.heatlayer from Leaflet.heat Leaflet plugin from https://github.com/Leaflet/Leaflet.heat?tab=readme-ov-file maintained by Vladimir Agafonkin.
+    function addHeatMap(coordinateArray, layerName) {
+        overlayMaps[layerName].addLayer(L.heatLayer(
+            coordinateArray
+            , { radius: 25 }))
+    }
 
     // must use colour codes from https://github.com/pointhi/leaflet-color-markers
     function colourMarkerIcon(colour) {
