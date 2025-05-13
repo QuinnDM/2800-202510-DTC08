@@ -1,4 +1,5 @@
 require("dotenv").config();
+const fetch = require("node-fetch");
 
 async function testGemini() {
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
