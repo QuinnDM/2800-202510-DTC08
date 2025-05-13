@@ -153,19 +153,21 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 
-    // Add the initial empty layers to the map
+    // Add the initial empty layers to the map such that they are on by default
     overlayMaps["Birds"].addTo(map);
     overlayMaps["Plants"].addTo(map);
-    overlayMaps["Birds HM"].addTo(map);
-    overlayMaps["Plants HM"].addTo(map)
 
     async function loadSightings(route) {
         try {
             response = await fetch(route);
             data = await response.json();
 
+            // first clear layer to avoid duplication
             overlayMaps["Birds"].clearLayers();
             overlayMaps["Plants"].clearLayers();
+            overlayMaps["Birds HM"].clearLayers();
+            overlayMaps["Plants HM"].clearLayers();
+
             // for building heat maps
             coordinateArrayBirds = [];
             coordinateArrayPlants = [];
