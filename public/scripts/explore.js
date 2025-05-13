@@ -305,9 +305,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     // Get the count of your sightings on the explore page
     async function displayYourSightingsCount() {
         try {
-            const response = await fetch("/sightings");
+            const response = await fetch("/yourSightings");
             const data = await response.json();
-            let yourSightingsCount = data.length;
+            let yourSightingsCount = 0;
+            if (Array.isArray(data)){
+                yourSightingsCount = data.length;
+            } 
             let yourSightingsElement = document.getElementById("yourSightingsCount");
             yourSightingsElement.innerText = yourSightingsCount;
         } catch (err) {
