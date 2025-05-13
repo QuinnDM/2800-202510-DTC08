@@ -381,6 +381,7 @@ function sightingsFilters(query, userIdString) {
 // Get sightings
 app.get("/sightings", async (req, res) => {
   if (req.session.user) {
+    // apply filter before getting sightings
     const filter = sightingsFilters(req.query, req.session.user._id);
     const sightings = await Sighting.find(filter);
     res.json(sightings);
