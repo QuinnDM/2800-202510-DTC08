@@ -370,3 +370,13 @@ body,
 .filterOptions label:hover {
     background-color: #eee;
 }
+
+.subheader {
+    font-weight: 600;
+}
+
+/* Could not find what is conflicting with this */
+.infoBlock {
+    margin-top: 0.5em !important;
+    margin-bottom: 0.5em !important;
+}

@@ -178,8 +178,8 @@ document.addEventListener("DOMContentLoaded", async function () {
 
             data.forEach(sighting => {
                 const [lng, lat] = sighting.location.coordinates;
-                let sightingPopupContent = `<img src=${sighting.photoUrl}><h1 class="species">${sighting.species}</h1><p>Spotted at (${lat}, ${lng})</p>
-                <p>${convertTimeStampToDate(sighting.timestamp)}</p><p class="speciesDescription">${sighting.description}</p>`
+                let sightingPopupContent = `<img src=${sighting.photoUrl}><h1 class="species">${sighting.species}</h1><p class="speciesDescription infoBlock"><span class="subheader">Description:</span> ${sighting.description}</p><p class="infoBlock"><span class="subheader">Coordinates:</span> ${lat}, ${lng}</p>
+                <p class="infoBlock"><span class="subheader">Sighting Time:</span> ${convertTimeStampToDate(sighting.timestamp)}</p><p class="infoBlock"><span class="subheader">Observer:</span></p>`
                 let markerIcon = L.icon({})
                 let sightingMarker = L.marker([lat, lng], { icon: markerIcon }).bindPopup(sightingPopupContent).openPopup();
                 switch (sighting.taxonomicGroup) {
@@ -236,7 +236,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (hours < 10) { hours = "0" + hours; }
         let minutes = date.getMinutes();
         let seconds = date.getSeconds();
-        let fullDate = `On ${dateString} at ${hours}:${minutes}:${seconds}`;
+        let fullDate = `${dateString} at ${hours}:${minutes}:${seconds}`;
         return fullDate;
     }
 
