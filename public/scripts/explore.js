@@ -58,6 +58,10 @@ document.addEventListener("DOMContentLoaded", async function () {
                 label.style.backgroundColor = "#2A81CB";
             } else if (text === 'Plants') {
                 label.style.backgroundColor = "#2AAD27";
+            } else if (text === 'Birds HM') {
+                label.style.backgroundColor = "#FF7F7F";
+            } else if (text === 'Plants HM') {
+                label.style.backgroundColor = "#FF7F7F";
             }
         });
     }
