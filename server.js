@@ -12,7 +12,7 @@ const path = require("path");
 
 // Import User model
 const User = require("./models/user");
-const Sighting = require("./models/sighting")
+const Sighting = require("./models/sighting");
 
 const app = express();
 const port = 3000;
@@ -66,23 +66,36 @@ app.post("/upload", upload.single("image"), async (req, res) => {
 
 // Routes
 app.get("/", (req, res) => {
-  res.redirect("/index");
+  res.render("index", {
+    title: "Nature Nexus - Home",
+    user: req.session.user || null,
+    currentPage: "home",
+  });
 });
 
 app.get("/index", (req, res) => {
   res.render("index", {
-    error: null,
     title: "Nature Nexus - Home",
     user: req.session.user || null,
+    currentPage: "home",
   });
 });
 
 app.get("/explore", (req, res) => {
-  res.render("explore", { error: null });
+  res.render("explore", {
+    title: "Nature Nexus - Explore",
+    error: null,
+    currentPage: "explore",
+    user: req.session.user || null,
+  });
 });
 
 app.get("/login", (req, res) => {
-  res.render("login", { error: null });
+  res.render("login", {
+    title: "Nature Nexus - Login",
+    error: null,
+    currentPage: "login",
+  });
 });
 
 app.get("/openweathermap/:lat/:lon", async (req, res) => {
@@ -92,9 +105,9 @@ app.get("/openweathermap/:lat/:lon", async (req, res) => {
     const openweathermapUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.OPENWEATHERMAP_API_KEY}`;
     const weatherRes = await fetch(openweathermapUrl);
     const weatherData = await weatherRes.json();
-    res.json(weatherData)
+    res.json(weatherData);
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch weather data" })
+    res.status(500).json({ error: "Failed to fetch weather data" });
   }
 });
 
@@ -130,18 +143,30 @@ app.post("/login", async (req, res) => {
     const user = await User.findOne({ email });
     if (user && (await bcrypt.compare(password, user.password))) {
       req.session.user = user;
-      res.redirect("/index");
+      res.redirect("/");
     } else {
-      res.render("login", { error: "Invalid email or password" });
+      res.render("login", {
+        title: "Nature Nexus - Login",
+        error: "Invalid email or password",
+        currentPage: "login",
+      });
     }
   } catch (err) {
     console.error("Login error:", err);
-    res.render("login", { error: "An error occurred" });
+    res.render("login", {
+      title: "Nature Nexus - Login",
+      error: "An error occurred",
+      currentPage: "login",
+    });
   }
 });
 
 app.get("/register", (req, res) => {
-  res.render("login", { error: null });
+  res.render("login", {
+    title: "Nature Nexus - Register",
+    error: null,
+    currentPage: "register",
+  });
 });
 
 app.post("/register", async (req, res) => {
@@ -149,13 +174,21 @@ app.post("/register", async (req, res) => {
   console.log("Registration attempt:", { email, password: "***" });
   if (!email || !password) {
     console.log("Missing email or password");
-    return res.render("login", { error: "Email and password are required" });
+    return res.render("login", {
+      title: "Nature Nexus - Register",
+      error: "Email and password are required",
+      currentPage: "register",
+    });
   }
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       console.log("Email already registered:", email);
-      res.render("login", { error: "Email already registered" });
+      res.render("login", {
+        title: "Nature Nexus - Register",
+        error: "Email already registered",
+        currentPage: "register",
+      });
     } else {
       const saltRounds = process.env.SALT_ROUND
         ? parseInt(process.env.SALT_ROUND)
@@ -174,13 +207,29 @@ app.post("/register", async (req, res) => {
     }
   } catch (err) {
     console.error("Registration error:", err);
-    res.render("login", { error: `Registration failed: ${err.message}` });
+    res.render("login", {
+      title: "Nature Nexus - Register",
+      error: `Registration failed: ${err.message}`,
+      currentPage: "register",
+    });
   }
+});
+
+app.get("/collections", (req, res) => {
+  res.render("collection", {
+    title: "Nature Nexus - Collections",
+    user: req.session.user || null,
+    currentPage: "collections",
+  });
 });
 
 app.get("/collection", (req, res) => {
   if (req.session.user) {
-    res.render("collection", { user: req.session.user });
+    res.render("collection", {
+      title: "Nature Nexus - Collection",
+      user: req.session.user,
+      currentPage: "collections",
+    });
   } else {
     res.redirect("/login");
   }
@@ -189,6 +238,15 @@ app.get("/collection", (req, res) => {
 app.get("/logout", (req, res) => {
   req.session.destroy(() => {
     res.redirect("/login");
+  });
+});
+
+// Added identify route
+app.get("/identify", (req, res) => {
+  res.render("identify", {
+    title: "Nature Nexus - Identify",
+    user: req.session.user || null,
+    currentPage: "identify",
   });
 });
 
@@ -315,7 +373,7 @@ app.post("/update-stats", async (req, res) => {
 });
 
 // Get user collections
-app.get("/collections", async (req, res) => {
+app.get("/api/collections", async (req, res) => {
   try {
     if (!req.session.user) {
       return res.status(401).json({ error: "Not authenticated" });
@@ -334,7 +392,7 @@ app.get("/collections", async (req, res) => {
 });
 
 // Create a new collection
-app.post("/collections", async (req, res) => {
+app.post("/api/collections", async (req, res) => {
   try {
     if (!req.session.user) {
       return res.status(401).json({ error: "Not authenticated" });
@@ -370,8 +428,8 @@ app.post("/collections", async (req, res) => {
 });
 
 // Build filter helper function
-function sightingsFilters(query, userIdString) { 
-  const filters = {}
+function sightingsFilters(query, userIdString) {
+  const filters = {};
   if (query.onlyYours == "true") {
     filters.userId = userIdString;
   }
@@ -401,6 +459,14 @@ app.get("/yourSightings", async (req, res) => {
   }
 });
 
+// Settings page route
+app.get("/settings", (req, res) => {
+  res.render("settings", {
+    title: "Nature Nexus - Settings",
+    user: req.session.user || null,
+    currentPage: "settings",
+  });
+});
 
 // Start Server
 app.listen(port, () => {
