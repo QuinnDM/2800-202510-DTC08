@@ -460,25 +460,25 @@ app.get("/yourSightings", async (req, res) => {
 });
 
 // Submit a sightings
-app.post("/submitSightings", async (req, res) => {
+app.post("/submitSighting", async (req, res) => {
+  console.log(req.body); // Log the entire body to inspect what data is being received
   if (req.session.user) {
     try {
+      console.log(req.body); // Log the entire body to inspect what data is being received
       const newSighting = new Sighting({
-        userId: `${req.session.user._id}`,
-        species: `${sightingData.species}`,
-        description: sightingData.description,
+        userId: req.session.user._id,
+        species: req.body.species,
+        description: req.body.description || '',
         location: {
           type: "Point",
-          coordinates: sightingData.coordinates, // [lng, lat]
+          coordinates: req.body.coordinates, // [lng, lat]
         },
-        photoUrl: sightingData.photoUrl,
-        timestamp: {
-          $date: `${new Date().toISOString()}`
-        },
-        taxonomicGroup: "bird"
+        photoUrl: req.body.photoUrl || '',
+        timestamp: new Date(req.body.timestamp),  //req.body.timestamp
+        taxonomicGroup: req.body.taxonomicGroup
       });
       const newSightingSaved = await newSighting.save();
-      res.status(201).json({ message: "Sighting saved", data: saved });
+      res.status(201).json({ message: "Sighting saved", data: newSightingSaved });
     } catch (err) {
       res.status(500).json({ error: "Failed to save sighting" });
     }
