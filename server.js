@@ -459,6 +459,34 @@ app.get("/yourSightings", async (req, res) => {
   }
 });
 
+// Submit a sightings
+app.post("/submitSightings", async (req, res) => {
+  if (req.session.user) {
+    try {
+      const newSighting = new Sighting({
+        userId: `${req.session.user._id}`,
+        species: `${sightingData.species}`,
+        description: sightingData.description,
+        location: {
+          type: "Point",
+          coordinates: sightingData.coordinates, // [lng, lat]
+        },
+        photoUrl: sightingData.photoUrl,
+        timestamp: {
+          $date: `${new Date().toISOString()}`
+        },
+        taxonomicGroup: "bird"
+      });
+      const newSightingSaved = await newSighting.save();
+      res.status(201).json({ message: "Sighting saved", data: saved });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to save sighting" });
+    }
+  } else {
+    return res.status(404).json({ error: "User not found. You must be logged in to submit a sighting." });
+  }
+});
+
 // Settings page route
 app.get("/settings", (req, res) => {
   res.render("settings", {
