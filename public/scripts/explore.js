@@ -186,12 +186,14 @@ document.addEventListener("DOMContentLoaded", async function () {
                     case "plant":
                         markerIcon = colourMarkerIcon("marker-icon-2x-green")
                         sightingMarker = L.marker([lat, lng], { icon: markerIcon }).bindPopup(sightingPopupContent).openPopup();
+                        sightingMarker.bindTooltip(sighting.species).openTooltip();
                         overlayMaps["Plants"].addLayer(sightingMarker);
                         coordinateArrayPlants.push([lat, lng])
                         break;
                     case "bird":
                         markerIcon = colourMarkerIcon("marker-icon-2x-blue")
                         sightingMarker = L.marker([lat, lng], { icon: markerIcon }).bindPopup(sightingPopupContent).openPopup();
+                        sightingMarker.bindTooltip(sighting.species).openTooltip();
                         overlayMaps["Birds"].addLayer(sightingMarker);
                         coordinateArrayBirds.push([lat, lng])
                         break;
