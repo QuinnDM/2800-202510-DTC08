@@ -1,241 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
-    <title><%= title %></title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="bg-green-50 text-gray-800 flex flex-col min-h-screen">
-    <!-- Fixed Header -->
-    <%- include('partials/header') %>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>
+    <%= title %>
+  </title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-green-50 text-gray-800 flex flex-col min-h-screen">
+  <!-- Fixed Header -->
+  <%- include('partials/header') %>
 
     <!-- Main Content -->
-    <main
-      class="flex-1 mt-10 pt-16 pb-16 overflow-y-auto px-4 md:px-8 max-w-screen-lg mx-auto"
-    >
+    <main class="flex-1 mt-10 pt-16 pb-16 overflow-y-auto px-4 md:px-8 max-w-screen-lg mx-auto">
       <h2 class="text-2xl font-bold mb-4">Identify Birds & Plants</h2>
       <p class="text-lg mb-6">Upload a photo to identify species in seconds!</p>
       <div class="bg-white rounded-lg shadow p-4 mb-6 text-center">
-        <svg
-          class="w-16 h-16 mx-auto mb-4 text-green-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-          ></path>
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-          ></path>
+        <svg class="w-16 h-16 mx-auto mb-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z">
+          </path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z">
+          </path>
         </svg>
-        <input
-          type="file"
-          id="imageInput"
-          accept="image/*"
-          class="mb-4 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-        />
+        <input type="file" id="imageInput" accept="image/*"
+          class="mb-4 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
         <img id="imagePreview" class="hidden max-w-xs mx-auto mb-4" />
-        <button
-          onclick="identifySpecies()"
-          class="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition"
-        >
+        <button onclick="identifySpecies()"
+          class="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition">
           Identify
         </button>
       </div>
       <div id="identificationResult" class="text-center text-gray-600">
         Results will appear here after identification.
       </div>
+      <div id="submitIdentificationContainer" class="text-gray-600 mt-6">
+
+      </div>
     </main>
 
     <!-- Bottom Navigation -->
     <%- include('partials/footer') %>
 
-    <script>
-      async function identifySpecies() {
-        const file = document.getElementById("imageInput").files[0];
-        const resultDiv = document.getElementById("identificationResult");
-        if (!file) {
-          resultDiv.innerText = "Please select an image.";
-          return;
-        }
-
-        resultDiv.innerHTML = `<div class="flex justify-center"><div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-600"></div></div>`;
-
-        try {
-          // Step 1: Upload image to Cloudinary
-          const formData = new FormData();
-          formData.append("image", file);
-          console.log("Uploading image...");
-          const uploadResponse = await fetch("/upload", {
-            method: "POST",
-            body: formData,
-          });
-          if (!uploadResponse.ok) {
-            const errorData = await uploadResponse.json();
-            throw new Error(errorData.error || "Failed to upload image");
-          }
-          const { imageUrl } = await uploadResponse.json();
-          console.log("Image URL:", imageUrl);
-
-          // Step 2: Identify species with Gemini
-          console.log("Identifying species...");
-          const identifyResponse = await fetch("/identify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ imageUrl }),
-          });
-          if (!identifyResponse.ok) {
-            const errorData = await identifyResponse.json();
-            console.error("Identify error:", errorData);
-            throw new Error(errorData.error || "Failed to identify species");
-          }
-          const { type, commonName, scientificName } =
-            await identifyResponse.json();
-          console.log("Identification result:", {
-            type,
-            commonName,
-            scientificName,
-          });
-
-          if (type === "unknown") {
-            resultDiv.innerText = "Could not identify as a bird or plant.";
+      <script>
+        async function identifySpecies() {
+          const file = document.getElementById("imageInput").files[0];
+          const resultDiv = document.getElementById("identificationResult");
+          const submssionDiv = document.getElementById("submitIdentificationContainer");
+          if (!file) {
+            resultDiv.innerText = "Please select an image.";
             return;
           }
 
-          // Step 3/4: Fetch details based on type
-          let detailsResponse;
-          if (type === "bird") {
-            detailsResponse = await fetch("/bird-details", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ scientificName }),
-            });
-          } else if (type === "plant") {
-            detailsResponse = await fetch("/plant-details", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ imageUrl, scientificName }),
-            });
-          }
-          if (!detailsResponse.ok) {
-            const errorData = await detailsResponse.json();
-            throw new Error(
-              errorData.error || `Failed to fetch ${type} details`
-            );
-          }
-          const details = await detailsResponse.json();
+          resultDiv.innerHTML = `<div class="flex justify-center"><div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-600"></div></div>`;
 
-          // Update stats and add to collection
-          await fetch("/update-stats", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
+          try {
+            // Step 1: Upload image to Cloudinary
+            const formData = new FormData();
+            formData.append("image", file);
+            console.log("Uploading image...");
+            const uploadResponse = await fetch("/upload", {
+              method: "POST",
+              body: formData,
+            });
+            if (!uploadResponse.ok) {
+              const errorData = await uploadResponse.json();
+              throw new Error(errorData.error || "Failed to upload image");
+            }
+            const { imageUrl } = await uploadResponse.json();
+            console.log("Image URL:", imageUrl);
+
+            // Step 2: Identify species with Gemini
+            console.log("Identifying species...");
+            const identifyResponse = await fetch("/identify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ imageUrl }),
+            });
+            if (!identifyResponse.ok) {
+              const errorData = await identifyResponse.json();
+              console.error("Identify error:", errorData);
+              throw new Error(errorData.error || "Failed to identify species");
+            }
+            const { type, commonName, scientificName } =
+              await identifyResponse.json();
+            console.log("Identification result:", {
               type,
               commonName,
               scientificName,
-              imageUrl,
-              details,
-            }),
-          });
+            });
 
-          // Refresh stats
-          loadStats();
+            if (type === "unknown") {
+              resultDiv.innerText = "Could not identify as a bird or plant.";
+              return;
+            }
 
-          // Display results
-          resultDiv.innerHTML = `
+            // Step 3/4: Fetch details based on type
+            let detailsResponse;
+            if (type === "bird") {
+              detailsResponse = await fetch("/bird-details", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ scientificName }),
+              });
+            } else if (type === "plant") {
+              detailsResponse = await fetch("/plant-details", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ imageUrl, scientificName }),
+              });
+            }
+            if (!detailsResponse.ok) {
+              const errorData = await detailsResponse.json();
+              throw new Error(
+                errorData.error || `Failed to fetch ${type} details`
+              );
+            }
+            const details = await detailsResponse.json();
+
+            // Update stats and add to collection
+            await fetch("/update-stats", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                type,
+                commonName,
+                scientificName,
+                imageUrl,
+                details,
+              }),
+            });
+
+            // Refresh stats
+            loadStats();
+
+            // Display results
+            resultDiv.innerHTML = `
             <div class="bg-white rounded-lg shadow p-4">
-              <h3 class="text-xl font-semibold mb-2">${
-                type.charAt(0).toUpperCase() + type.slice(1)
+              <h3 class="text-xl font-semibold mb-2">${type.charAt(0).toUpperCase() + type.slice(1)
               } Identified</h3>
-              <p><strong>Common Name:</strong> ${
-                details.commonName || "N/A"
+              <p><strong>Common Name:</strong> ${details.commonName || "N/A"
               }</p>
-              <p><strong>Scientific Name:</strong> ${
-                details.scientificName || "N/A"
+              <p><strong>Scientific Name:</strong> ${details.scientificName || "N/A"
               }</p>
-              ${
-                type === "bird"
-                  ? `
+              ${type === "bird"
+                ? `
                 <p><strong>Family:</strong> ${details.family || "N/A"}</p>
-                <p><strong>Habitat:</strong> ${
-                  details.habitat || "Inferred from sightings"
+                <p><strong>Habitat:</strong> ${details.habitat || "Inferred from sightings"
                 }</p>
                 <p><strong>Recent Sightings:</strong></p>
                 <ul class="list-disc pl-5">
-                  ${
-                    details.sightings
-                      ?.map(
-                        (s) =>
-                          `<li>${s.location} on ${s.date} (${s.count} observed)</li>`
-                      )
-                      .join("") || "No sightings found"
-                  }
+                  ${details.sightings
+                  ?.map(
+                    (s) =>
+                      `<li>${s.location} on ${s.date} (${s.count} observed)</li>`
+                  )
+                  .join("") || "No sightings found"
+                }
                 </ul>
               `
-                  : `
+                : `
                 <p><strong>Family:</strong> ${details.family || "N/A"}</p>
                 <p><strong>Confidence:</strong> ${(
                   details.confidence * 100
                 ).toFixed(2)}%</p>
-                <p><strong>Metadata:</strong> ${
-                  details.metadata?.note || "N/A"
+                <p><strong>Metadata:</strong> ${details.metadata?.note || "N/A"
                 }</p>
               `
               }
             </div>
           `;
-        } catch (error) {
-          console.error("Error:", error);
-          resultDiv.innerText = `Error: ${error.message}`;
+            submssionDiv.innerHTML = `<div class="bg-white rounded-lg shadow p-4 mb-6 text-center"><p><strong>Would you like to 
+            submit your sighting?</strong></p><p class="mt-3 w-[75%] mx-auto">Submissions will be added to your collections page and will contribute to the explore page</p><button
+          class="bg-green-600 mt-4 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition">
+          Submit
+        </button></div>`
+          } catch (error) {
+            console.error("Error:", error);
+            resultDiv.innerText = `Error: ${error.message}`;
+          }
         }
-      }
 
-      // Image preview
-      document.getElementById("imageInput").addEventListener("change", () => {
-        const file = document.getElementById("imageInput").files[0];
-        const imagePreview = document.getElementById("imagePreview");
-        if (file) {
-          imagePreview.src = URL.createObjectURL(file);
-          imagePreview.classList.remove("hidden");
-        } else {
-          imagePreview.classList.add("hidden");
+        // Image preview
+        document.getElementById("imageInput").addEventListener("change", () => {
+          const file = document.getElementById("imageInput").files[0];
+          const imagePreview = document.getElementById("imagePreview");
+          if (file) {
+            imagePreview.src = URL.createObjectURL(file);
+            imagePreview.classList.remove("hidden");
+          } else {
+            imagePreview.classList.add("hidden");
+          }
+        });
+
+        // Load stats
+        async function loadStats() {
+          try {
+            const response = await fetch("/stats");
+            if (!response.ok) throw new Error("Failed to fetch stats");
+            const { birds, plants } = await response.json();
+            // We're not displaying stats on this page, but we'll keep this function
+            // in case we want to add it later
+          } catch (error) {
+            console.error("Load Stats Error:", error);
+          }
         }
-      });
 
-      // Load stats
-      async function loadStats() {
-        try {
-          const response = await fetch("/stats");
-          if (!response.ok) throw new Error("Failed to fetch stats");
-          const { birds, plants } = await response.json();
-          // We're not displaying stats on this page, but we'll keep this function
-          // in case we want to add it later
-        } catch (error) {
-          console.error("Load Stats Error:", error);
-        }
-      }
+        // Initialize
+        document.addEventListener("DOMContentLoaded", () => {
+          // Nothing specific to initialize for this page
+        });
+      </script>
+</body>
 
-      // Initialize
-      document.addEventListener("DOMContentLoaded", () => {
-        // Nothing specific to initialize for this page
-      });
-    </script>
-  </body>
 </html>
