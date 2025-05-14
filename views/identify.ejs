@@ -41,14 +41,16 @@
         Results will appear here after identification.
       </div>
       <!-- <div id="submitIdentificationContainer" class="text-gray-600 mt-6"> -->
-        <div id="submitIdentificationContainer" class="text-gray-600 mt-6 bg-white rounded-lg shadow p-4 mb-6 text-center hidden">
-          <p><strong>Would you like to submit your sighting?</strong></p>
-          <p class="mt-3 w-[75%] mx-auto">Submissions will be added to your collections page and will contribute to the
-            explore
-            page</p><button class="bg-green-600 mt-4 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition">
-            Submit
-          </button>
-        </div>
+      <div id="submitIdentificationContainer"
+        class="text-gray-600 mt-6 bg-white rounded-lg shadow p-4 mb-6 text-center hidden">
+        <p><strong>Would you like to submit your sighting?</strong></p>
+        <p class="mt-3 w-[75%] mx-auto">Submissions will be added to your collections page and will contribute to the
+          explore
+          page</p><button id="submissionButton"
+          class="bg-green-600 mt-4 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition" onclick="submitSighting()">
+          Submit
+        </button>
+      </div>
       <!-- </div> -->
     </main>
 
@@ -56,10 +58,14 @@
     <%- include('partials/footer') %>
 
       <script>
+        let sightingData;
+
         async function identifySpecies() {
           const file = document.getElementById("imageInput").files[0];
           const resultDiv = document.getElementById("identificationResult");
-          const submssionDiv = document.getElementById("submitIdentificationContainer");
+          const submissionDiv = document.getElementById("submitIdentificationContainer");
+          const submissionButton = document.getElementById("submissionButton");
+
           if (!file) {
             resultDiv.innerText = "Please select an image.";
             return;
@@ -183,7 +189,20 @@
               }
             </div>
           `;
-            submssionDiv.classList.remove("hidden");
+            // show the submission div on identification
+            submissionDiv.classList.remove("hidden");
+            console.log(type);
+            console.log(details.commonName);
+            // assign identification data to global variable
+            sightingData = {
+              species: `${details.commonName}`,
+              description: "",
+              coordinates: [-123.1207, 49.2827], // [lng, lat]
+              photoUrl: "",
+              timestamp: new Date(), //.toISOString(),
+              taxonomicGroup: `${type}`
+            };
+            return sightingData;
           } catch (error) {
             console.error("Error:", error);
             resultDiv.innerText = `Error: ${error.message}`;
@@ -212,6 +231,31 @@
             // in case we want to add it later
           } catch (error) {
             console.error("Load Stats Error:", error);
+          }
+        }
+
+        // Adds the identification to sightings collection in the database
+        async function submitSighting() {
+          try {
+            const response = await fetch("/submitSighting", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify(sightingData)
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+              console.log("Sighting saved:", result);
+              alert("Sighting submitted!");
+            } else {
+              console.error("Submission error:", result);
+              alert(result.error || "Submission failed.");
+            }
+          } catch (err) {
+            console.error("Request failed:", err);
+            alert("Could not submit sighting.");
           }
         }
 
