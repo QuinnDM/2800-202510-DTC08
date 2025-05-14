@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     map.whenReady( async () => {
         jawgStreetMap.addTo(map)
         await loadSightings("/sightings");
+        displaySightingsCounts();
         insertLayerControlSeparator();
         styleDropDownLayers();
         getLocation();
@@ -286,7 +287,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         totalSightingsElement.innerText = totalSightingsCount;
     }
 
-    displaySightingsCounts();
+    // displaySightingsCounts();
 
     // Populates the visible sightings counts (number of sightings within the current map view)
     function countVisibleMarkers(map) {
