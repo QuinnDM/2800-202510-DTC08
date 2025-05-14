@@ -348,6 +348,6 @@ locationInformationButton.addEventListener("click", () => {
     if (locationInformationContainer.style.display === "none" || locationInformationContainer.style.display === "") {
         locationInformationContainer.style.display = "block";
     } else {
-        locationInformationContainer.style.display = "none";
+        locationInformationContainer.removeAttribute('style');
     }
 });
