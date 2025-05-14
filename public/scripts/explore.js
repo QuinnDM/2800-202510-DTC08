@@ -16,6 +16,14 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     jawgStreetMap.addTo(map)
 
+    map.whenReady( async () => {
+        jawgStreetMap.addTo(map)
+        await loadSightings("/sightings");
+        insertLayerControlSeparator();
+        styleDropDownLayers();
+        getLocation();
+    });
+
     // Esri world imagery base map
     let esriWorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
@@ -66,11 +74,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
     }
 
-    map.on("locationfound", function () {
-        styleDropDownLayers()
-    })
-
-    // Move the map view to the user's location on open and refresh
+    // // Move the map view to the user's location on open and refresh
     map.locate({ setView: true, maxZoom: 16 });
 
     const provider = new window.GeoSearch.OpenStreetMapProvider();
@@ -153,7 +157,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     // retrieve user's location information every 5 minutes
-    setInterval(getLocation(), 300000);
+    setInterval(getLocation, 300000);
 
     const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 
@@ -242,7 +246,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         return fullDate;
     }
 
-    await loadSightings("/sightings");
+    // await loadSightings("/sightings");
 
     const yoursOnly = document.getElementById("onlyShowYourSightings");
     yoursOnly.addEventListener("change", () => {
@@ -329,14 +333,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     displayYourSightingsCount();
 
     // Add separator to the leaflet layer control group
-    setTimeout(() => {
+    function insertLayerControlSeparator() {
         const controlContainer = document.querySelector('.leaflet-control-layers-overlays');
         if (controlContainer) {
             const separator = document.createElement('div');
             separator.className = 'leaflet-control-layers-separator';
             controlContainer.insertBefore(separator, controlContainer.children[3]);
         }
-    }, 1000);
+    }
+
 
 });
 
