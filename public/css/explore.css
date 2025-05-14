@@ -280,29 +280,24 @@ body,
 
     #yourSightings {
         width: 120px;
+        /* height: 54px; */
         background-color: none;
-        /* border: 2px solid #ccc; */
-        color: grey;
+        color: #718096;
         font-size: 20px;
         font-weight: 600;
-        font-family: sans-serif;
         cursor: pointer;
         transition: background-color 0.3s, transform 0.2s;
-        /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
-        /* padding: 5px 10px; */
         z-index: 500;
         text-align: center;
     }
 
     .sightings {
-        height: 54px;
-        background-color: white;
+        /* height: 54px; */
+        background-color: none;
         font-size: 20px;
         font-weight: 600;
         color: #718096;
         text-align: center;
-        /* position: absolute; */
-        /* left: 10px; */
     }
 
     #observationHeader {
