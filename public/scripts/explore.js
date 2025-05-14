@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     map.whenReady( async () => {
         jawgStreetMap.addTo(map)
         await loadSightings("/sightings");
-        displaySightingsCounts();
+        displayTotalSightingsCount();
         insertLayerControlSeparator();
         styleDropDownLayers();
         getLocation();
@@ -281,13 +281,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     zoomToYourSightings();
 
     // Displays the total count of total sighting contributions from all user
-    async function displaySightingsCounts() {
+    async function displayTotalSightingsCount() {
         let totalSightingsElement = document.getElementById("totalSightingsCount");
         let totalSightingsCount = overlayMaps["Birds"].getLayers().length + overlayMaps["Plants"].getLayers().length;
         totalSightingsElement.innerText = totalSightingsCount;
     }
 
-    // displaySightingsCounts();
+    // displayTotalSightingsCount();
 
     // Populates the visible sightings counts (number of sightings within the current map view)
     function countVisibleMarkers(map) {
