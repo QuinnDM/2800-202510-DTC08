@@ -364,6 +364,21 @@
           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors',
           }).addTo(map);
+
+          // Add a marker to the map at clicked location
+          // Fill coordinate fields with coordinates at clicked point
+          map.on('click', function (pointClicked) {
+            const lat = pointClicked.latlng.lat.toFixed(6);
+            const lng = pointClicked.latlng.lng.toFixed(6);
+            document.getElementById('sightingLatitude').value = lat;
+            document.getElementById('sightingLongitude').value = lng;
+
+            if (window.sightingMarker) {
+              window.sightingMarker.setLatLng(pointClicked.latlng);
+            } else {
+              window.sightingMarker = L.marker(pointClicked.latlng).addTo(map);
+            }
+          });
         }
 
         // Initialize
