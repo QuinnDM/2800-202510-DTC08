@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <title>Getting Started with Bird Watching - Nature Nexus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-green-50 text-gray-800 flex flex-col min-h-screen">
+    <!-- Fixed Header -->
+    <%- include('partials/header') %>
+
+    <!-- Main Content -->
+    <main class="flex-1 mt-10 pt-16 pb-16 overflow-y-auto px-4 md:px-8 max-w-screen-lg mx-auto">
+      <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md p-8 my-6">
+        <!-- Back button -->
+        <a href="/" class="inline-block mb-6 px-4 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition">
+          &larr; Back to Home
+        </a>
+        
+        <article>
+          <h1 class="text-3xl font-bold mb-6">Getting Started with Bird Watching</h1>
+
+          <p class="mb-4">
+            Bird watching is one of the most accessible and rewarding hobbies
+            you can take up. It requires minimal equipment to begin, can be
+            done virtually anywhere, and offers a lifetime of learning and
+            discovery. Whether you're interested in the colorful visitors to
+            your backyard feeder or dream of traveling to spot rare species,
+            this guide will help you begin your bird watching journey.
+          </p>
+
+          <h2 class="text-2xl font-bold mt-8 mb-4">Essential Equipment for Beginners</h2>
+
+          <p class="mb-4">
+            While you can start bird watching with just your eyes and ears, a
+            few basic tools will significantly enhance your experience:
+          </p>
+
+          <ul class="list-disc pl-6 mb-6 space-y-2">
+            <li>
+              <strong>Binoculars:</strong> Your most important tool. For
+              beginners, look for binoculars with 8x42 magnification – these
+              provide a good balance of magnification and field of view.
+              Expected cost: $100-300 for decent starter binoculars.
+            </li>
+            <li>
+              <strong>Field Guide:</strong> Choose a guide specific to your
+              region. Modern guides include range maps, identification tips,
+              and information about habitat and behavior. Popular options
+              include The Sibley Guide, National Geographic, and Merlin Bird
+              ID app.
+            </li>
+            <li>
+              <strong>Notebook:</strong> Recording your observations helps
+              improve your identification skills and creates a personal record
+              of your sightings.
+            </li>
+            <li>
+              <strong>Appropriate Clothing:</strong> Comfortable,
+              weather-appropriate clothing in neutral colors. Waterproof
+              footwear is valuable for many habitats.
+            </li>
+          </ul>
+
+          <h2 class="text-2xl font-bold mt-8 mb-4">Where to Find Birds</h2>
+
+          <p class="mb-4">
+            Birds are everywhere, but these locations are particularly
+            productive for beginners:
+          </p>
+
+          <ul class="list-disc pl-6 mb-6 space-y-2">
+            <li>
+              <strong>Your Backyard:</strong> Setting up a bird feeder allows
+              you to observe birds from the comfort of your home.
+            </li>
+            <li>
+              <strong>Local Parks:</strong> Urban and suburban parks often
+              host a surprising variety of species.
+            </li>
+            <li>
+              <strong>Wildlife Refuges:</strong> These protected areas are
+              designed to support wildlife, including many bird species.
+            </li>
+            <li>
+              <strong>Water Bodies:</strong> Lakes, ponds, rivers, and coastal
+              areas attract diverse water birds.
+            </li>
+            <li>
+              <strong>Woodland Edges:</strong> The transition between forests
+              and open areas creates diverse habitat that attracts many
+              species.
+            </li>
+          </ul>
+
+          <h2 class="text-2xl font-bold mt-8 mb-4">Bird Watching Etiquette</h2>
+
+          <p class="mb-4">
+            Responsible bird watching helps protect birds and their habitats:
+          </p>
+
+          <ul class="list-disc pl-6 mb-6 space-y-2">
+            <li>Observe from a distance that doesn't disturb the birds</li>
+            <li>Keep noise to a minimum</li>
+            <li>Stay on designated trails to avoid damaging habitat</li>
+            <li>Never approach nests during breeding season</li>
+            <li>
+              Follow all rules and regulations in wildlife refuges and parks
+            </li>
+          </ul>
+
+          <h2 class="text-2xl font-bold mt-8 mb-4">Joining the Community</h2>
+
+          <p class="mb-4">
+            The bird watching community is welcoming and enthusiastic. Ways to
+            connect include:
+          </p>
+
+          <ul class="list-disc pl-6 mb-6 space-y-2">
+            <li>
+              Local Audubon Society chapters often host walks for beginners
+            </li>
+            <li>
+              Bird watching festivals celebrate migration and offer guided
+              tours
+            </li>
+            <li>
+              Online forums and social media groups like eBird provide
+              identification help
+            </li>
+          </ul>
+
+          <p class="mt-8 mb-4">
+            By starting with these basics, you'll be well on your way to a
+            fulfilling bird watching journey. Remember, bird watching is not
+            about ticking species off a list (unless you want it to be) – it's
+            about connecting with nature and developing an appreciation for
+            the incredible diversity of bird life around us.
+          </p>
+        </article>
+        
+        <!-- Related articles -->
+        <div class="mt-12 pt-6 border-t border-gray-200">
+          <h3 class="text-xl font-semibold mb-4">Related Articles</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <a href="/articles/bird-identification-tips" class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+              <h4 class="font-medium text-green-800">Bird Identification Tips for Beginners</h4>
+              <p class="text-sm text-gray-600 mt-1">Learn key field marks and behaviors to identify birds more easily.</p>
+            </a>
+            <a href="/articles/bird-photography-fundamentals" class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+              <h4 class="font-medium text-green-800">Bird Photography Fundamentals</h4>
+              <p class="text-sm text-gray-600 mt-1">Capture stunning bird photographs with these equipment and technique tips.</p>
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <%- include('partials/footer') %>
+  </body>
+</html>
