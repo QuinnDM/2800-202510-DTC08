@@ -64,7 +64,6 @@
           const file = document.getElementById("imageInput").files[0];
           const resultDiv = document.getElementById("identificationResult");
           const submissionDiv = document.getElementById("submitIdentificationContainer");
-          const submissionButton = document.getElementById("submissionButton");
 
           if (!file) {
             resultDiv.innerText = "Please select an image.";
@@ -77,7 +76,6 @@
             // Step 1: Upload image to Cloudinary
             const formData = new FormData();
             formData.append("image", file);
-            console.log("Uploading image...");
             const uploadResponse = await fetch("/upload", {
               method: "POST",
               body: formData,
@@ -87,10 +85,8 @@
               throw new Error(errorData.error || "Failed to upload image");
             }
             const { imageUrl } = await uploadResponse.json();
-            console.log("Image URL:", imageUrl);
 
-            // Step 2: Identify species with Gemini
-            console.log("Identifying species...");
+            // Step 2: Identify species with Google Vision
             const identifyResponse = await fetch("/identify", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -98,113 +94,72 @@
             });
             if (!identifyResponse.ok) {
               const errorData = await identifyResponse.json();
-              console.error("Identify error:", errorData);
               throw new Error(errorData.error || "Failed to identify species");
             }
-            const { type, commonName, scientificName } =
-              await identifyResponse.json();
-            console.log("Identification result:", {
-              type,
-              commonName,
-              scientificName,
-            });
+            const { type, commonName, scientificName, confidence, details } = await identifyResponse.json();
 
             if (type === "unknown") {
-              resultDiv.innerText = "Could not identify as a bird or plant.";
+              resultDiv.innerHTML = `
+                <div class="bg-white rounded-lg shadow p-4">
+                  <h3 class="text-xl font-semibold mb-2">Identification Result</h3>
+                  <p>Could not confidently identify this as a bird or plant.</p>
+                  <p class="mt-2"><strong>Detected features:</strong> ${details}</p>
+                </div>
+              `;
               return;
             }
 
-            // Step 3/4: Fetch details based on type
-            let detailsResponse;
-            if (type === "bird") {
-              detailsResponse = await fetch("/bird-details", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ scientificName }),
-              });
-            } else if (type === "plant") {
-              detailsResponse = await fetch("/plant-details", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ imageUrl, scientificName }),
-              });
-            }
-            if (!detailsResponse.ok) {
-              const errorData = await detailsResponse.json();
-              throw new Error(
-                errorData.error || `Failed to fetch ${type} details`
-              );
-            }
-            const details = await detailsResponse.json();
-
-            // Update stats and add to collection
-            await fetch("/update-stats", {
+            // Step 3: Fetch details based on type
+            const detailsResponse = await fetch(`/${type}-details`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                type,
+              body: JSON.stringify({ 
+                scientificName, 
                 commonName,
-                scientificName,
-                imageUrl,
-                details,
+                imageUrl 
               }),
             });
-
-            // Refresh stats
-            loadStats();
+            
+            if (!detailsResponse.ok) {
+              throw new Error(`Failed to fetch ${type} details`);
+            }
+            const detailsData = await detailsResponse.json();
 
             // Display results
             resultDiv.innerHTML = `
-            <div class="bg-white rounded-lg shadow p-4">
-              <h3 class="text-xl font-semibold mb-2">${type.charAt(0).toUpperCase() + type.slice(1)
-              } Identified</h3>
-              <p><strong>Common Name:</strong> ${details.commonName || "N/A"
-              }</p>
-              <p><strong>Scientific Name:</strong> ${details.scientificName || "N/A"
-              }</p>
-              ${type === "bird"
-                ? `
-                <p><strong>Family:</strong> ${details.family || "N/A"}</p>
-                <p><strong>Habitat:</strong> ${details.habitat || "Inferred from sightings"
-                }</p>
-                <p><strong>Recent Sightings:</strong></p>
-                <ul class="list-disc pl-5">
-                  ${details.sightings
-                  ?.map(
-                    (s) =>
-                      `<li>${s.location} on ${s.date} (${s.count} observed)</li>`
-                  )
-                  .join("") || "No sightings found"
-                }
-                </ul>
-              `
-                : `
-                <p><strong>Family:</strong> ${details.family || "N/A"}</p>
-                <p><strong>Confidence:</strong> ${(
-                  details.confidence * 100
-                ).toFixed(2)}%</p>
-                <p><strong>Metadata:</strong> ${details.metadata?.note || "N/A"
-                }</p>
-              `
-              }
-            </div>
-          `;
-            // show the submission div on identification
+              <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="text-xl font-semibold mb-2">${type.charAt(0).toUpperCase() + type.slice(1)} Identified</h3>
+                <p><strong>Common Name:</strong> ${commonName || "Unknown"}</p>
+                <p><strong>Scientific Name:</strong> ${scientificName || "Unknown"}</p>
+                <p><strong>Confidence:</strong> ${(confidence * 100).toFixed(0)}%</p>
+                <p><strong>Family:</strong> ${detailsData.family || "Unknown"}</p>
+                ${type === "bird" ? `
+                  <p><strong>Habitat:</strong> ${detailsData.habitat || "Unknown"}</p>
+                ` : `
+                  <p><strong>Additional Info:</strong> ${detailsData.metadata?.note || "None available"}</p>
+                `}
+              </div>
+            `;
+
+            // Show submission button
             submissionDiv.classList.remove("hidden");
             
-            // assign identification data to global variable
+            // Store sighting data for potential submission
             sightingData = {
-              species: `${details.commonName}`,
+              species: commonName,
               description: "",
-              coordinates: [-123.1207, 49.2827], // [lng, lat]
-              photoUrl: "",
-              timestamp: new Date(), //.toISOString(),
-              taxonomicGroup: `${type}`
+              coordinates: [-123.1207, 49.2827], // Default coordinates (Vancouver)
+              photoUrl: imageUrl,
+              timestamp: new Date(),
+              taxonomicGroup: type
             };
-            return sightingData;
           } catch (error) {
             console.error("Error:", error);
-            resultDiv.innerText = `Error: ${error.message}`;
+            resultDiv.innerHTML = `
+              <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                <strong>Error:</strong> ${error.message}
+              </div>
+            `;
           }
         }
 

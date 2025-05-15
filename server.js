@@ -9,6 +9,12 @@ const multer = require("multer");
 const fetch = require("node-fetch");
 const fs = require("fs");
 const path = require("path");
+const vision = require('@google-cloud/vision');
+
+// Initialize the Vision API client (add after other middleware)
+
+// Replace the existing /identify endpoint with this:
+
 
 // Import User model
 const User = require("./models/user");
@@ -17,6 +23,9 @@ const Sighting = require("./models/sighting");
 const app = express();
 const port = 3000;
 
+const visionClient = new vision.ImageAnnotatorClient({
+  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+});
 // MongoDB Connection using .env
 mongoose
   .connect(process.env.MONGODB_URI)
@@ -258,35 +267,109 @@ app.post("/identify", async (req, res) => {
       return res.status(400).json({ error: "Image URL is required" });
     }
 
-    // For now, let's return a mock result
-    const mockIdentification = {
-      type: Math.random() > 0.5 ? "bird" : "plant",
-      commonName: Math.random() > 0.5 ? "American Robin" : "Oak Tree",
-      scientificName:
-        Math.random() > 0.5 ? "Turdus migratorius" : "Quercus robur",
+    console.log(`Analyzing image: ${imageUrl}`);
+    
+    // Detect labels (objects, animals, plants)
+    const [labelResult] = await visionClient.labelDetection(imageUrl);
+    const labels = labelResult.labelAnnotations;
+
+    // Detect web entities (for scientific names and additional info)
+    const [webResult] = await visionClient.webDetection(imageUrl);
+    const webEntities = webResult.webDetection?.webEntities || [];
+    
+    // Get pages with matching images (for more context)
+    const pagesWithMatchingImages = webResult.webDetection?.pagesWithMatchingImages || [];
+
+    // Filter relevant labels (birds/plants)
+    const isBird = labels.some(label => 
+      label.description.toLowerCase().includes('bird') && label.score > 0.85
+    );
+    const isPlant = labels.some(label => 
+      (label.description.toLowerCase().includes('plant') || 
+       label.description.toLowerCase().includes('flower') ||
+       label.description.toLowerCase().includes('tree')) && label.score > 0.85
+    );
+
+    // Extract potential family and habitat from web entities
+    let family = null;
+    let habitat = null;
+    
+    // Look for family information in web entities
+    const familyEntity = webEntities.find(entity => 
+      entity.description && (
+        entity.description.toLowerCase().includes('family') ||
+        entity.description.toLowerCase().includes('genus') ||
+        entity.description.match(/\b[A-Z][a-z]+ceae\b/) // Matches plant families like "Rosaceae"
+      )
+    );
+    
+    if (familyEntity) {
+      family = familyEntity.description;
+    }
+
+    // Look for habitat information in web entities
+    const habitatEntity = webEntities.find(entity => 
+      entity.description && (
+        entity.description.toLowerCase().includes('habitat') ||
+        entity.description.toLowerCase().includes('forest') ||
+        entity.description.toLowerCase().includes('wetland') ||
+        entity.description.toLowerCase().includes('grassland') ||
+        entity.description.toLowerCase().includes('urban')
+      )
+    );
+    
+    if (habitatEntity) {
+      habitat = habitatEntity.description;
+    }
+
+    // Prepare response
+    const response = {
+      type: isBird ? 'bird' : isPlant ? 'plant' : 'unknown',
+      commonName: isBird || isPlant ? labels[0].description : null,
+      scientificName: webEntities[0]?.description || null,
+      confidence: isBird || isPlant ? labels[0].score : 0,
+      family: family || null,
+      habitat: habitat || null,
+      details: {
+        labels: labels.slice(0, 5).map(label => ({
+          description: label.description,
+          score: label.score
+        })),
+        webEntities: webEntities.slice(0, 3).map(entity => ({
+          description: entity.description,
+          score: entity.score
+        })),
+        matchingPages: pagesWithMatchingImages.slice(0, 2).map(page => ({
+          url: page.url,
+          pageTitle: page.pageTitle
+        }))
+      }
     };
 
-    res.json(mockIdentification);
+    console.log('Analysis Result:', response);
+    res.json(response);
   } catch (error) {
-    console.error("Identification error:", error);
-    res.status(500).json({ error: "Failed to identify species" });
+    console.error('Error analyzing image:', error.message);
+    res.status(500).json({ 
+      type: 'error', 
+      details: error.message,
+      error: "Failed to identify species" 
+    });
   }
 });
 
 // Bird details API endpoint
 app.post("/bird-details", async (req, res) => {
   try {
-    const { scientificName } = req.body;
-    // Mock bird details
+    const { scientificName, commonName, family, habitat } = req.body;
+    
+    // If we already have family and habitat from the initial call, use them
     const birdDetails = {
-      commonName: "American Robin",
-      scientificName: scientificName || "Turdus migratorius",
-      family: "Turdidae",
-      habitat: "Woodland, urban gardens, parks",
-      sightings: [
-        { location: "City Park", date: "2025-04-28", count: 3 },
-        { location: "Backyard", date: "2025-05-01", count: 1 },
-      ],
+      commonName: commonName || "Unknown Bird",
+      scientificName: scientificName || "Unknown Species",
+      family: family || "Unknown Family",
+      habitat: habitat || "Habitat information not available",
+      sightings: []
     };
 
     res.json(birdDetails);
@@ -299,14 +382,14 @@ app.post("/bird-details", async (req, res) => {
 // Plant details API endpoint
 app.post("/plant-details", async (req, res) => {
   try {
-    const { scientificName } = req.body;
-    // Mock plant details
+    const { scientificName, commonName, family } = req.body;
+    
     const plantDetails = {
-      commonName: "English Oak",
-      scientificName: scientificName || "Quercus robur",
-      family: "Fagaceae",
-      confidence: 0.95,
-      metadata: { note: "Deciduous tree native to Europe" },
+      commonName: commonName || "Unknown Plant",
+      scientificName: scientificName || "Unknown Species",
+      family: family || "Unknown Family",
+      confidence: 0.85, // Default confidence
+      metadata: { note: "Additional information not available" }
     };
 
     res.json(plantDetails);
