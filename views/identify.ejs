@@ -40,7 +40,6 @@
       <div id="identificationResult" class="text-center text-gray-600">
         Results will appear here after identification.
       </div>
-      <!-- <div id="submitIdentificationContainer" class="text-gray-600 mt-6"> -->
       <div id="submitIdentificationContainer"
         class="text-gray-600 mt-6 bg-white rounded-lg shadow p-4 mb-6 text-center hidden">
         <p><strong>Would you like to submit your sighting?</strong></p>
@@ -52,26 +51,73 @@
           explore
           page</p>
       </div>
-      <dialog id="submissionModal" class="modal">
-        <div class="modal-box p-5 rounded-2xl">
+      <div id="submitIdentificationContainer"
+        class="text-gray-600 mt-6 bg-white rounded-lg shadow p-4 mb-6 text-center">
+        <p><strong>Would you like to submit your sighting?</strong></p>
+        <button id="yesButton" class="bg-green-600 mt-4 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition"
+          onclick="submissionModal.showModal()">
+          Yes
+        </button>
+        <p class="mt-3 w-[75%] mx-auto">Submissions will be added to your collections page and will contribute to
+          the
+          explore
+          page</p><button id="submissionButton"
+          class="bg-green-600 mt-4 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition"
+          onclick="submitSighting()">
+          Submit
+        </button>
+      </div>
+      <dialog id="submissionModal" class="border rounded-2xl modal">
+        <div class="modal-box p-5 border rounded-2xl">
           <form method="dialog">
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
           </form>
-          <h3 class="text-lg font-bold mt-5">Please fill out some information about your sighting below.</h3>
-          <div id="descriptionDiv">
-            <form class="gap-y-4">
-              <div>
-                <label class="py-4">Description:</label>
-                <input name="description" id="description" type="text"
-                  placeholder="Please describe your sighting (e.g. location, observations, etc.)">
+          <h3 class="text-3xl font-bold mt-4 mb-5 mx-auto text-center underline">Sighting Information</h3>
+          <div id="descriptionDiv" class="gap-y-4">
+            <form class="space-y-6">
+              <div class="text-center mx-auto">
+                <h3 class="text-center mx-auto text-2xl font-bold mb-4">Description</h3>
+                <textarea name="description" id="description"
+                  placeholder="Please describe your sighting (e.g. location, observations, etc.)"
+                  class="border border-2 border-green-600 rounded w-3/4 md:w-[500px] p-2"></textarea>
+              </div>
+              <div class="text-center mx-auto">
+                <h3 class=" text-2xl font-bold mb-4">Time & Date</h3>
+                <input name="sightingTime" id="sightingTime" type="datetime-local" required>
               </div>
               <div>
-                <label class="py-4">Sighting Date and Time:</label>
-                <input name="sightingTime" id="sightingTime" type="datetime-local">
-              </div>
-              <div>
-                <label class="py-4">Latitude:</label>
-                <input name="sightingTime" id="sightingTime" type="datetime-local">
+                <h3 class="text-center mx-auto text-2xl font-bold mb-4">Location</h3>
+                <div class="flex flex-row space-x-5 justify-center">
+                  <div id="latitude">
+                    <label class="py-4 font-semibold">Latitude:</label>
+                    <input name="sightingLatitude" id="sightingLatitude" type="number"
+                      class="border border-2 border-green-600 rounded px-2" required>
+                  </div>
+                  <div id="longitude">
+                    <label class="py-4 font-semibold">Longitude:</label>
+                    <input name="sightingLongitude" id="sightingLongitude" type="number"
+                      class="border border-2 border-green-600 rounded px-2" required>
+                  </div>
+                </div>
+                <h3 class="text-center mx-auto underline text-xl font-semibold my-4">OR</h3>
+                <div class="text-center mx-auto">
+                  <p id="useCurrentLocation"
+                    class="py-4 font-semibold text-lg text-green-600 hover:underline cursor-pointer font-medium">
+                    Use your current location</p>
+                </div>
+                <h3 class="text-center mx-auto underline text-xl font-semibold my-4">OR</h3>
+                <div>
+                  <div class="text-center mx-auto font-semibold">
+                    <p class="text-lg ">Click on the map to choose a sighting location</p>
+                  </div>
+                  <div id="map" class="mx-auto mt-4" style="height: 300px; width: 100%; max-width: 500px;"></div>
+                </div>
+                <!-- class="mx-auto mt-4 rounded border border-green-600" -->
+                <button id="submissionButton"
+                  class="bg-green-600 mt-4 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition mx-auto block"
+                  onclick="submitSighting()">
+                  Submit
+                </button>
               </div>
             </form>
           </div>
