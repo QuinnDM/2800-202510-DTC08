@@ -25,13 +25,20 @@ document.addEventListener("DOMContentLoaded", async function () {
         getLocation();
     });
 
-    // Esri world imagery base map
-    let esriWorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
-        // Add tile caching to store tiles locally and improve load speed
-        crossOrigin: true,
-        minZoom: 3,
-        maxZoom: 22,
+    // // Esri world imagery base map
+    // let esriWorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    //     attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+    //     // Add tile caching to store tiles locally and improve load speed
+    //     crossOrigin: true,
+    //     minZoom: 3,
+    //     maxZoom: 22,
+    // });
+
+    let stadiaAlidadeSatellite = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.{ext}', {
+        minZoom: 0,
+        maxZoom: 20,
+        attribution: '&copy; CNES, Distribution Airbus DS, © Airbus DS, © PlanetObserver (Contains Copernicus Data) | &copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        ext: 'jpg'
     });
 
     // Dummy layer just for the header label
@@ -40,7 +47,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     // creating layer groups
     var baseMaps = {
         "Street Map": jawgStreetMap,
-        "Satellite": esriWorldImagery
+        "Satellite": stadiaAlidadeSatellite
     };
 
     var overlayMaps = {
