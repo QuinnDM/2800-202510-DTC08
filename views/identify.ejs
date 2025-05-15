@@ -201,6 +201,9 @@
               timestamp: new Date(), //.toISOString(),
               taxonomicGroup: `${type}`
             };
+            // scroll down to have the identification results and submission in view
+            submissionDiv.scrollIntoView({ behavior: "smooth", block: "center" });
+            
             return sightingData;
           } catch (error) {
             console.error("Error:", error);
