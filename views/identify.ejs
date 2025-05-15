@@ -334,6 +334,13 @@
         }
 
         // Submission functionality
+
+        // only load the map when the submission modal is opened
+        const yesButton = document.getElementById("yesButton");
+        yesButton.addEventListener("click", () => {
+          initializeMap();
+        })
+
         function initializeMap() {
           const map = L.map('map', {
             minZoom: 1,
