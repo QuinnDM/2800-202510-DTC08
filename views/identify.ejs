@@ -381,6 +381,33 @@
           });
         }
 
+        // try to get the user's current location
+        window.getLocation = function () {
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(getLocationSuccess, getLocationError);
+          } else {
+            alert("Geolocation is not supported by this browser.");
+          }
+        };
+        // if position retrieval is successful, fill sighting location coordinates
+        async function getLocationSuccess(position) {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          document.getElementById('sightingLatitude').value = lat;
+          document.getElementById('sightingLongitude').value = lng;
+        }
+
+        function getLocationError(err) {
+          alert("Could not access current location.")
+          console.warn(`ERROR(${err.code}): ${err.message}`);
+        }
+        
+        // Populate coordinates using current location on element click
+        const useCurrentLocation = document.getElementById("useCurrentLocation");
+        useCurrentLocation.addEventListener("click", () => {
+          getLocation();
+        });
+
         // Initialize
         document.addEventListener("DOMContentLoaded", () => {
           // Nothing specific to initialize for this page
