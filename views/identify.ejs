@@ -333,6 +333,32 @@
           }
         }
 
+        // Submission functionality
+        function initializeMap() {
+          const map = L.map('map', {
+            minZoom: 1,
+            maxZoom: 21
+          }).fitWorld();
+          map.setZoom(1); // Zoom in the map a little
+
+          // Set the map bounds
+          const south_west = L.latLng(-90, -200)
+          const north_east = L.latLng(90, 200)
+          const bounds = L.latLngBounds(south_west, north_east)
+
+          // Prevent users from being able to pan outside of the map's bounds
+          /* credit to rob.m's stackflow answer to prevent user from being able to pan out of map bounds
+          https://stackoverflow.com/questions/22155017/can-i-prevent-panning-leaflet-map-out-of-the-worlds-edge*/
+          map.setMaxBounds(bounds);
+          map.on('drag', function () {
+            map.panInsideBounds(bounds, { animate: false });
+          })
+
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+          }).addTo(map);
+        }
+
         // Initialize
         document.addEventListener("DOMContentLoaded", () => {
           // Nothing specific to initialize for this page
