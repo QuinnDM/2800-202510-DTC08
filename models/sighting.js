@@ -2,9 +2,13 @@ const mongoose = require('mongoose');
 
 const sightingSchema = new mongoose.Schema({
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     ref: 'User', // assumes you have a User model
     required: true
+  }, 
+  username: {
+    type: String,
+    required: false
   },
   species: {
     type: String,
@@ -37,6 +41,10 @@ const sightingSchema = new mongoose.Schema({
   taxonomicGroup: {
     type: String,
     required: true
+  },
+  userDescription: {
+    type: String,
+    required: false
   }
 });
 

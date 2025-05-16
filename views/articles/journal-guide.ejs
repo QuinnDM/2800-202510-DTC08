@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <title>Creating Your Bird Watching Journal - Nature Nexus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-green-50 text-gray-800 flex flex-col min-h-screen">
+    <!-- Fixed Header -->
+    <%- include('../partials/header') %>
+
+    <!-- Main Content -->
+    <main class="flex-1 mt-10 pt-16 pb-16 overflow-y-auto px-4 md:px-8 max-w-screen-lg mx-auto">
+      <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md p-8 my-6">
+        <!-- Back button -->
+        <a href="/" class="inline-block mb-6 px-4 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition">
+          &larr; Back to Home
+        </a>
+        
+        <article>
+          <h1 class="text-3xl font-bold mb-6">Creating Your Bird Watching Journal</h1>
+          
+          <p class="mb-4">
+            Keeping a bird watching journal enriches your experience, improves your identification skills, and creates a lasting record of your observations. Whether you prefer a traditional paper notebook or digital options, journaling will deepen your connection to the birds you observe.
+          </p>
+          
+          <h2 class="text-2xl font-bold mt-8 mb-4">Essential Information to Record</h2>
+          
+          <ul class="list-disc pl-6 mb-6 space-y-2">
+            <li>
+              <strong>Date and Time:</strong> When you observed the bird.
+            </li>
+            <li>
+              <strong>Location:</strong> Include specific details like trail names or GPS coordinates.
+            </li>
+            <li>
+              <strong>Weather Conditions:</strong> Temperature, cloud cover, wind, and precipitation.
+            </li>
+            <li>
+              <strong>Species Observed:</strong> Record both common and scientific names if possible.
+            </li>
+            <li>
+              <strong>Count:</strong> The number of individuals you observed.
+            </li>
+            <li>
+              <strong>Behavior:</strong> What was the bird doing? Feeding, singing, nesting?
+            </li>
+            <li>
+              <strong>Habitat:</strong> The environment where you found the bird.
+            </li>
+          </ul>
+          
+          <h2 class="text-2xl font-bold mt-8 mb-4">Journal Formats</h2>
+          
+          <p class="mb-4">
+            Choose a format that works best for your personal style:
+          </p>
+          
+          <ul class="list-disc pl-6 mb-6 space-y-2">
+            <li>
+              <strong>Traditional Notebook:</strong> Offers flexibility and is weather-resistant with the right choice of paper and cover.
+            </li>
+            <li>
+              <strong>Pre-printed Journal:</strong> Several publishers offer specialized bird watching journals with helpful prompts and checklists.
+            </li>
+            <li>
+              <strong>Digital Apps:</strong> eBird, iNaturalist, and other apps allow you to record observations directly on your smartphone.
+            </li>
+            <li>
+              <strong>Sketching Journal:</strong> Adding field sketches helps develop observation skills and creates a unique record.
+            </li>
+          </ul>
+          
+          <h2 class="text-2xl font-bold mt-8 mb-4">Sketching Tips for Non-Artists</h2>
+          
+          <p class="mb-4">
+            You don't need to be a talented artist to benefit from sketching birds:
+          </p>
+          
+          <ul class="list-disc pl-6 mb-6 space-y-2">
+            <li>
+              <strong>Focus on Shape:</strong> Begin with the basic outline and proportions.
+            </li>
+            <li>
+              <strong>Add Field Marks:</strong> Note eye rings, wing bars, and distinctive patterns.
+            </li>
+            <li>
+              <strong>Use Arrows and Notes:</strong> Label your sketch with field marks and colors.
+            </li>
+            <li>
+              <strong>Practice Shorthand:</strong> Develop quick notation for common shapes and patterns.
+            </li>
+          </ul>
+          
+          <h2 class="text-2xl font-bold mt-8 mb-4">Organizing Your Journal</h2>
+          
+          <p class="mb-4">
+            Consider these organizational approaches:
+          </p>
+          
+          <ul class="list-disc pl-6 mb-6 space-y-2">
+            <li>
+              <strong>Chronological:</strong> The simplest approach, recording observations by date.
+            </li>
+            <li>
+              <strong>Location-based:</strong> Separate sections for different birding spots.
+            </li>
+            <li>
+              <strong>Species-based:</strong> Dedicated pages for each species, tracking encounters over time.
+            </li>
+            <li>
+              <strong>Life List:</strong> A running tally of all species you've identified.
+            </li>
+          </ul>
+          
+          <h2 class="text-2xl font-bold mt-8 mb-4">Beyond Basic Observations</h2>
+          
+          <p class="mb-4">
+            Enhance your journal with these additional elements:
+          </p>
+          
+          <ul class="list-disc pl-6 mb-6 space-y-2">
+            <li>
+              <strong>Photos:</strong> Include your own photographs or printed images.
+            </li>
+            <li>
+              <strong>Habitat Notes:</strong> Describe the environment in detail.
+            </li>
+            <li>
+              <strong>Personal Reflections:</strong> Record your thoughts and feelings about your experiences.
+            </li>
+            <li>
+              <strong>Phenology:</strong> Track seasonal changes and patterns year to year.
+            </li>
+            <li>
+              <strong>Trip Reports:</strong> Summarize birding excursions and travels.
+            </li>
+          </ul>
+          
+          <p class="mt-8 mb-4">
+            Remember that your journal is for your own use and enjoyment. There's no right or wrong way to keep one—the most important thing is consistency. A bird journal maintained over years becomes a treasured record of your growth as a birder and the changing patterns of birds in your area.
+          </p>
+        </article>
+        
+        <!-- Related articles -->
+        <div class="mt-12 pt-6 border-t border-gray-200">
+          <h3 class="text-xl font-semibold mb-4">Related Articles</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <a href="/articles/getting-started" class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+              <h4 class="font-medium text-green-800">Getting Started with Bird Watching</h4>
+              <p class="text-sm text-gray-600 mt-1">Learn the essential gear, techniques, and etiquette for beginners.</p>
+            </a>
+            <a href="/articles/migration-guide" class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+              <h4 class="font-medium text-green-800">Seasonal Bird Migration Guide</h4>
+              <p class="text-sm text-gray-600 mt-1">Understand migration patterns and know when to look for different species.</p>
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <%- include('../partials/footer') %>
+  </body>
+</html>

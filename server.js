@@ -6,17 +6,36 @@ require("dotenv").config();
 const bcrypt = require("bcrypt");
 const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
-const fetch = require("node-fetch");
 const fs = require("fs");
 const path = require("path");
+const vision = require('@google-cloud/vision');
+
+// Initialize the Vision API client (add after other middleware)
+
+// Replace the existing /identify endpoint with this:
+
 
 // Import User model
 const User = require("./models/user");
-const Sighting = require("./models/sighting")
+const Sighting = require("./models/sighting");
 
 const app = express();
 const port = 3000;
 
+const visionClient = new vision.ImageAnnotatorClient({
+  credentials: {
+    type: 'service_account',
+    project_id: process.env.GOOGLE_CLOUD_PROJECT_ID,
+    private_key_id: process.env.GOOGLE_CLOUD_PRIVATE_KEY_ID,
+    private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
+    client_id: process.env.GOOGLE_CLOUD_CLIENT_ID,
+    auth_uri: process.env.GOOGLE_CLOUD_AUTH_URI,
+    token_uri: process.env.GOOGLE_CLOUD_TOKEN_URI,
+    auth_provider_x509_cert_url: process.env.GOOGLE_CLOUD_AUTH_PROVIDER_CERT_URL,
+    client_x509_cert_url: process.env.GOOGLE_CLOUD_CLIENT_CERT_URL
+  }
+});
 // MongoDB Connection using .env
 mongoose
   .connect(process.env.MONGODB_URI)
@@ -66,23 +85,36 @@ app.post("/upload", upload.single("image"), async (req, res) => {
 
 // Routes
 app.get("/", (req, res) => {
-  res.redirect("/index");
+  res.render("index", {
+    title: "Nature Nexus - Home",
+    user: req.session.user || null,
+    currentPage: "home",
+  });
 });
 
 app.get("/index", (req, res) => {
   res.render("index", {
-    error: null,
     title: "Nature Nexus - Home",
     user: req.session.user || null,
+    currentPage: "home",
   });
 });
 
 app.get("/explore", (req, res) => {
-  res.render("explore", { error: null });
+  res.render("explore", {
+    title: "Nature Nexus - Explore",
+    error: null,
+    currentPage: "explore",
+    user: req.session.user || null,
+  });
 });
 
 app.get("/login", (req, res) => {
-  res.render("login", { error: null });
+  res.render("login", {
+    title: "Nature Nexus - Login",
+    error: null,
+    currentPage: "login",
+  });
 });
 
 app.get("/openweathermap/:lat/:lon", async (req, res) => {
@@ -92,9 +124,9 @@ app.get("/openweathermap/:lat/:lon", async (req, res) => {
     const openweathermapUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.OPENWEATHERMAP_API_KEY}`;
     const weatherRes = await fetch(openweathermapUrl);
     const weatherData = await weatherRes.json();
-    res.json(weatherData)
+    res.json(weatherData);
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch weather data"})
+    res.status(500).json({ error: "Failed to fetch weather data" });
   }
 });
 
@@ -130,18 +162,30 @@ app.post("/login", async (req, res) => {
     const user = await User.findOne({ email });
     if (user && (await bcrypt.compare(password, user.password))) {
       req.session.user = user;
-      res.redirect("/index");
+      res.redirect("/");
     } else {
-      res.render("login", { error: "Invalid email or password" });
+      res.render("login", {
+        title: "Nature Nexus - Login",
+        error: "Invalid email or password",
+        currentPage: "login",
+      });
     }
   } catch (err) {
     console.error("Login error:", err);
-    res.render("login", { error: "An error occurred" });
+    res.render("login", {
+      title: "Nature Nexus - Login",
+      error: "An error occurred",
+      currentPage: "login",
+    });
   }
 });
 
 app.get("/register", (req, res) => {
-  res.render("login", { error: null });
+  res.render("login", {
+    title: "Nature Nexus - Register",
+    error: null,
+    currentPage: "register",
+  });
 });
 
 app.post("/register", async (req, res) => {
@@ -149,13 +193,21 @@ app.post("/register", async (req, res) => {
   console.log("Registration attempt:", { email, password: "***" });
   if (!email || !password) {
     console.log("Missing email or password");
-    return res.render("login", { error: "Email and password are required" });
+    return res.render("login", {
+      title: "Nature Nexus - Register",
+      error: "Email and password are required",
+      currentPage: "register",
+    });
   }
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       console.log("Email already registered:", email);
-      res.render("login", { error: "Email already registered" });
+      res.render("login", {
+        title: "Nature Nexus - Register",
+        error: "Email already registered",
+        currentPage: "register",
+      });
     } else {
       const saltRounds = process.env.SALT_ROUND
         ? parseInt(process.env.SALT_ROUND)
@@ -174,13 +226,29 @@ app.post("/register", async (req, res) => {
     }
   } catch (err) {
     console.error("Registration error:", err);
-    res.render("login", { error: `Registration failed: ${err.message}` });
+    res.render("login", {
+      title: "Nature Nexus - Register",
+      error: `Registration failed: ${err.message}`,
+      currentPage: "register",
+    });
   }
+});
+
+app.get("/collections", (req, res) => {
+  res.render("collection", {
+    title: "Nature Nexus - Collections",
+    user: req.session.user || null,
+    currentPage: "collections",
+  });
 });
 
 app.get("/collection", (req, res) => {
   if (req.session.user) {
-    res.render("collection", { user: req.session.user });
+    res.render("collection", {
+      title: "Nature Nexus - Collection",
+      user: req.session.user,
+      currentPage: "collections",
+    });
   } else {
     res.redirect("/login");
   }
@@ -192,43 +260,160 @@ app.get("/logout", (req, res) => {
   });
 });
 
+// Added identify route
+app.get("/identify", (req, res) => {
+  res.render("identify", {
+    title: "Nature Nexus - Identify",
+    user: req.session.user || null,
+    currentPage: "identify",
+  });
+});
+
 // Step 2: Identify species using Gemini API endpoint
 app.post("/identify", async (req, res) => {
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`;
+  
   try {
     const { imageUrl } = req.body;
     if (!imageUrl) {
       return res.status(400).json({ error: "Image URL is required" });
     }
 
-    // For now, let's return a mock result
-    const mockIdentification = {
-      type: Math.random() > 0.5 ? "bird" : "plant",
-      commonName: Math.random() > 0.5 ? "American Robin" : "Oak Tree",
-      scientificName:
-        Math.random() > 0.5 ? "Turdus migratorius" : "Quercus robur",
+    console.log(`Analyzing image: ${imageUrl}`);
+    
+    // First, use Vision API to get basic labels and web entities
+    const [labelResult] = await visionClient.labelDetection(imageUrl);
+    const labels = labelResult.labelAnnotations;
+    const [webResult] = await visionClient.webDetection(imageUrl);
+    const webEntities = webResult.webDetection?.webEntities || [];
+    
+    // Prepare the Gemini prompt with Vision API results as context
+    const geminiRequest = {
+      contents: [
+        {
+          parts: [
+            {
+              text: `You are an expert biologist and bird watcher. Analyze this image and the following context:
+              
+              Vision API detected labels: ${labels.slice(0, 5).map(l => l.description).join(', ')}
+              Web entities found: ${webEntities.slice(0, 3).map(e => e.description).join(', ')}
+              
+              If it's a bird, provide:
+              1. Type: "bird"
+              2. Common Name: [bird's common name]
+              3. Scientific Name: [bird's scientific name]
+              4. Family: [bird family]
+              5. Habitat: [typical habitat]
+              6. Conservation Status: [if known]
+              7. Interesting Facts: [2-3 interesting facts]
+
+              If it's a plant, provide:
+              1. Type: "plant"
+              2. Common Name: [plant's common name]
+              3. Scientific Name: [plant's scientific name]
+              4. Family: [plant family]
+              5. Native Region: [if known]
+              6. Uses: [common uses if any]
+              7. Interesting Facts: [2-3 interesting facts]
+
+              If the image doesn't clearly show a bird or plant, or if you're uncertain, respond with:
+              1. Type: "unknown"
+
+              Format your response ONLY as a JSON object like this:
+              {
+                "type": "bird" or "plant" or "unknown",
+                "commonName": "Common name of species",
+                "scientificName": "Scientific name of species",
+                "confidence": 0.95,
+                "family": "Family name",
+                "habitat": "Typical habitat",
+                "conservationStatus": "Status if known",
+                "interestingFacts": ["Fact 1", "Fact 2"],
+                "details": "Brief description about the species",
+                "visionLabels": ["label1", "label2"] // top 3 labels from Vision API
+              }
+
+              Respond ONLY with this JSON object and nothing else. No markdown, no code blocks, just pure JSON.`
+            }
+          ]
+        }
+      ]
     };
 
-    res.json(mockIdentification);
+    // Call Gemini API
+    const response = await fetch(GEMINI_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(geminiRequest),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Gemini API failed: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+
+    // Extract the JSON response from Gemini
+    let geminiResponse;
+    try {
+      const responseText = data.candidates[0].content.parts[0].text;
+      // Remove markdown code blocks if present
+      const cleanedResponse = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+      geminiResponse = JSON.parse(cleanedResponse);
+    } catch (parseError) {
+      console.error("Error parsing Gemini response:", parseError);
+      throw new Error("Failed to parse Gemini response");
+    }
+
+    // Enhance the response with Vision API data
+    const enhancedResponse = {
+      ...geminiResponse,
+      visionLabels: labels.slice(0, 3).map(label => ({
+        description: label.description,
+        score: label.score
+      })),
+      webEntities: webEntities.slice(0, 3).map(entity => ({
+        description: entity.description,
+        score: entity.score
+      }))
+    };
+
+    res.json(enhancedResponse);
+    
   } catch (error) {
-    console.error("Identification error:", error);
-    res.status(500).json({ error: "Failed to identify species" });
+    console.error('Error analyzing image:', error.message);
+    res.status(500).json({ 
+      type: 'error', 
+      details: error.message,
+      error: "Failed to identify species" 
+    });
   }
 });
 
-// Bird details API endpoint
+// Updated bird details endpoint to use Gemini's enhanced response
 app.post("/bird-details", async (req, res) => {
   try {
-    const { scientificName } = req.body;
-    // Mock bird details
+    const { 
+      commonName, 
+      scientificName, 
+      family, 
+      habitat, 
+      conservationStatus, 
+      interestingFacts,
+      details
+    } = req.body;
+    
     const birdDetails = {
-      commonName: "American Robin",
-      scientificName: scientificName || "Turdus migratorius",
-      family: "Turdidae",
-      habitat: "Woodland, urban gardens, parks",
-      sightings: [
-        { location: "City Park", date: "2025-04-28", count: 3 },
-        { location: "Backyard", date: "2025-05-01", count: 1 },
-      ],
+      commonName: commonName || "Unknown Bird",
+      scientificName: scientificName || "Unknown Species",
+      family: family || "Unknown Family",
+      habitat: habitat || "Habitat information not available",
+      conservationStatus: conservationStatus || "Unknown",
+      interestingFacts: interestingFacts || ["No additional facts available"],
+      description: details || "No description available",
+      sightings: []
     };
 
     res.json(birdDetails);
@@ -238,17 +423,28 @@ app.post("/bird-details", async (req, res) => {
   }
 });
 
-// Plant details API endpoint
+// Updated plant details endpoint to use Gemini's enhanced response
 app.post("/plant-details", async (req, res) => {
   try {
-    const { scientificName } = req.body;
-    // Mock plant details
+    const { 
+      commonName, 
+      scientificName, 
+      family, 
+      nativeRegion, 
+      uses,
+      interestingFacts,
+      details
+    } = req.body;
+    
     const plantDetails = {
-      commonName: "English Oak",
-      scientificName: scientificName || "Quercus robur",
-      family: "Fagaceae",
-      confidence: 0.95,
-      metadata: { note: "Deciduous tree native to Europe" },
+      commonName: commonName || "Unknown Plant",
+      scientificName: scientificName || "Unknown Species",
+      family: family || "Unknown Family",
+      nativeRegion: nativeRegion || "Unknown",
+      uses: uses || "Unknown",
+      interestingFacts: interestingFacts || ["No additional facts available"],
+      description: details || "No description available",
+      confidence: 0.85
     };
 
     res.json(plantDetails);
@@ -315,7 +511,7 @@ app.post("/update-stats", async (req, res) => {
 });
 
 // Get user collections
-app.get("/collections", async (req, res) => {
+app.get("/api/collections", async (req, res) => {
   try {
     if (!req.session.user) {
       return res.status(401).json({ error: "Not authenticated" });
@@ -334,7 +530,7 @@ app.get("/collections", async (req, res) => {
 });
 
 // Create a new collection
-app.post("/collections", async (req, res) => {
+app.post("/api/collections", async (req, res) => {
   try {
     if (!req.session.user) {
       return res.status(401).json({ error: "Not authenticated" });
@@ -369,10 +565,116 @@ app.post("/collections", async (req, res) => {
   }
 });
 
+// Build filter helper function
+function sightingsFilters(query, userIdString) {
+  const filters = {};
+  if (query.onlyYours == "true") {
+    filters.userId = userIdString;
+  }
+  return filters;
+}
+
 // Get sightings
 app.get("/sightings", async (req, res) => {
-  const sightings = await Sighting.find({});
-  res.json(sightings);
+  if (req.session.user) {
+    // apply filter before getting sightings
+    const filter = sightingsFilters(req.query, req.session.user._id);
+    const sightings = await Sighting.find(filter);
+    res.json(sightings);
+  } else {
+    const sightings = await Sighting.find({});
+    res.json(sightings);
+  }
+});
+
+// Get your sightings
+app.get("/yourSightings", async (req, res) => {
+  if (req.session.user) {
+    const sightings = await Sighting.find({ userId: req.session.user._id });
+    res.json(sightings);
+  } else {
+    return res.status(404).json({ error: "User not found" });
+  }
+});
+
+// Submit a sighting
+app.post("/submitSighting", async (req, res) => {
+  if (req.session.user) {
+    try {
+      const newSighting = new Sighting({
+        userId: req.session.user._id,
+        username: req.session.user.username,
+        species: req.body.species,
+        description: req.body.description || '',
+        location: {
+          type: "Point",
+          coordinates: req.body.coordinates, // [lng, lat]
+        },
+        photoUrl: req.body.photoUrl || '',
+        timestamp: new Date(req.body.timestamp),
+        taxonomicGroup: req.body.taxonomicGroup,
+        userDescription: req.body.userDescription
+      });
+      const newSightingSaved = await newSighting.save();
+      res.status(201).json({ message: "Sighting saved", data: newSightingSaved });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to save sighting" });
+    }
+  } else {
+    return res.status(404).json({ error: "User not found. You must be logged in to submit a sighting." });
+  }
+});
+
+// Settings page route
+app.get("/settings", (req, res) => {
+  res.render("settings", {
+    title: "Nature Nexus - Settings",
+    user: req.session.user || null,
+    currentPage: "settings",
+  });
+});
+
+// Article routes
+app.get("/articles/getting-started", (req, res) => {
+  res.render("articles/getting-started", {
+    title: "Getting Started with Bird Watching - Nature Nexus",
+    user: req.session.user || null,
+    currentPage: "articles",
+  });
+});
+
+app.get("/articles/bird-identification-tips", (req, res) => {
+  res.render("articles/bird-identification-tips", {
+    title: "Bird Identification Tips - Nature Nexus",
+    user: req.session.user || null,
+    currentPage: "articles",
+  });
+});
+
+app.get("/articles/bird-photography-fundamentals", (req, res) => {
+  res.render("articles/bird-photography-fundamentals", {
+    title: "Bird Photography Fundamentals - Nature Nexus",
+    user: req.session.user || null,
+    currentPage: "articles",
+  });
+});
+
+// Migration guide article route
+app.get("/articles/migration-guide", (req, res) => {
+  res.render("articles/migration-guide", {
+    title: "Seasonal Bird Migration Guide",
+    user: req.session.user || null,
+    currentPage: "articles",
+  });
+});
+
+// Journal guide article route
+app.get("/articles/journal-guide", (req, res) => {
+  res.render("articles/journal-guide", {
+    title: "Creating Your Bird Watching Journal",
+    user: req.session.user || null,
+    currentPage: "articles",
+  });
 });
 
 // Start Server

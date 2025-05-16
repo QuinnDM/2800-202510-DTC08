@@ -16,22 +16,47 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     jawgStreetMap.addTo(map)
 
-    // Esri world imagery base map
-    let esriWorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
-        // Add tile caching to store tiles locally and improve load speed
-        crossOrigin: true,
-        minZoom: 3,
-        maxZoom: 22,
+    map.whenReady( async () => {
+        jawgStreetMap.addTo(map)
+        await loadSightings("/sightings");
+        displayTotalSightingsCount();
+        insertLayerControlSeparator();
+        styleDropDownLayers();
+        getLocation();
     });
+
+    // // Esri world imagery base map
+    // let esriWorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    //     attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+    //     // Add tile caching to store tiles locally and improve load speed
+    //     crossOrigin: true,
+    //     minZoom: 3,
+    //     maxZoom: 22,
+    // });
+
+    let stadiaAlidadeSatellite = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.{ext}', {
+        minZoom: 0,
+        maxZoom: 20,
+        attribution: '&copy; CNES, Distribution Airbus DS, © Airbus DS, © PlanetObserver (Contains Copernicus Data) | &copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        ext: 'jpg'
+    });
+
+    // Dummy layer just for the header label
+    const dummyHeader = L.layerGroup();
 
     // creating layer groups
     var baseMaps = {
         "Street Map": jawgStreetMap,
-        "Satellite": esriWorldImagery
+        "Satellite": stadiaAlidadeSatellite
     };
 
     var overlayMaps = {
+        "Taxonomic Groups": dummyHeader,
+        "Birds": L.featureGroup(),
+        "Plants": L.featureGroup(),
+        "Heatmaps": dummyHeader,
+        "Birds HM": L.featureGroup(),
+        "Plants HM": L.featureGroup()
     };
 
     function styleDropDownLayers() {
@@ -49,15 +74,15 @@ document.addEventListener("DOMContentLoaded", async function () {
                 label.style.backgroundColor = "#2A81CB";
             } else if (text === 'Plants') {
                 label.style.backgroundColor = "#2AAD27";
+            } else if (text === 'Birds HM') {
+                label.style.backgroundColor = "#FF7F7F";
+            } else if (text === 'Plants HM') {
+                label.style.backgroundColor = "#FF7F7F";
             }
         });
     }
 
-    map.on("locationfound", function () {
-        styleDropDownLayers()
-    })
-
-    // Move the map view to the user's location on open and refresh
+    // // Move the map view to the user's location on open and refresh
     map.locate({ setView: true, maxZoom: 16 });
 
     const provider = new window.GeoSearch.OpenStreetMapProvider();
@@ -140,56 +165,75 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     // retrieve user's location information every 5 minutes
-    setInterval(getLocation(), 300000);
+    setInterval(getLocation, 300000);
 
-    let birdLayer = null;
-    let plantLayer = null;
+    const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 
-    // fetch all sightings in database and add them to the map as markers
-    async function loadSightings() {
+    // Add the initial empty layers to the map such that they are on by default
+    overlayMaps["Birds"].addTo(map);
+    overlayMaps["Plants"].addTo(map);
+
+    async function loadSightings(route) {
         try {
-            response = await fetch("/sightings");
+            response = await fetch(route);
             data = await response.json();
-            birdLayer = L.featureGroup();
-            plantLayer = L.featureGroup();
+
+            // first clear layer to avoid duplication
+            overlayMaps["Birds"].clearLayers();
+            overlayMaps["Plants"].clearLayers();
+            overlayMaps["Birds HM"].clearLayers();
+            overlayMaps["Plants HM"].clearLayers();
+
+            // for building heat maps
+            coordinateArrayBirds = [];
+            coordinateArrayPlants = [];
+
             data.forEach(sighting => {
                 const [lng, lat] = sighting.location.coordinates;
-                let sightingPopupContent = `<img src=${sighting.photoUrl}><h1 class="species">${sighting.species}</h1><p>Spotted at (${lat}, ${lng})</p>
-                <p>${convertTimeStampToDate(sighting.timestamp)}</p><p class="speciesDescription">${sighting.description}</p>`
+                let sightingPopupContent = `<img src=${sighting.photoUrl}><h1 class="species">${sighting.species}</h1><p class="speciesDescription infoBlock"><span class="subheader">Description:</span> ${sighting.description}</p><p class="infoBlock"><span class="subheader">Coordinates:</span> ${lat}, ${lng}</p>
+                <p class="infoBlock"><span class="subheader">Sighting Time:</span> ${convertTimeStampToDate(sighting.timestamp)}</p><p class="infoBlock"><span class="subheader">Observer:</span></p>`
                 let markerIcon = L.icon({})
                 let sightingMarker = L.marker([lat, lng], { icon: markerIcon }).bindPopup(sightingPopupContent).openPopup();
                 switch (sighting.taxonomicGroup) {
                     case "plant":
-                        markerIcon = colourMarkerIcon("marker-icon-2x-green")
+                        markerIcon = colourMarkerIcon("green")
                         sightingMarker = L.marker([lat, lng], { icon: markerIcon }).bindPopup(sightingPopupContent).openPopup();
-                        plantLayer.addLayer(sightingMarker);
+                        sightingMarker.bindTooltip(sighting.species).openTooltip();
+                        overlayMaps["Plants"].addLayer(sightingMarker);
+                        coordinateArrayPlants.push([lat, lng])
                         break;
                     case "bird":
-                        markerIcon = colourMarkerIcon("marker-icon-2x-blue")
+                        markerIcon = colourMarkerIcon("blue")
                         sightingMarker = L.marker([lat, lng], { icon: markerIcon }).bindPopup(sightingPopupContent).openPopup();
-                        birdLayer.addLayer(sightingMarker);
+                        sightingMarker.bindTooltip(sighting.species).openTooltip();
+                        overlayMaps["Birds"].addLayer(sightingMarker);
+                        coordinateArrayBirds.push([lat, lng])
                         break;
                 }
-                // sightingsLayer.addLayer(sightingMarker);
             });
-            plantLayer.addTo(map)
-            birdLayer.addTo(map);
-
-            // Add sightings layer to the overlay map and update the control
-            overlayMaps["Birds"] = birdLayer;
-            overlayMaps["Plants"] = plantLayer;
-            L.control.layers(baseMaps, overlayMaps).addTo(map);
-            return birdLayer;
+            // Create heat maps for the various layers. 
+            addHeatMap(coordinateArrayBirds, "Birds HM");
+            addHeatMap(coordinateArrayPlants, "Plants HM");
+            
+            return overlayMaps["Birds"];
         } catch (err) {
             console.error('Failed to load sightings:', err);
             return null;
         }
     };
 
+    // Create and add a heat map to the overlay layers group
+    // L.heatlayer from Leaflet.heat Leaflet plugin from https://github.com/Leaflet/Leaflet.heat?tab=readme-ov-file maintained by Vladimir Agafonkin.
+    function addHeatMap(coordinateArray, layerName) {
+        overlayMaps[layerName].addLayer(L.heatLayer(
+            coordinateArray
+            , { radius: 25 }))
+    }
+
     // must use colour codes from https://github.com/pointhi/leaflet-color-markers
     function colourMarkerIcon(colour) {
         markerIcon = L.icon({
-            iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/${colour}.png`,
+            iconUrl: `../images/marker-icon-${colour}.png`, //https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/${colour}.png
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
             iconSize: [25, 41],
             iconAnchor: [12, 41],
@@ -206,18 +250,36 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (hours < 10) { hours = "0" + hours; }
         let minutes = date.getMinutes();
         let seconds = date.getSeconds();
-        let fullDate = `On ${dateString} at ${hours}:${minutes}:${seconds}`;
+        let fullDate = `${dateString} at ${hours}:${minutes}:${seconds}`;
         return fullDate;
     }
 
-    await loadSightings();
+    // await loadSightings("/sightings");
+
+    const yoursOnly = document.getElementById("onlyShowYourSightings");
+    yoursOnly.addEventListener("change", () => {
+        applySightingsFilter();
+    });
+
+    // apply sighting filters by adding query parameters when fetching the sighting data
+    async function applySightingsFilter() {
+        let filterQuery = "/sightings?"
+        const showOnlyYourSightingsFilterElement = document.getElementById("onlyShowYourSightings");
+        if (showOnlyYourSightingsFilterElement.checked) {
+            filterQuery = filterQuery + "onlyYours=true"
+            await loadSightings(filterQuery);
+        } else {
+            await loadSightings(filterQuery); // load sighting without any filters
+        }
+        return null;
+    }
 
     // Zoom to extent of sitings
     async function zoomToYourSightings() {
         const yourSightingsButton = document.getElementById("yourSightings");
         yourSightingsButton.addEventListener("click", function () {
-            if (birdLayer && birdLayer.getLayers().length > 0) {
-                map.fitBounds(birdLayer.getBounds());
+            if (overlayMaps["Birds"] && overlayMaps["Birds"].getLayers().length > 0) {
+                map.fitBounds(overlayMaps["Birds"].getBounds());
             } else {
                 console.warn("Sightings layer is not loaded or empty.");
             }
@@ -225,15 +287,16 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     zoomToYourSightings();
 
-    async function displaySightingsCounts() {
+    // Displays the total count of total sighting contributions from all user
+    async function displayTotalSightingsCount() {
         let totalSightingsElement = document.getElementById("totalSightingsCount");
-        let totalSightingsCount = birdLayer.getLayers().length + plantLayer.getLayers().length;
+        let totalSightingsCount = overlayMaps["Birds"].getLayers().length + overlayMaps["Plants"].getLayers().length;
         totalSightingsElement.innerText = totalSightingsCount;
     }
 
-    displaySightingsCounts();
+    // displayTotalSightingsCount();
 
-    // populates the visible marker count
+    // Populates the visible sightings counts (number of sightings within the current map view)
     function countVisibleMarkers(map) {
         let visibleMarkersCount = document.getElementById("visibleSightings");
         const bounds = map.getBounds();
@@ -245,20 +308,12 @@ document.addEventListener("DOMContentLoaded", async function () {
                         sightingsCount++;
                     }
                 })
-                // if (bounds.contains(layer.getLatLng())) {
-                //     count++;
-                //     visibleMarkersCount.innerText = count;
-                // }
-                // else {
-                //     visibleMarkersCount.innerText = 0;
-                // }
             }
         });
         visibleMarkersCount.innerText = sightingsCount;
         return sightingsCount;
     }
-
-    // populate visible markers of map load
+    // populate visible markers on map load
     jawgStreetMap.on("load", function () {
         countVisibleMarkers(map)
     })
@@ -266,6 +321,36 @@ document.addEventListener("DOMContentLoaded", async function () {
     map.on("move", function () {
         countVisibleMarkers(map);
     });
+
+    // Get the count of your sightings on the explore page
+    async function displayYourSightingsCount() {
+        try {
+            const response = await fetch("/yourSightings");
+            const data = await response.json();
+            let yourSightingsCount = 0;
+            if (Array.isArray(data)){
+                yourSightingsCount = data.length;
+            } 
+            let yourSightingsElement = document.getElementById("yourSightingsCount");
+            yourSightingsElement.innerText = yourSightingsCount;
+        } catch (err) {
+            console.error('Failed to load your sightings:', err);
+            return null;
+        }
+    }
+    displayYourSightingsCount();
+
+    // Add separator to the leaflet layer control group
+    function insertLayerControlSeparator() {
+        const controlContainer = document.querySelector('.leaflet-control-layers-overlays');
+        if (controlContainer) {
+            const separator = document.createElement('div');
+            separator.className = 'leaflet-control-layers-separator';
+            controlContainer.insertBefore(separator, controlContainer.children[3]);
+        }
+    }
+
+
 });
 
 // Implement toggle for the location information popup
@@ -276,6 +361,6 @@ locationInformationButton.addEventListener("click", () => {
     if (locationInformationContainer.style.display === "none" || locationInformationContainer.style.display === "") {
         locationInformationContainer.style.display = "block";
     } else {
-        locationInformationContainer.style.display = "none";
+        locationInformationContainer.removeAttribute('style');
     }
 });
