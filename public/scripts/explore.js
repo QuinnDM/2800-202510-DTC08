@@ -190,7 +190,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
             data.forEach(sighting => {
                 const [lng, lat] = sighting.location.coordinates;
-                let sightingPopupContent = `<div class="speciesInformation"><img class="speciesImage" src=${sighting.photoUrl}><h1 class="species">${sighting.species}</h1><p class="speciesDescription infoBlock"><span class="subheader">Description:</span> ${sighting.description}</p></div>
+                let sightingPopupContent = `<div class="speciesInformation"><div class="speciesImageContainer"><img class="speciesImage" src=${sighting.photoUrl}></div><h1 class="species">${sighting.species}</h1><p class="speciesDescription infoBlock"><span class="subheader">Description:</span> ${sighting.description}</p></div>
                 <p class="infoBlock"><p class="infoBlock"><span class="subheader">Observed by:</span> ${sighting.username}</p><p class="infoBlock"><span class="subheader">Observer Description:</span> ${sighting.userDescription}</p><p class="infoBlock"><span class="subheader">Coordinates:</span> ${lat}, ${lng}</p><span class="subheader">Sighting Time:</span> ${convertTimeStampToDate(sighting.timestamp)}</p>`
                 let markerIcon = L.icon({})
                 let sightingMarker = L.marker([lat, lng], { icon: markerIcon }).bindPopup(sightingPopupContent).openPopup();
