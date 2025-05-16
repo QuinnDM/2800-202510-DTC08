@@ -16,29 +16,38 @@
   </head>
   <body class="bg-green-50 text-gray-800 flex flex-col min-h-screen">
     <!-- Fixed Header -->
-    <%- include('partials/header') %>
+    <%- include('../partials/header') %>
 
     <!-- Main Content -->
-    <main class="flex-1 mt-10 pt-16 pb-16 overflow-y-auto px-4 md:px-8 max-w-screen-lg mx-auto">
+    <main
+      class="flex-1 mt-10 pt-16 pb-16 overflow-y-auto px-4 md:px-8 max-w-screen-lg mx-auto"
+    >
       <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md p-8 my-6">
         <!-- Back button -->
-        <a href="/" class="inline-block mb-6 px-4 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition">
+        <a
+          href="/"
+          class="inline-block mb-6 px-4 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition"
+        >
           &larr; Back to Home
         </a>
-        
+
         <article>
-          <h1 class="text-3xl font-bold mb-6">Getting Started with Bird Watching</h1>
+          <h1 class="text-3xl font-bold mb-6">
+            Getting Started with Bird Watching
+          </h1>
 
           <p class="mb-4">
             Bird watching is one of the most accessible and rewarding hobbies
-            you can take up. It requires minimal equipment to begin, can be
-            done virtually anywhere, and offers a lifetime of learning and
-            discovery. Whether you're interested in the colorful visitors to
-            your backyard feeder or dream of traveling to spot rare species,
-            this guide will help you begin your bird watching journey.
+            you can take up. It requires minimal equipment to begin, can be done
+            virtually anywhere, and offers a lifetime of learning and discovery.
+            Whether you're interested in the colorful visitors to your backyard
+            feeder or dream of traveling to spot rare species, this guide will
+            help you begin your bird watching journey.
           </p>
 
-          <h2 class="text-2xl font-bold mt-8 mb-4">Essential Equipment for Beginners</h2>
+          <h2 class="text-2xl font-bold mt-8 mb-4">
+            Essential Equipment for Beginners
+          </h2>
 
           <p class="mb-4">
             While you can start bird watching with just your eyes and ears, a
@@ -54,10 +63,9 @@
             </li>
             <li>
               <strong>Field Guide:</strong> Choose a guide specific to your
-              region. Modern guides include range maps, identification tips,
-              and information about habitat and behavior. Popular options
-              include The Sibley Guide, National Geographic, and Merlin Bird
-              ID app.
+              region. Modern guides include range maps, identification tips, and
+              information about habitat and behavior. Popular options include
+              The Sibley Guide, National Geographic, and Merlin Bird ID app.
             </li>
             <li>
               <strong>Notebook:</strong> Recording your observations helps
@@ -84,8 +92,8 @@
               you to observe birds from the comfort of your home.
             </li>
             <li>
-              <strong>Local Parks:</strong> Urban and suburban parks often
-              host a surprising variety of species.
+              <strong>Local Parks:</strong> Urban and suburban parks often host
+              a surprising variety of species.
             </li>
             <li>
               <strong>Wildlife Refuges:</strong> These protected areas are
@@ -97,8 +105,7 @@
             </li>
             <li>
               <strong>Woodland Edges:</strong> The transition between forests
-              and open areas creates diverse habitat that attracts many
-              species.
+              and open areas creates diverse habitat that attracts many species.
             </li>
           </ul>
 
@@ -130,8 +137,7 @@
               Local Audubon Society chapters often host walks for beginners
             </li>
             <li>
-              Bird watching festivals celebrate migration and offer guided
-              tours
+              Bird watching festivals celebrate migration and offer guided tours
             </li>
             <li>
               Online forums and social media groups like eBird provide
@@ -143,22 +149,38 @@
             By starting with these basics, you'll be well on your way to a
             fulfilling bird watching journey. Remember, bird watching is not
             about ticking species off a list (unless you want it to be) – it's
-            about connecting with nature and developing an appreciation for
-            the incredible diversity of bird life around us.
+            about connecting with nature and developing an appreciation for the
+            incredible diversity of bird life around us.
           </p>
         </article>
-        
+
         <!-- Related articles -->
         <div class="mt-12 pt-6 border-t border-gray-200">
           <h3 class="text-xl font-semibold mb-4">Related Articles</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <a href="/articles/bird-identification-tips" class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-              <h4 class="font-medium text-green-800">Bird Identification Tips for Beginners</h4>
-              <p class="text-sm text-gray-600 mt-1">Learn key field marks and behaviors to identify birds more easily.</p>
+            <a
+              href="/articles/bird-identification-tips"
+              class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
+            >
+              <h4 class="font-medium text-green-800">
+                Bird Identification Tips for Beginners
+              </h4>
+              <p class="text-sm text-gray-600 mt-1">
+                Learn key field marks and behaviors to identify birds more
+                easily.
+              </p>
             </a>
-            <a href="/articles/bird-photography-fundamentals" class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-              <h4 class="font-medium text-green-800">Bird Photography Fundamentals</h4>
-              <p class="text-sm text-gray-600 mt-1">Capture stunning bird photographs with these equipment and technique tips.</p>
+            <a
+              href="/articles/bird-photography-fundamentals"
+              class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
+            >
+              <h4 class="font-medium text-green-800">
+                Bird Photography Fundamentals
+              </h4>
+              <p class="text-sm text-gray-600 mt-1">
+                Capture stunning bird photographs with these equipment and
+                technique tips.
+              </p>
             </a>
           </div>
         </div>
@@ -166,6 +188,6 @@
     </main>
 
     <!-- Bottom Navigation -->
-    <%- include('partials/footer') %>
+    <%- include('../partials/footer') %>
   </body>
 </html>
