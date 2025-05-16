@@ -335,6 +335,16 @@ body,
     margin-bottom: 0.5em;
 }
 
+.speciesInformation {
+    margin-bottom: 25px;
+}
+
+/* To change marker popup style */
+/* .leaflet-popup .leaflet-popup-content-wrapper .leaflet-popup-content {
+    margin-left: 0px;
+    margin-right: 0px;
+} */
+
 .filterControl {
     position: fixed;
     bottom: 110px;
