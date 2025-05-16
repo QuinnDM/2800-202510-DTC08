@@ -4,7 +4,7 @@
   <!-- Home Tab -->
   <a
     href="/"
-    class="flex flex-col items-center <%= currentPage === 'home' ? 'text-green-600' : 'text-gray-600' %>"
+    class="flex flex-col items-center <%= locals.currentPage === 'home' ? 'text-green-600' : 'text-gray-600' %>"
   >
     <svg
       class="w-6 h-6"
@@ -26,7 +26,7 @@
   <!-- Collection Tab -->
   <a
     href="/collections"
-    class="flex flex-col items-center <%= currentPage === 'collections' ? 'text-green-600' : 'text-gray-600' %>"
+    class="flex flex-col items-center <%= locals.currentPage === 'collections' ? 'text-green-600' : 'text-gray-600' %>"
   >
     <svg
       class="w-6 h-6"
@@ -48,7 +48,7 @@
   <!-- Identify Tab -->
   <a
     href="/identify"
-    class="flex flex-col items-center <%= currentPage === 'identify' ? 'text-green-600' : 'text-gray-600' %>"
+    class="flex flex-col items-center <%= locals.currentPage === 'identify' ? 'text-green-600' : 'text-gray-600' %>"
   >
     <svg
       class="w-6 h-6"
@@ -76,7 +76,7 @@
   <!-- Explore Tab -->
   <a
     href="/explore"
-    class="flex flex-col items-center <%= currentPage === 'explore' ? 'text-green-600' : 'text-gray-600' %>"
+    class="flex flex-col items-center <%= locals.currentPage === 'explore' ? 'text-green-600' : 'text-gray-600' %>"
   >
     <svg
       class="w-6 h-6"
@@ -98,7 +98,7 @@
   <!-- Settings Tab -->
   <a
     href="/settings"
-    class="flex flex-col items-center <%= currentPage === 'settings' ? 'text-green-600' : 'text-gray-600' %>"
+    class="flex flex-col items-center <%= locals.currentPage === 'settings' ? 'text-green-600' : 'text-gray-600' %>"
   >
     <svg
       class="w-6 h-6"
