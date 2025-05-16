@@ -9,6 +9,7 @@
   <title>
     <%= title %>
   </title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -54,8 +55,7 @@
       <div id="submitIdentificationContainer"
         class="text-gray-600 mt-6 bg-white rounded-lg shadow p-4 mb-6 text-center  hidden">
         <p><strong>Would you like to submit your sighting?</strong></p>
-        <button id="yesButton" class="bg-green-600 mt-4 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition"
-          onclick="submissionModal.showModal()">
+        <button id="yesButton" class="bg-green-600 mt-4 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition">
           Yes
         </button>
         <p class="mt-3 w-[75%] mx-auto">Submissions will be added to your collections page and will contribute to
@@ -335,11 +335,24 @@
 
         // Submission functionality
 
-        // only load the map when the submission modal is opened
+        let mapInitialized = false;
+
+
         const yesButton = document.getElementById("yesButton");
+        let submissionModal = document.getElementById("submissionModal");
         yesButton.addEventListener("click", () => {
-          initializeMap();
-        })
+          // only load the map when the submission modal is opened
+          submissionModal.showModal();
+          // Give some time for modal to open
+          setTimeout(() => {
+            if (!mapInitialized) {
+              initializeMap();
+              mapInitialized = true;
+            } else {
+            }
+          }, 300);
+        });
+
 
         function initializeMap() {
           const map = L.map('map', {
@@ -361,9 +374,12 @@
             map.panInsideBounds(bounds, { animate: false });
           })
 
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors',
-          }).addTo(map);
+          map.whenReady(() => {
+            // Add tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '&copy; OpenStreetMap contributors',
+            }).addTo(map);
+          });
 
           // Add a marker to the map at clicked location
           // Fill coordinate fields with coordinates at clicked point
