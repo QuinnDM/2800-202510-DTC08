@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <title>Bird Identification Tips - Nature Nexus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-green-50 text-gray-800 flex flex-col min-h-screen">
+    <!-- Fixed Header -->
+    <%- include('../partials/header') %>
+
+    <!-- Main Content -->
+    <main class="flex-1 mt-10 pt-16 pb-16 overflow-y-auto px-4 md:px-8 max-w-screen-lg mx-auto">
+      <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md p-8 my-6">
+        <!-- Back button -->
+        <a href="/" class="inline-block mb-6 px-4 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition">
+          &larr; Back to Home
+        </a>
+        
+        <article>
+          <h1 class="text-3xl font-bold mb-6">Bird Identification Tips for Beginners</h1>
+          
+          <p class="mb-4">
+            Learning to identify birds is one of the most rewarding aspects of bird watching. 
+            While it may seem overwhelming at first with thousands of species worldwide, 
+            focusing on a few key characteristics can make the process much simpler.
+          </p>
+          
+          <h2 class="text-2xl font-bold mt-8 mb-4">The Four Keys to Bird Identification</h2>
+          
+          <p class="mb-4">
+            Professional birders often use these four main characteristics to identify birds:
+          </p>
+          
+          <ul class="list-disc pl-6 mb-6 space-y-2">
+            <li>
+              <strong>Size and Shape:</strong> Is the bird small like a sparrow or large like a crow? 
+              Notice the proportions of the head, bill, wings, and tail.
+            </li>
+            <li>
+              <strong>Color Pattern:</strong> What are the main colors and where are they located? 
+              Look for wing bars, eye rings, and distinctive markings.
+            </li>
+            <li>
+              <strong>Behavior:</strong> How does the bird move and feed? Does it walk, hop, swim, or soar? 
+              Some birds bob their tails or flick their wings in characteristic ways.
+            </li>
+            <li>
+              <strong>Habitat:</strong> Where did you see the bird? Different species prefer specific 
+              environments like forests, wetlands, grasslands, or urban areas.
+            </li>
+          </ul>
+          
+          <h2 class="text-2xl font-bold mt-8 mb-4">Tools for Identification</h2>
+          
+          <ul class="list-disc pl-6 mb-6 space-y-2">
+            <li>
+              <strong>Field Guide:</strong> A regional guide is essential for narrowing down possibilities.
+            </li>
+            <li>
+              <strong>Smartphone Apps:</strong> Apps like Merlin Bird ID or Audubon can help with instant identification.
+            </li>
+            <li>
+              <strong>Binoculars:</strong> Good optics let you see details from a distance.
+            </li>
+            <li>
+              <strong>Camera:</strong> Photos can help with later identification of challenging birds.
+            </li>
+          </ul>
+          
+          <h2 class="text-2xl font-bold mt-8 mb-4">Bird Topography: Learning the Parts</h2>
+          
+          <p class="mb-4">
+            Learning the names of bird parts will help you describe what you see and understand field guide descriptions:
+          </p>
+          
+          <ul class="list-disc pl-6 mb-6 space-y-2">
+            <li><strong>Crown:</strong> Top of the head</li>
+            <li><strong>Nape:</strong> Back of the neck</li>
+            <li><strong>Mantle:</strong> Area between the wings on the back</li>
+            <li><strong>Primaries:</strong> Outer wing feathers, visible in flight</li>
+            <li><strong>Secondaries:</strong> Inner wing feathers</li>
+            <li><strong>Coverts:</strong> Smaller feathers covering the wing</li>
+            <li><strong>Supercilium:</strong> Eyebrow stripe</li>
+            <li><strong>Lores:</strong> Area between the eye and bill</li>
+            <li><strong>Flanks:</strong> Sides of the body</li>
+            <li><strong>Undertail coverts:</strong> Feathers under the base of the tail</li>
+          </ul>
+          
+          <h2 class="text-2xl font-bold mt-8 mb-4">Common Identification Challenges</h2>
+          
+          <p class="mb-4">
+            Be aware of these factors that can complicate bird identification:
+          </p>
+          
+          <ul class="list-disc pl-6 mb-6 space-y-2">
+            <li><strong>Lighting:</strong> Colors can appear dramatically different in bright sun versus shade</li>
+            <li><strong>Juveniles:</strong> Young birds often look different from adults of the same species</li>
+            <li><strong>Seasonal plumage:</strong> Many birds have breeding and non-breeding plumages</li>
+            <li><strong>Male vs. female:</strong> Sexual dimorphism means males and females may look very different</li>
+            <li><strong>Similar species:</strong> Some bird groups contain nearly identical species that require careful observation to distinguish</li>
+          </ul>
+          
+          <p class="mt-8 mb-4">
+            Remember that even experienced birders sometimes can't identify every bird they see. 
+            The process of learning is part of what makes bird watching such an engaging hobby.
+          </p>
+        </article>
+        
+        <!-- Related articles -->
+        <div class="mt-12 pt-6 border-t border-gray-200">
+          <h3 class="text-xl font-semibold mb-4">Related Articles</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <a href="/articles/getting-started" class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+              <h4 class="font-medium text-green-800">Getting Started with Bird Watching</h4>
+              <p class="text-sm text-gray-600 mt-1">Learn the essential gear, techniques, and etiquette for beginners.</p>
+            </a>
+            <a href="/articles/bird-photography-fundamentals" class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+              <h4 class="font-medium text-green-800">Bird Photography Fundamentals</h4>
+              <p class="text-sm text-gray-600 mt-1">Capture stunning bird photographs with these equipment and technique tips.</p>
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <%- include('../partials/footer') %>
+  </body>
+</html>

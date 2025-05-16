@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <title>Seasonal Bird Migration Guide - Nature Nexus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-green-50 text-gray-800 flex flex-col min-h-screen">
+    <!-- Fixed Header -->
+    <%- include('../partials/header') %>
+
+    <!-- Main Content -->
+    <main
+      class="flex-1 mt-10 pt-16 pb-16 overflow-y-auto px-4 md:px-8 max-w-screen-lg mx-auto"
+    >
+      <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md p-8 my-6">
+        <!-- Back button -->
+        <a
+          href="/"
+          class="inline-block mb-6 px-4 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition"
+        >
+          &larr; Back to Home
+        </a>
+
+        <article>
+          <h1 class="text-3xl font-bold mb-6">Seasonal Bird Migration Guide</h1>
+
+          <p class="mb-4">
+            Bird migration is one of nature's most impressive phenomena. Each
+            year, billions of birds travel thousands of miles between breeding
+            and wintering grounds, navigating by stars, landmarks, Earth's
+            magnetic field, and even their sense of smell.
+          </p>
+
+          <h2 class="text-2xl font-bold mt-8 mb-4">
+            Understanding Migration Timing
+          </h2>
+
+          <p class="mb-4">
+            Migration follows a predictable calendar in most regions, though
+            exact timing can vary by species and weather conditions:
+          </p>
+
+          <ul class="list-disc pl-6 mb-6 space-y-2">
+            <li>
+              <strong>Spring Migration (March-May):</strong> Birds travel north
+              to breeding grounds. Waterbirds and raptors often lead, followed
+              by insect-eaters like warblers and flycatchers.
+            </li>
+            <li>
+              <strong>Fall Migration (August-November):</strong> Birds travel
+              south to wintering grounds. Generally more spread out than spring
+              migration, with shorebirds often starting in July.
+            </li>
+          </ul>
+
+          <h2 class="text-2xl font-bold mt-8 mb-4">Migration Hotspots</h2>
+
+          <p class="mb-4">
+            Certain geographic features concentrate migrating birds, making
+            these locations excellent for observation:
+          </p>
+
+          <ul class="list-disc pl-6 mb-6 space-y-2">
+            <li>
+              <strong>Coastlines:</strong> Many birds follow coastlines as
+              navigational guides.
+            </li>
+            <li>
+              <strong>Ridges and Mountain Passes:</strong> Migrating raptors use
+              thermal updrafts along ridges.
+            </li>
+            <li>
+              <strong>Major Waterways:</strong> Rivers provide navigation routes
+              and rest stops.
+            </li>
+            <li>
+              <strong>Peninsulas and Land Bridges:</strong> Birds concentrate
+              where land narrows.
+            </li>
+          </ul>
+
+          <h2 class="text-2xl font-bold mt-8 mb-4">
+            Tips for Observing Migration
+          </h2>
+
+          <ul class="list-disc pl-6 mb-6 space-y-2">
+            <li>
+              <strong>Time of Day:</strong> Dawn is best for songbirds; hawks
+              often migrate mid-morning to afternoon.
+            </li>
+            <li>
+              <strong>Weather:</strong> Check forecasts for conditions that
+              trigger migratory movements. Birds often move after cold fronts in
+              fall and warm fronts in spring.
+            </li>
+            <li>
+              <strong>Night Migration:</strong> Many birds migrate at night. On
+              clear nights in migration season, try watching the moon with
+              binoculars to observe silhouettes passing by.
+            </li>
+          </ul>
+
+          <h2 class="text-2xl font-bold mt-8 mb-4">
+            Seasonal Guide to Migrating Species
+          </h2>
+
+          <h3 class="text-xl font-bold mt-6 mb-3">
+            Spring Migration Highlights
+          </h3>
+          <ul class="list-disc pl-6 mb-6 space-y-2">
+            <li>
+              <strong>March:</strong> Waterfowl, early songbirds like Eastern
+              Phoebes and Tree Swallows
+            </li>
+            <li>
+              <strong>April:</strong> Many sparrows, kinglets, early warblers,
+              vireos, thrushes
+            </li>
+            <li>
+              <strong>May:</strong> Peak warbler migration, flycatchers,
+              tanagers, orioles, grosbeaks
+            </li>
+          </ul>
+
+          <h3 class="text-xl font-bold mt-6 mb-3">Fall Migration Highlights</h3>
+          <ul class="list-disc pl-6 mb-6 space-y-2">
+            <li>
+              <strong>July-August:</strong> Shorebirds, early warblers in
+              non-breeding plumage
+            </li>
+            <li>
+              <strong>September:</strong> Peak for many songbirds, including
+              warblers, vireos, thrushes
+            </li>
+            <li>
+              <strong>October:</strong> Sparrows, kinglets, late thrushes,
+              increasing waterfowl
+            </li>
+            <li>
+              <strong>November:</strong> Waterfowl, late sparrows, winter
+              finches, northern raptors
+            </li>
+          </ul>
+
+          <p class="mt-8 mb-4">
+            Migration is a vulnerable time for birds. You can help by keeping
+            cats indoors during peak migration, turning off unnecessary lights
+            at night to prevent disorientation, and supporting habitat
+            conservation efforts along migratory routes.
+          </p>
+        </article>
+
+        <!-- Related articles -->
+        <div class="mt-12 pt-6 border-t border-gray-200">
+          <h3 class="text-xl font-semibold mb-4">Related Articles</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <a
+              href="/articles/getting-started"
+              class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
+            >
+              <h4 class="font-medium text-green-800">
+                Getting Started with Bird Watching
+              </h4>
+              <p class="text-sm text-gray-600 mt-1">
+                Learn the essential gear, techniques, and etiquette for
+                beginners.
+              </p>
+            </a>
+            <a
+              href="/articles/journal-guide"
+              class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
+            >
+              <h4 class="font-medium text-green-800">
+                Creating Your Bird Watching Journal
+              </h4>
+              <p class="text-sm text-gray-600 mt-1">
+                Document your sightings effectively and create a lasting record.
+              </p>
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <%- include('../partials/footer') %>
+  </body>
+</html>
