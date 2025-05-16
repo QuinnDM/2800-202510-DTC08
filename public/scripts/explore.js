@@ -230,10 +230,10 @@ document.addEventListener("DOMContentLoaded", async function () {
             , { radius: 25 }))
     }
 
-    // must use colour codes from https://github.com/pointhi/leaflet-color-markers
+    // colour sighting markers according to species
     function colourMarkerIcon(colour) {
         markerIcon = L.icon({
-            iconUrl: `../images/marker-icon-${colour}.png`, //https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/${colour}.png
+            iconUrl: `../images/marker-icon-${colour}.png`, 
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
             iconSize: [25, 41],
             iconAnchor: [12, 41],
