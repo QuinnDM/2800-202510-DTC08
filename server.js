@@ -10,9 +10,10 @@ const fetch = require("node-fetch");
 const fs = require("fs");
 const path = require("path");
 
-// Import User model
+// Import models
 const User = require("./models/user");
 const Sighting = require("./models/sighting");
+const DailyFeature = require("./models/dailyFeature"); // Import here before using it
 
 const app = express();
 const port = 3000;
@@ -64,13 +65,48 @@ app.post("/upload", upload.single("image"), async (req, res) => {
   }
 });
 
-// Routes
-app.get("/", (req, res) => {
-  res.render("index", {
-    title: "Nature Nexus - Home",
-    user: req.session.user || null,
-    currentPage: "home",
-  });
+// Routes - KEEPING ONLY THE ENHANCED VERSION WITH DAILY FEATURE
+app.get("/", async (req, res) => {
+  try {
+    // Get the current date
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Determine if we should show a bird or plant based on the day
+    // Alternate between birds and plants (odd days get birds, even days get plants)
+    const featureType = today.getDate() % 2 === 0 ? "plant" : "bird";
+
+    // Find a random featured item of the selected type
+    const count = await DailyFeature.countDocuments({
+      type: featureType,
+      featured: true,
+    });
+
+    // Get a random index
+    const random = Math.floor(Math.random() * count);
+
+    // Find one featured item skipping to the random position
+    const dailyFeature = await DailyFeature.findOne({
+      type: featureType,
+      featured: true,
+    }).skip(random);
+
+    res.render("index", {
+      title: "Nature Nexus - Home",
+      user: req.session.user || null,
+      currentPage: "home",
+      dailyFeature: dailyFeature || null,
+    });
+  } catch (error) {
+    console.error("Error getting daily feature:", error);
+    // If there's an error, still render the page without the feature
+    res.render("index", {
+      title: "Nature Nexus - Home",
+      user: req.session.user || null,
+      currentPage: "home",
+      dailyFeature: null,
+    });
+  }
 });
 
 app.get("/index", (req, res) => {
@@ -466,22 +502,26 @@ app.post("/submitSighting", async (req, res) => {
       const newSighting = new Sighting({
         userId: req.session.user._id,
         species: req.body.species,
-        description: req.body.description || '',
+        description: req.body.description || "",
         location: {
           type: "Point",
           coordinates: req.body.coordinates, // [lng, lat]
         },
-        photoUrl: req.body.photoUrl || '',
+        photoUrl: req.body.photoUrl || "",
         timestamp: new Date(req.body.timestamp),
-        taxonomicGroup: req.body.taxonomicGroup
+        taxonomicGroup: req.body.taxonomicGroup,
       });
       const newSightingSaved = await newSighting.save();
-      res.status(201).json({ message: "Sighting saved", data: newSightingSaved });
+      res
+        .status(201)
+        .json({ message: "Sighting saved", data: newSightingSaved });
     } catch (err) {
       res.status(500).json({ error: "Failed to save sighting" });
     }
   } else {
-    return res.status(404).json({ error: "User not found. You must be logged in to submit a sighting." });
+    return res.status(404).json({
+      error: "User not found. You must be logged in to submit a sighting.",
+    });
   }
 });
 

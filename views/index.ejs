@@ -27,6 +27,10 @@
         <!-- Hero Section with Stats -->
         <%- include('components/home-hero') %>
 
+        <!-- Feature of the Day -->
+        <% if (dailyFeature) { %> <%- include('components/feature-of-day', {
+        feature: dailyFeature }) %> <% } %>
+
         <!-- Article Previews -->
         <%- include('components/article-previews') %>
 

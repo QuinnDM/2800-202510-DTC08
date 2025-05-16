@@ -1,0 +1,66 @@
+<!-- views/components/feature-of-day.ejs -->
+<div class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+  <div class="p-5">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-2xl font-bold text-green-800"><%= feature.type === 'bird' ? 'Bird' : 'Plant' %> of the Day</h2>
+      <span class="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">Featured</span>
+    </div>
+    
+    <div class="md:flex">
+      <!-- Image Column -->
+      <div class="md:w-2/5 flex-shrink-0">
+        <img src="<%= feature.imageUrl %>" alt="<%= feature.commonName %>" class="w-full h-auto rounded-lg object-cover max-h-80">
+      </div>
+      
+      <!-- Info Column -->
+      <div class="md:w-3/5 md:pl-6 mt-4 md:mt-0">
+        <div class="flex flex-col h-full justify-between">
+          <div>
+            <h3 class="text-xl font-bold text-gray-900"><%= feature.commonName %></h3>
+            <p class="text-sm italic text-gray-600 mb-4"><%= feature.scientificName %></p>
+            
+            <div class="mb-4">
+              <h4 class="font-semibold text-green-700 mb-2">Taxonomy</h4>
+              <ul class="space-y-1 text-gray-700">
+                <li><span class="font-medium">Family:</span> <%= feature.family %></li>
+                <% if (feature.type === 'bird') { %>
+                  <li><span class="font-medium">Habitat:</span> <%= feature.habitat %></li>
+                  <li><span class="font-medium">Conservation Status:</span> <%= feature.conservationStatus %></li>
+                <% } else { %>
+                  <li><span class="font-medium">Native Region:</span> <%= feature.nativeRegion %></li>
+                  <li><span class="font-medium">Uses:</span> <%= feature.uses %></li>
+                <% } %>
+              </ul>
+            </div>
+            
+            <div class="mb-4">
+              <h4 class="font-semibold text-green-700 mb-2">Description</h4>
+              <p class="text-gray-700"><%= feature.description %></p>
+            </div>
+            
+            <div>
+              <h4 class="font-semibold text-green-700 mb-2">Interesting Facts</h4>
+              <ul class="list-disc pl-5 text-gray-700 space-y-1">
+                <% feature.interestingFacts.forEach(fact => { %>
+                  <li><%= fact %></li>
+                <% }); %>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="mt-6">
+            <% if (feature.type === 'bird') { %>
+              <a href="/identify" class="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition">
+                Identify Birds
+              </a>
+            <% } else { %>
+              <a href="/identify" class="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition">
+                Identify Plants
+              </a>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
