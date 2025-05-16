@@ -328,6 +328,7 @@ body,
     transform: scale(0.97);
 }
 
+/* Sighting popup styles */
 .species {
     font-weight: 1000;
     font-size: 18px;
@@ -337,6 +338,16 @@ body,
 
 .speciesInformation {
     margin-bottom: 25px;
+}
+
+.speciesImageContainer {
+    height: 225px;
+}
+
+.speciesImageContainer .speciesImage {
+    height:100%;
+    width: 100%;
+    object-fit: contain;
 }
 
 /* To change marker popup style */
