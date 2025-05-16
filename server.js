@@ -603,6 +603,7 @@ app.post("/submitSighting", async (req, res) => {
     try {
       const newSighting = new Sighting({
         userId: req.session.user._id,
+        username: req.session.user.username,
         species: req.body.species,
         description: req.body.description || '',
         location: {
@@ -611,7 +612,8 @@ app.post("/submitSighting", async (req, res) => {
         },
         photoUrl: req.body.photoUrl || '',
         timestamp: new Date(req.body.timestamp),
-        taxonomicGroup: req.body.taxonomicGroup
+        taxonomicGroup: req.body.taxonomicGroup,
+        userDescription: req.body.userDescription
       });
       const newSightingSaved = await newSighting.save();
       res.status(201).json({ message: "Sighting saved", data: newSightingSaved });
