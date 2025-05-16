@@ -196,14 +196,14 @@ document.addEventListener("DOMContentLoaded", async function () {
                 let sightingMarker = L.marker([lat, lng], { icon: markerIcon }).bindPopup(sightingPopupContent).openPopup();
                 switch (sighting.taxonomicGroup) {
                     case "plant":
-                        markerIcon = colourMarkerIcon("marker-icon-2x-green")
+                        markerIcon = colourMarkerIcon("green")
                         sightingMarker = L.marker([lat, lng], { icon: markerIcon }).bindPopup(sightingPopupContent).openPopup();
                         sightingMarker.bindTooltip(sighting.species).openTooltip();
                         overlayMaps["Plants"].addLayer(sightingMarker);
                         coordinateArrayPlants.push([lat, lng])
                         break;
                     case "bird":
-                        markerIcon = colourMarkerIcon("marker-icon-2x-blue")
+                        markerIcon = colourMarkerIcon("blue")
                         sightingMarker = L.marker([lat, lng], { icon: markerIcon }).bindPopup(sightingPopupContent).openPopup();
                         sightingMarker.bindTooltip(sighting.species).openTooltip();
                         overlayMaps["Birds"].addLayer(sightingMarker);
@@ -233,7 +233,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     // must use colour codes from https://github.com/pointhi/leaflet-color-markers
     function colourMarkerIcon(colour) {
         markerIcon = L.icon({
-            iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/${colour}.png`,
+            iconUrl: `../images/marker-icon-${colour}.png`, //https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/${colour}.png
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
             iconSize: [25, 41],
             iconAnchor: [12, 41],
