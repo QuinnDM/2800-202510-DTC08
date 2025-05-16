@@ -31,7 +31,7 @@
         </svg>
         <input type="file" id="imageInput" accept="image/*"
           class="mb-4 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
-        <img id="imagePreview" class="hidden max-w-xs mx-auto mb-4" />
+        <img id="imagePreview" class="hidden max-w-xs mx-auto mb-4 rounded-lg shadow" />
         <button onclick="identifySpecies()"
           class="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition">
           Identify
@@ -40,18 +40,16 @@
       <div id="identificationResult" class="text-center text-gray-600">
         Results will appear here after identification.
       </div>
-      <!-- <div id="submitIdentificationContainer" class="text-gray-600 mt-6"> -->
       <div id="submitIdentificationContainer"
         class="text-gray-600 mt-6 bg-white rounded-lg shadow p-4 mb-6 text-center hidden">
         <p><strong>Would you like to submit your sighting?</strong></p>
         <p class="mt-3 w-[75%] mx-auto">Submissions will be added to your collections page and will contribute to the
-          explore
-          page</p><button id="submissionButton"
+          explore page</p>
+        <button id="submissionButton"
           class="bg-green-600 mt-4 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition" onclick="submitSighting()">
           Submit
         </button>
       </div>
-      <!-- </div> -->
     </main>
 
     <!-- Bottom Navigation -->
@@ -64,13 +62,24 @@
           const file = document.getElementById("imageInput").files[0];
           const resultDiv = document.getElementById("identificationResult");
           const submissionDiv = document.getElementById("submitIdentificationContainer");
+          const imagePreview = document.getElementById("imagePreview");
 
           if (!file) {
-            resultDiv.innerText = "Please select an image.";
+            resultDiv.innerHTML = `
+              <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                Please select an image to identify.
+              </div>
+            `;
             return;
           }
 
-          resultDiv.innerHTML = `<div class="flex justify-center"><div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-600"></div></div>`;
+          // Show loading spinner and image preview
+          resultDiv.innerHTML = `
+            <div class="flex flex-col items-center">
+              <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-600 mb-4"></div>
+              <p>Analyzing your image...</p>
+            </div>
+          `;
 
           try {
             // Step 1: Upload image to Cloudinary
@@ -86,7 +95,11 @@
             }
             const { imageUrl } = await uploadResponse.json();
 
-            // Step 2: Identify species with Google Vision
+            // Show the uploaded image
+            imagePreview.src = imageUrl;
+            imagePreview.classList.remove("hidden");
+
+            // Step 2: Identify species with our enhanced endpoint
             const identifyResponse = await fetch("/identify", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -96,48 +109,87 @@
               const errorData = await identifyResponse.json();
               throw new Error(errorData.error || "Failed to identify species");
             }
-            const { type, commonName, scientificName, confidence, details } = await identifyResponse.json();
+            const identification = await identifyResponse.json();
 
-            if (type === "unknown") {
+            if (identification.type === "unknown") {
               resultDiv.innerHTML = `
-                <div class="bg-white rounded-lg shadow p-4">
+                <div class="bg-white rounded-lg shadow p-4 text-left">
                   <h3 class="text-xl font-semibold mb-2">Identification Result</h3>
-                  <p>Could not confidently identify this as a bird or plant.</p>
-                  <p class="mt-2"><strong>Detected features:</strong> ${details}</p>
+                  <p class="mb-2">Could not confidently identify this as a bird or plant.</p>
+                  ${identification.visionLabels?.length ? `
+                    <div class="mt-3">
+                      <h4 class="font-medium">Detected features:</h4>
+                      <ul class="list-disc pl-5 mt-1">
+                        ${identification.visionLabels.map(label => `
+                          <li>${label.description} (${(label.score * 100).toFixed(0)}% confidence)</li>
+                        `).join('')}
+                      </ul>
+                    </div>
+                  ` : ''}
                 </div>
               `;
               return;
             }
 
             // Step 3: Fetch details based on type
-            const detailsResponse = await fetch(`/${type}-details`, {
+            const detailsEndpoint = identification.type === "bird" ? "/bird-details" : "/plant-details";
+            const detailsResponse = await fetch(detailsEndpoint, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ 
-                scientificName, 
-                commonName,
-                imageUrl 
-              }),
+              body: JSON.stringify(identification),
             });
             
             if (!detailsResponse.ok) {
-              throw new Error(`Failed to fetch ${type} details`);
+              throw new Error(`Failed to fetch ${identification.type} details`);
             }
             const detailsData = await detailsResponse.json();
 
-            // Display results
+            // Display enhanced results
             resultDiv.innerHTML = `
-              <div class="bg-white rounded-lg shadow p-4">
-                <h3 class="text-xl font-semibold mb-2">${type.charAt(0).toUpperCase() + type.slice(1)} Identified</h3>
-                <p><strong>Common Name:</strong> ${commonName || "Unknown"}</p>
-                <p><strong>Scientific Name:</strong> ${scientificName || "Unknown"}</p>
-                <p><strong>Confidence:</strong> ${(confidence * 100).toFixed(0)}%</p>
-                <p><strong>Family:</strong> ${detailsData.family || "Unknown"}</p>
-                ${type === "bird" ? `
-                  <p><strong>Habitat:</strong> ${detailsData.habitat || "Unknown"}</p>
-                ` : `
-                  <p><strong>Additional Info:</strong> ${detailsData.metadata?.note || "None available"}</p>
-                `}
+              <div class="bg-white rounded-lg shadow p-4 text-left">
+                <div class="flex items-start mb-4">
+                  <img src="${imageUrl}" alt="${identification.commonName}" class="w-32 h-32 object-cover rounded-lg mr-4">
+                  <div>
+                    <h3 class="text-xl font-semibold">${identification.commonName || "Unknown"}</h3>
+                    <p class="text-gray-600 italic">${identification.scientificName || "Unknown"}</p>
+                    <div class="flex items-center mt-1">
+                      <span class="inline-block px-2 py-1 text-xs font-semibold rounded 
+                        ${identification.confidence > 0.8 ? 'bg-green-100 text-green-800' : 
+                          identification.confidence > 0.5 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">
+                        ${(identification.confidence * 100).toFixed(0)}% Confidence
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 class="font-medium text-green-700">Taxonomy</h4>
+                    <ul class="mt-2 space-y-1">
+                      <li><strong>Type:</strong> ${identification.type.charAt(0).toUpperCase() + identification.type.slice(1)}</li>
+                      <li><strong>Family:</strong> ${detailsData.family || "Unknown"}</li>
+                      ${identification.type === "bird" ? `
+                        <li><strong>Habitat:</strong> ${detailsData.habitat || "Unknown"}</li>
+                        <li><strong>Conservation Status:</strong> ${detailsData.conservationStatus || "Unknown"}</li>
+                      ` : `
+                        <li><strong>Native Region:</strong> ${detailsData.nativeRegion || "Unknown"}</li>
+                        <li><strong>Uses:</strong> ${detailsData.uses || "Unknown"}</li>
+                      `}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h4 class="font-medium text-green-700">Description</h4>
+                    <p class="mt-2">${detailsData.description || "No description available"}</p>
+                    
+                    ${detailsData.interestingFacts?.length ? `
+                      <h4 class="font-medium text-green-700 mt-3">Interesting Facts</h4>
+                      <ul class="list-disc pl-5 mt-1 space-y-1">
+                        ${detailsData.interestingFacts.map(fact => `<li>${fact}</li>`).join('')}
+                      </ul>
+                    ` : ''}
+                  </div>
+                </div>
               </div>
             `;
 
@@ -146,12 +198,15 @@
             
             // Store sighting data for potential submission
             sightingData = {
-              species: commonName,
-              description: "",
+              species: identification.commonName,
+              scientificName: identification.scientificName,
+              description: detailsData.description || "",
               coordinates: [-123.1207, 49.2827], // Default coordinates (Vancouver)
               photoUrl: imageUrl,
               timestamp: new Date(),
-              taxonomicGroup: type
+              taxonomicGroup: identification.type,
+              family: detailsData.family,
+              ...(identification.type === "bird" ? { habitat: detailsData.habitat } : {})
             };
           } catch (error) {
             console.error("Error:", error);
@@ -160,6 +215,7 @@
                 <strong>Error:</strong> ${error.message}
               </div>
             `;
+            submissionDiv.classList.add("hidden");
           }
         }
 
@@ -190,6 +246,15 @@
 
         // Adds the identification to sightings collection in the database
         async function submitSighting() {
+          const button = document.getElementById("submissionButton");
+          button.disabled = true;
+          button.innerHTML = `
+            <span class="flex items-center">
+              <span class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></span>
+              Submitting...
+            </span>
+          `;
+
           try {
             const response = await fetch("/submitSighting", {
               method: "POST",
@@ -202,14 +267,23 @@
             const result = await response.json();
             if (response.ok) {
               console.log("Sighting saved:", result);
-              alert("Sighting submitted!");
+              button.innerHTML = "Submitted!";
+              setTimeout(() => {
+                document.getElementById("submitIdentificationContainer").classList.add("hidden");
+                button.disabled = false;
+                button.innerHTML = "Submit";
+              }, 2000);
             } else {
               console.error("Submission error:", result);
               alert(result.error || "Submission failed.");
+              button.disabled = false;
+              button.innerHTML = "Submit";
             }
           } catch (err) {
             console.error("Request failed:", err);
             alert("Could not submit sighting.");
+            button.disabled = false;
+            button.innerHTML = "Submit";
           }
         }
 

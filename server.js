@@ -343,7 +343,6 @@ app.post("/identify", async (req, res) => {
     }
 
     const data = await response.json();
-    console.log("Gemini Raw Response:", JSON.stringify(data, null, 2));
 
     // Extract the JSON response from Gemini
     let geminiResponse;
@@ -370,7 +369,6 @@ app.post("/identify", async (req, res) => {
       }))
     };
 
-    console.log('Enhanced Analysis Result:', enhancedResponse);
     res.json(enhancedResponse);
     
   } catch (error) {
