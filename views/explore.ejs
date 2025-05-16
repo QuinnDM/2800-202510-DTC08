@@ -23,7 +23,7 @@
     <%- include('partials/header') %>
         <div id="locationInformationControl">
             <div id="locationInformationButton"></div>
-            <div id="locationInformationContainer"> 
+            <div id="locationInformationContainer">
                 <p id="output"></p>
             </div>
         </div>
@@ -60,8 +60,10 @@
                 <p id="visibleSightings"></p>
             </div>
             <div id="yourSightings">
-                <p>Yours: </p>
-                <p id="yourSightingsCount"></p>
+                <button id="yourSightingsButton">
+                    <span>Yours: </span>
+                    <span id="yourSightingsCount"></span>
+                </button>
             </div>
             <div class="sightings">
                 <p>Total: </p>
