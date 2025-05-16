@@ -6,7 +6,6 @@ require("dotenv").config();
 const bcrypt = require("bcrypt");
 const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
-const fetch = require("node-fetch");
 const fs = require("fs");
 const path = require("path");
 const vision = require('@google-cloud/vision');
@@ -261,6 +260,9 @@ app.get("/identify", (req, res) => {
 
 // Step 2: Identify species using Gemini API endpoint
 app.post("/identify", async (req, res) => {
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`;
+  
   try {
     const { imageUrl } = req.body;
     if (!imageUrl) {
@@ -269,85 +271,108 @@ app.post("/identify", async (req, res) => {
 
     console.log(`Analyzing image: ${imageUrl}`);
     
-    // Detect labels (objects, animals, plants)
+    // First, use Vision API to get basic labels and web entities
     const [labelResult] = await visionClient.labelDetection(imageUrl);
     const labels = labelResult.labelAnnotations;
-
-    // Detect web entities (for scientific names and additional info)
     const [webResult] = await visionClient.webDetection(imageUrl);
     const webEntities = webResult.webDetection?.webEntities || [];
     
-    // Get pages with matching images (for more context)
-    const pagesWithMatchingImages = webResult.webDetection?.pagesWithMatchingImages || [];
+    // Prepare the Gemini prompt with Vision API results as context
+    const geminiRequest = {
+      contents: [
+        {
+          parts: [
+            {
+              text: `You are an expert biologist and bird watcher. Analyze this image and the following context:
+              
+              Vision API detected labels: ${labels.slice(0, 5).map(l => l.description).join(', ')}
+              Web entities found: ${webEntities.slice(0, 3).map(e => e.description).join(', ')}
+              
+              If it's a bird, provide:
+              1. Type: "bird"
+              2. Common Name: [bird's common name]
+              3. Scientific Name: [bird's scientific name]
+              4. Family: [bird family]
+              5. Habitat: [typical habitat]
+              6. Conservation Status: [if known]
+              7. Interesting Facts: [2-3 interesting facts]
 
-    // Filter relevant labels (birds/plants)
-    const isBird = labels.some(label => 
-      label.description.toLowerCase().includes('bird') && label.score > 0.85
-    );
-    const isPlant = labels.some(label => 
-      (label.description.toLowerCase().includes('plant') || 
-       label.description.toLowerCase().includes('flower') ||
-       label.description.toLowerCase().includes('tree')) && label.score > 0.85
-    );
+              If it's a plant, provide:
+              1. Type: "plant"
+              2. Common Name: [plant's common name]
+              3. Scientific Name: [plant's scientific name]
+              4. Family: [plant family]
+              5. Native Region: [if known]
+              6. Uses: [common uses if any]
+              7. Interesting Facts: [2-3 interesting facts]
 
-    // Extract potential family and habitat from web entities
-    let family = null;
-    let habitat = null;
-    
-    // Look for family information in web entities
-    const familyEntity = webEntities.find(entity => 
-      entity.description && (
-        entity.description.toLowerCase().includes('family') ||
-        entity.description.toLowerCase().includes('genus') ||
-        entity.description.match(/\b[A-Z][a-z]+ceae\b/) // Matches plant families like "Rosaceae"
-      )
-    );
-    
-    if (familyEntity) {
-      family = familyEntity.description;
-    }
+              If the image doesn't clearly show a bird or plant, or if you're uncertain, respond with:
+              1. Type: "unknown"
 
-    // Look for habitat information in web entities
-    const habitatEntity = webEntities.find(entity => 
-      entity.description && (
-        entity.description.toLowerCase().includes('habitat') ||
-        entity.description.toLowerCase().includes('forest') ||
-        entity.description.toLowerCase().includes('wetland') ||
-        entity.description.toLowerCase().includes('grassland') ||
-        entity.description.toLowerCase().includes('urban')
-      )
-    );
-    
-    if (habitatEntity) {
-      habitat = habitatEntity.description;
-    }
+              Format your response ONLY as a JSON object like this:
+              {
+                "type": "bird" or "plant" or "unknown",
+                "commonName": "Common name of species",
+                "scientificName": "Scientific name of species",
+                "confidence": 0.95,
+                "family": "Family name",
+                "habitat": "Typical habitat",
+                "conservationStatus": "Status if known",
+                "interestingFacts": ["Fact 1", "Fact 2"],
+                "details": "Brief description about the species",
+                "visionLabels": ["label1", "label2"] // top 3 labels from Vision API
+              }
 
-    // Prepare response
-    const response = {
-      type: isBird ? 'bird' : isPlant ? 'plant' : 'unknown',
-      commonName: isBird || isPlant ? labels[0].description : null,
-      scientificName: webEntities[0]?.description || null,
-      confidence: isBird || isPlant ? labels[0].score : 0,
-      family: family || null,
-      habitat: habitat || null,
-      details: {
-        labels: labels.slice(0, 5).map(label => ({
-          description: label.description,
-          score: label.score
-        })),
-        webEntities: webEntities.slice(0, 3).map(entity => ({
-          description: entity.description,
-          score: entity.score
-        })),
-        matchingPages: pagesWithMatchingImages.slice(0, 2).map(page => ({
-          url: page.url,
-          pageTitle: page.pageTitle
-        }))
-      }
+              Respond ONLY with this JSON object and nothing else. No markdown, no code blocks, just pure JSON.`
+            }
+          ]
+        }
+      ]
     };
 
-    console.log('Analysis Result:', response);
-    res.json(response);
+    // Call Gemini API
+    const response = await fetch(GEMINI_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(geminiRequest),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Gemini API failed: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log("Gemini Raw Response:", JSON.stringify(data, null, 2));
+
+    // Extract the JSON response from Gemini
+    let geminiResponse;
+    try {
+      const responseText = data.candidates[0].content.parts[0].text;
+      // Remove markdown code blocks if present
+      const cleanedResponse = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+      geminiResponse = JSON.parse(cleanedResponse);
+    } catch (parseError) {
+      console.error("Error parsing Gemini response:", parseError);
+      throw new Error("Failed to parse Gemini response");
+    }
+
+    // Enhance the response with Vision API data
+    const enhancedResponse = {
+      ...geminiResponse,
+      visionLabels: labels.slice(0, 3).map(label => ({
+        description: label.description,
+        score: label.score
+      })),
+      webEntities: webEntities.slice(0, 3).map(entity => ({
+        description: entity.description,
+        score: entity.score
+      }))
+    };
+
+    console.log('Enhanced Analysis Result:', enhancedResponse);
+    res.json(enhancedResponse);
+    
   } catch (error) {
     console.error('Error analyzing image:', error.message);
     res.status(500).json({ 
@@ -358,17 +383,27 @@ app.post("/identify", async (req, res) => {
   }
 });
 
-// Bird details API endpoint
+// Updated bird details endpoint to use Gemini's enhanced response
 app.post("/bird-details", async (req, res) => {
   try {
-    const { scientificName, commonName, family, habitat } = req.body;
+    const { 
+      commonName, 
+      scientificName, 
+      family, 
+      habitat, 
+      conservationStatus, 
+      interestingFacts,
+      details
+    } = req.body;
     
-    // If we already have family and habitat from the initial call, use them
     const birdDetails = {
       commonName: commonName || "Unknown Bird",
       scientificName: scientificName || "Unknown Species",
       family: family || "Unknown Family",
       habitat: habitat || "Habitat information not available",
+      conservationStatus: conservationStatus || "Unknown",
+      interestingFacts: interestingFacts || ["No additional facts available"],
+      description: details || "No description available",
       sightings: []
     };
 
@@ -379,17 +414,28 @@ app.post("/bird-details", async (req, res) => {
   }
 });
 
-// Plant details API endpoint
+// Updated plant details endpoint to use Gemini's enhanced response
 app.post("/plant-details", async (req, res) => {
   try {
-    const { scientificName, commonName, family } = req.body;
+    const { 
+      commonName, 
+      scientificName, 
+      family, 
+      nativeRegion, 
+      uses,
+      interestingFacts,
+      details
+    } = req.body;
     
     const plantDetails = {
       commonName: commonName || "Unknown Plant",
       scientificName: scientificName || "Unknown Species",
       family: family || "Unknown Family",
-      confidence: 0.85, // Default confidence
-      metadata: { note: "Additional information not available" }
+      nativeRegion: nativeRegion || "Unknown",
+      uses: uses || "Unknown",
+      interestingFacts: interestingFacts || ["No additional facts available"],
+      description: details || "No description available",
+      confidence: 0.85
     };
 
     res.json(plantDetails);

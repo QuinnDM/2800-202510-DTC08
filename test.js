@@ -1,5 +1,4 @@
 require("dotenv").config();
-const fetch = require("node-fetch");
 
 async function testGemini() {
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -37,7 +36,7 @@ Format your response ONLY as a JSON object like this:
 
 Respond ONLY with this JSON object and nothing else.`,
           },
-          { text: `Image URL: ${imageUrl}` },
+          { text: `Bird species: Bald Eagle` },
         ],
       },
     ],
