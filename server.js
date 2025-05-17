@@ -8,12 +8,11 @@ const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
-const vision = require('@google-cloud/vision');
+const vision = require("@google-cloud/vision");
 
 // Initialize the Vision API client (add after other middleware)
 
 // Replace the existing /identify endpoint with this:
-
 
 // Import User model
 const User = require("./models/user");
@@ -24,17 +23,18 @@ const port = 3000;
 
 const visionClient = new vision.ImageAnnotatorClient({
   credentials: {
-    type: 'service_account',
+    type: "service_account",
     project_id: process.env.GOOGLE_CLOUD_PROJECT_ID,
     private_key_id: process.env.GOOGLE_CLOUD_PRIVATE_KEY_ID,
-    private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY.replace(/\\n/g, "\n"),
     client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
     client_id: process.env.GOOGLE_CLOUD_CLIENT_ID,
     auth_uri: process.env.GOOGLE_CLOUD_AUTH_URI,
     token_uri: process.env.GOOGLE_CLOUD_TOKEN_URI,
-    auth_provider_x509_cert_url: process.env.GOOGLE_CLOUD_AUTH_PROVIDER_CERT_URL,
-    client_x509_cert_url: process.env.GOOGLE_CLOUD_CLIENT_CERT_URL
-  }
+    auth_provider_x509_cert_url:
+      process.env.GOOGLE_CLOUD_AUTH_PROVIDER_CERT_URL,
+    client_x509_cert_url: process.env.GOOGLE_CLOUD_CLIENT_CERT_URL,
+  },
 });
 // MongoDB Connection using .env
 mongoose
@@ -75,7 +75,19 @@ app.post("/upload", upload.single("image"), async (req, res) => {
     const result = await cloudinary.uploader.upload(req.file.path, {
       folder: "species_identification",
     });
-    const imageUrl = result.secure_url; // Public URL
+    // get the Cloudinary URL
+    const imageUrl = result.secure_url;
+
+    // Delete the temporary file from the uploads folder
+    fs.unlink(req.file.path, (unlinkErr) => {
+      if (unlinkErr) {
+        console.error("Failed to delete temporary file:", unlinkErr);
+      } else {
+        console.log("Successfully deleted temporary file:", req.file.path);
+      }
+    });
+
+    // Return the Cloudinary URL
     res.json({ imageUrl });
   } catch (error) {
     console.error("Cloudinary Error:", error);
@@ -273,7 +285,7 @@ app.get("/identify", (req, res) => {
 app.post("/identify", async (req, res) => {
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
   const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`;
-  
+
   try {
     const { imageUrl } = req.body;
     if (!imageUrl) {
@@ -281,13 +293,13 @@ app.post("/identify", async (req, res) => {
     }
 
     console.log(`Analyzing image: ${imageUrl}`);
-    
+
     // First, use Vision API to get basic labels and web entities
     const [labelResult] = await visionClient.labelDetection(imageUrl);
     const labels = labelResult.labelAnnotations;
     const [webResult] = await visionClient.webDetection(imageUrl);
     const webEntities = webResult.webDetection?.webEntities || [];
-    
+
     // Prepare the Gemini prompt with Vision API results as context
     const geminiRequest = {
       contents: [
@@ -296,8 +308,14 @@ app.post("/identify", async (req, res) => {
             {
               text: `You are an expert biologist and bird watcher. Analyze this image and the following context:
               
-              Vision API detected labels: ${labels.slice(0, 5).map(l => l.description).join(', ')}
-              Web entities found: ${webEntities.slice(0, 3).map(e => e.description).join(', ')}
+              Vision API detected labels: ${labels
+                .slice(0, 5)
+                .map((l) => l.description)
+                .join(", ")}
+              Web entities found: ${webEntities
+                .slice(0, 3)
+                .map((e) => e.description)
+                .join(", ")}
               
               If it's a bird, provide:
               1. Type: "bird"
@@ -334,11 +352,11 @@ app.post("/identify", async (req, res) => {
                 "visionLabels": ["label1", "label2"] // top 3 labels from Vision API
               }
 
-              Respond ONLY with this JSON object and nothing else. No markdown, no code blocks, just pure JSON.`
-            }
-          ]
-        }
-      ]
+              Respond ONLY with this JSON object and nothing else. No markdown, no code blocks, just pure JSON.`,
+            },
+          ],
+        },
+      ],
     };
 
     // Call Gemini API
@@ -360,7 +378,10 @@ app.post("/identify", async (req, res) => {
     try {
       const responseText = data.candidates[0].content.parts[0].text;
       // Remove markdown code blocks if present
-      const cleanedResponse = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+      const cleanedResponse = responseText
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
       geminiResponse = JSON.parse(cleanedResponse);
     } catch (parseError) {
       console.error("Error parsing Gemini response:", parseError);
@@ -370,24 +391,23 @@ app.post("/identify", async (req, res) => {
     // Enhance the response with Vision API data
     const enhancedResponse = {
       ...geminiResponse,
-      visionLabels: labels.slice(0, 3).map(label => ({
+      visionLabels: labels.slice(0, 3).map((label) => ({
         description: label.description,
-        score: label.score
+        score: label.score,
       })),
-      webEntities: webEntities.slice(0, 3).map(entity => ({
+      webEntities: webEntities.slice(0, 3).map((entity) => ({
         description: entity.description,
-        score: entity.score
-      }))
+        score: entity.score,
+      })),
     };
 
     res.json(enhancedResponse);
-    
   } catch (error) {
-    console.error('Error analyzing image:', error.message);
-    res.status(500).json({ 
-      type: 'error', 
+    console.error("Error analyzing image:", error.message);
+    res.status(500).json({
+      type: "error",
       details: error.message,
-      error: "Failed to identify species" 
+      error: "Failed to identify species",
     });
   }
 });
@@ -395,16 +415,16 @@ app.post("/identify", async (req, res) => {
 // Updated bird details endpoint to use Gemini's enhanced response
 app.post("/bird-details", async (req, res) => {
   try {
-    const { 
-      commonName, 
-      scientificName, 
-      family, 
-      habitat, 
-      conservationStatus, 
+    const {
+      commonName,
+      scientificName,
+      family,
+      habitat,
+      conservationStatus,
       interestingFacts,
-      details
+      details,
     } = req.body;
-    
+
     const birdDetails = {
       commonName: commonName || "Unknown Bird",
       scientificName: scientificName || "Unknown Species",
@@ -413,7 +433,7 @@ app.post("/bird-details", async (req, res) => {
       conservationStatus: conservationStatus || "Unknown",
       interestingFacts: interestingFacts || ["No additional facts available"],
       description: details || "No description available",
-      sightings: []
+      sightings: [],
     };
 
     res.json(birdDetails);
@@ -426,16 +446,16 @@ app.post("/bird-details", async (req, res) => {
 // Updated plant details endpoint to use Gemini's enhanced response
 app.post("/plant-details", async (req, res) => {
   try {
-    const { 
-      commonName, 
-      scientificName, 
-      family, 
-      nativeRegion, 
+    const {
+      commonName,
+      scientificName,
+      family,
+      nativeRegion,
       uses,
       interestingFacts,
-      details
+      details,
     } = req.body;
-    
+
     const plantDetails = {
       commonName: commonName || "Unknown Plant",
       scientificName: scientificName || "Unknown Species",
@@ -444,7 +464,7 @@ app.post("/plant-details", async (req, res) => {
       uses: uses || "Unknown",
       interestingFacts: interestingFacts || ["No additional facts available"],
       description: details || "No description available",
-      confidence: 0.85
+      confidence: 0.85,
     };
 
     res.json(plantDetails);
@@ -605,23 +625,29 @@ app.post("/submitSighting", async (req, res) => {
         userId: req.session.user._id,
         username: req.session.user.username,
         species: req.body.species,
-        description: req.body.description || '',
+        description: req.body.description || "",
         location: {
           type: "Point",
           coordinates: req.body.coordinates, // [lng, lat]
         },
-        photoUrl: req.body.photoUrl || '',
+        photoUrl: req.body.photoUrl || "",
         timestamp: new Date(req.body.timestamp),
         taxonomicGroup: req.body.taxonomicGroup,
-        userDescription: req.body.userDescription
+        userDescription: req.body.userDescription,
       });
       const newSightingSaved = await newSighting.save();
-      res.status(201).json({ message: "Sighting saved", data: newSightingSaved });
+      res
+        .status(201)
+        .json({ message: "Sighting saved", data: newSightingSaved });
     } catch (err) {
       res.status(500).json({ error: "Failed to save sighting" });
     }
   } else {
-    return res.status(404).json({ error: "User not found. You must be logged in to submit a sighting." });
+    return res
+      .status(404)
+      .json({
+        error: "User not found. You must be logged in to submit a sighting.",
+      });
   }
 });
 
