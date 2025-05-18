@@ -95,13 +95,14 @@ app.post("/upload", upload.single("image"), async (req, res) => {
   }
 });
 
-// Routes
 
 // Import routes
 const authRoutes = require("./routes/auth");
+const articlesRoutes = require("./routes/articles");
 
 // Use routes
 app.use(authRoutes);
+app.use(articlesRoutes);
 
 app.get("/", (req, res) => {
   res.render("index", {
@@ -570,49 +571,6 @@ app.get("/settings", (req, res) => {
     title: "Nature Nexus - Settings",
     user: req.session.user || null,
     currentPage: "settings",
-  });
-});
-
-// Article routes
-app.get("/articles/getting-started", (req, res) => {
-  res.render("articles/getting-started", {
-    title: "Getting Started with Bird Watching - Nature Nexus",
-    user: req.session.user || null,
-    currentPage: "articles",
-  });
-});
-
-app.get("/articles/bird-identification-tips", (req, res) => {
-  res.render("articles/bird-identification-tips", {
-    title: "Bird Identification Tips - Nature Nexus",
-    user: req.session.user || null,
-    currentPage: "articles",
-  });
-});
-
-app.get("/articles/bird-photography-fundamentals", (req, res) => {
-  res.render("articles/bird-photography-fundamentals", {
-    title: "Bird Photography Fundamentals - Nature Nexus",
-    user: req.session.user || null,
-    currentPage: "articles",
-  });
-});
-
-// Migration guide article route
-app.get("/articles/migration-guide", (req, res) => {
-  res.render("articles/migration-guide", {
-    title: "Seasonal Bird Migration Guide",
-    user: req.session.user || null,
-    currentPage: "articles",
-  });
-});
-
-// Journal guide article route
-app.get("/articles/journal-guide", (req, res) => {
-  res.render("articles/journal-guide", {
-    title: "Creating Your Bird Watching Journal",
-    user: req.session.user || null,
-    currentPage: "articles",
   });
 });
 
