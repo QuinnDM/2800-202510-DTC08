@@ -40,12 +40,14 @@ const authRoutes = require("./routes/auth");
 const identifyRoutes = require("./routes/identify");
 const articlesRoutes = require("./routes/articles");
 const collectionsRoutes = require("./routes/collections");
+const settingsRoutes = require("./routes/settings");
 
 // Use routes
 app.use(authRoutes);
 app.use(identifyRoutes);
 app.use(articlesRoutes);
 app.use(collectionsRoutes);
+app.use(settingsRoutes);
 
 app.get("/", (req, res) => {
   res.render("index", {
@@ -173,15 +175,6 @@ app.post("/submitSighting", async (req, res) => {
       error: "User not found. You must be logged in to submit a sighting.",
     });
   }
-});
-
-// Settings page route
-app.get("/settings", (req, res) => {
-  res.render("settings", {
-    title: "Nature Nexus - Settings",
-    user: req.session.user || null,
-    currentPage: "settings",
-  });
 });
 
 // Start Server
