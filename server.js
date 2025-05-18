@@ -9,6 +9,7 @@ const path = require("path");
 // Import User model
 const User = require("./models/user");
 const Sighting = require("./models/sighting");
+const DailyFeature = require("./models/dailyFeature");
 
 const app = express();
 const port = 3000;
@@ -51,20 +52,51 @@ app.use(collectionsRoutes);
 app.use(settingsRoutes);
 app.use(exploreRoutes);
 
-app.get("/", (req, res) => {
-  res.render("index", {
-    title: "Nature Nexus - Home",
-    user: req.session.user || null,
-    currentPage: "home",
-  });
+app.get("/", async (req, res) => {
+  try {
+    // Fetch the most recent daily feature
+    const dailyFeature = await DailyFeature.findOne({ featured: true }).sort({
+      createdAt: -1,
+    });
+
+    res.render("index", {
+      title: "Nature Nexus - Home",
+      user: req.session.user || null,
+      currentPage: "home",
+      dailyFeature: dailyFeature, // Pass the daily feature to the template
+    });
+  } catch (error) {
+    console.error("Error fetching daily feature:", error);
+    res.render("index", {
+      title: "Nature Nexus - Home",
+      user: req.session.user || null,
+      currentPage: "home",
+      dailyFeature: null, // Pass null if there's an error
+    });
+  }
 });
 
-app.get("/index", (req, res) => {
-  res.render("index", {
-    title: "Nature Nexus - Home",
-    user: req.session.user || null,
-    currentPage: "home",
-  });
+app.get("/index", async (req, res) => {
+  try {
+    const dailyFeature = await DailyFeature.findOne({ featured: true }).sort({
+      createdAt: -1,
+    });
+
+    res.render("index", {
+      title: "Nature Nexus - Home",
+      user: req.session.user || null,
+      currentPage: "home",
+      dailyFeature: dailyFeature,
+    });
+  } catch (error) {
+    console.error("Error fetching daily feature:", error);
+    res.render("index", {
+      title: "Nature Nexus - Home",
+      user: req.session.user || null,
+      currentPage: "home",
+      dailyFeature: null,
+    });
+  }
 });
 
 // Build filter helper function
