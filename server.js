@@ -3,7 +3,6 @@ const session = require("express-session");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 require("dotenv").config();
-const bcrypt = require("bcrypt");
 const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
 const fs = require("fs");
@@ -95,14 +94,15 @@ app.post("/upload", upload.single("image"), async (req, res) => {
   }
 });
 
-
 // Import routes
 const authRoutes = require("./routes/auth");
 const articlesRoutes = require("./routes/articles");
+const collectionsRoutes = require("./routes/collections");
 
 // Use routes
 app.use(authRoutes);
 app.use(articlesRoutes);
+app.use(collectionsRoutes);
 
 app.get("/", (req, res) => {
   res.render("index", {
@@ -165,26 +165,6 @@ app.get("/tiles/:z/:x/:y", async (req, res) => {
   } catch (err) {
     console.error("Tile fetch threw error:", err);
     res.status(500).send("Internal fetch error.");
-  }
-});
-
-app.get("/collections", (req, res) => {
-  res.render("collection", {
-    title: "Nature Nexus - Collections",
-    user: req.session.user || null,
-    currentPage: "collections",
-  });
-});
-
-app.get("/collection", (req, res) => {
-  if (req.session.user) {
-    res.render("collection", {
-      title: "Nature Nexus - Collection",
-      user: req.session.user,
-      currentPage: "collections",
-    });
-  } else {
-    res.redirect("/login");
   }
 });
 
@@ -387,117 +367,6 @@ app.post("/plant-details", async (req, res) => {
   } catch (error) {
     console.error("Plant details error:", error);
     res.status(500).json({ error: "Failed to fetch plant details" });
-  }
-});
-
-// Get user stats
-app.get("/stats", async (req, res) => {
-  try {
-    if (!req.session.user) {
-      return res.json({ birds: 0, plants: 0 });
-    }
-
-    const user = await User.findById(req.session.user._id);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    res.json(user.stats || { birds: 0, plants: 0 });
-  } catch (error) {
-    console.error("Stats error:", error);
-    res.status(500).json({ error: "Failed to fetch stats" });
-  }
-});
-
-// Update user stats
-app.post("/update-stats", async (req, res) => {
-  try {
-    if (!req.session.user) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
-
-    const { type } = req.body;
-    if (!type || (type !== "bird" && type !== "plant")) {
-      return res.status(400).json({ error: "Invalid species type" });
-    }
-
-    const user = await User.findById(req.session.user._id);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    // Initialize stats if they don't exist
-    if (!user.stats) {
-      user.stats = { birds: 0, plants: 0 };
-    }
-
-    // Increment the appropriate counter
-    if (type === "bird") {
-      user.stats.birds += 1;
-    } else {
-      user.stats.plants += 1;
-    }
-
-    await user.save();
-    res.json(user.stats);
-  } catch (error) {
-    console.error("Update stats error:", error);
-    res.status(500).json({ error: "Failed to update stats" });
-  }
-});
-
-// Get user collections
-app.get("/api/collections", async (req, res) => {
-  try {
-    if (!req.session.user) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
-
-    const user = await User.findById(req.session.user._id);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    res.json(user.collections || []);
-  } catch (error) {
-    console.error("Collections error:", error);
-    res.status(500).json({ error: "Failed to fetch collections" });
-  }
-});
-
-// Create a new collection
-app.post("/api/collections", async (req, res) => {
-  try {
-    if (!req.session.user) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
-
-    const { name } = req.body;
-    if (!name) {
-      return res.status(400).json({ error: "Collection name is required" });
-    }
-
-    const user = await User.findById(req.session.user._id);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    // Initialize collections if they don't exist
-    if (!user.collections) {
-      user.collections = [];
-    }
-
-    // Add the new collection
-    user.collections.push({
-      name,
-      items: [],
-    });
-
-    await user.save();
-    res.json(user.collections);
-  } catch (error) {
-    console.error("Create collection error:", error);
-    res.status(500).json({ error: "Failed to create collection" });
   }
 });
 
