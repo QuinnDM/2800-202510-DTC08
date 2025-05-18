@@ -3,15 +3,6 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/user");
 
-// Collections page
-router.get("/collections", (req, res) => {
-  res.render("collection", {
-    title: "Nature Nexus - Collections",
-    user: req.session.user || null,
-    currentPage: "collections",
-  });
-});
-
 // User collection page (requires login)
 router.get("/collection", (req, res) => {
   if (req.session.user) {
