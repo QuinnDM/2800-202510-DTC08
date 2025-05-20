@@ -52,12 +52,39 @@ app.use(collectionsRoutes);
 app.use(settingsRoutes);
 app.use(exploreRoutes);
 
+// Function to get daily feature based on current date
+async function getDailyFeature() {
+  try {
+    // Get the current date and use it as a seed for selection
+    const today = new Date();
+    const dateString = `${today.getFullYear()}-${
+      today.getMonth() + 1
+    }-${today.getDate()}`;
+
+    // Count total features
+    const count = await DailyFeature.countDocuments();
+    if (count === 0) return null;
+
+    // Create a deterministic "random" index based on the date
+    // This ensures the same feature is shown all day, but changes daily
+    const hash = dateString.split("").reduce((acc, char) => {
+      return acc + char.charCodeAt(0);
+    }, 0);
+
+    const index = hash % count;
+
+    // Get the feature at this index
+    return await DailyFeature.findOne().skip(index);
+  } catch (error) {
+    console.error("Error getting daily feature:", error);
+    return null;
+  }
+}
+
 app.get("/", async (req, res) => {
   try {
-    // Fetch the most recent daily feature
-    const dailyFeature = await DailyFeature.findOne({ featured: true }).sort({
-      createdAt: -1,
-    });
+    // Use the date-based function to get today's feature
+    const dailyFeature = await getDailyFeature();
 
     res.render("index", {
       title: "Nature Nexus - Home",
@@ -78,9 +105,8 @@ app.get("/", async (req, res) => {
 
 app.get("/index", async (req, res) => {
   try {
-    const dailyFeature = await DailyFeature.findOne({ featured: true }).sort({
-      createdAt: -1,
-    });
+    // Use the same date-based function for consistency
+    const dailyFeature = await getDailyFeature();
 
     res.render("index", {
       title: "Nature Nexus - Home",
@@ -159,6 +185,30 @@ app.post("/submitSighting", async (req, res) => {
   } else {
     return res.status(404).json({
       error: "User not found. You must be logged in to submit a sighting.",
+    });
+  }
+});
+
+// Add a route to manually refresh the daily feature (useful for testing)
+app.get("/refresh-daily-feature", async (req, res) => {
+  try {
+    const dailyFeature = await getDailyFeature();
+    res.json({
+      success: true,
+      message: "Daily feature refreshed",
+      feature: dailyFeature
+        ? {
+            type: dailyFeature.type,
+            commonName: dailyFeature.commonName,
+            scientificName: dailyFeature.scientificName,
+          }
+        : null,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to refresh daily feature",
+      error: error.message,
     });
   }
 });
