@@ -121,7 +121,7 @@ body,
     background-color: rgb(236, 236, 236);
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 767px) {
     #locationInformationControl {
         position: fixed;
         bottom: 110px;
@@ -226,8 +226,6 @@ body,
         color: #718096;
         text-align: center;
         width: 120px;
-        /* position: absolute; */
-        /* left: 10px; */
     }
 
     #observationHeader {
@@ -247,7 +245,7 @@ body,
     }
 }
 
-@media only screen and (min-width: 600px) {
+@media only screen and (min-width: 768px) {
 
     #locationInformationControl {
         position: fixed;
