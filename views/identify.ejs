@@ -430,13 +430,8 @@
             const lng = pointClicked.latlng.lng.toFixed(6);
             document.getElementById('sightingLatitude').value = lat;
             document.getElementById('sightingLongitude').value = lng;
-
-            // if there is a sightingMarker in the window, update its coord position, else set and add to map
-            if (window.sightingMarker) {
-              window.sightingMarker.setLatLng(pointClicked.latlng);
-            } else {
-              window.sightingMarker = L.marker(pointClicked.latlng).addTo(map);
-            }
+            
+            addSightingMarker(lat, lng);
           });
 
           let coordinateInputTimeout;
@@ -455,6 +450,15 @@
           });
         }
 
+        // Add sighting marker to map or update it's position using coordinate info
+        function addSightingMarker(latitude, longitude) {
+          if (window.sightingMarker) {
+            window.sightingMarker.setLatLng([latitude, longitude]);
+          } else {
+            window.sightingMarker = L.marker([latitude, longitude]).addTo(map);
+          }
+        }
+
         // try to get the user's current location
         window.getLocation = function () {
           if (navigator.geolocation) {
@@ -471,11 +475,7 @@
           document.getElementById('sightingLongitude').value = lng;
 
           // Add marker based on your coordinate position
-          if (window.sightingMarker) {
-            window.sightingMarker.setLatLng([lat, lng]);
-          } else {
-            window.sightingMarker = L.marker([lat, lng]).addTo(map);
-          }
+          addSightingMarker(lat, lng);
           // pan to input lat and long
           map.setView(
             [lat, lng],
@@ -490,13 +490,7 @@
           if (latitude != "" && longitude != "") {
             // Add marker to coordinate location
             // if there is a sightingMarker in the window, update its coord position, else set and add to map
-            if (window.sightingMarker) {
-              console.log(longitude);
-              window.sightingMarker.setLatLng([latitude, longitude]);
-            } else {
-              console.log(longitude);
-              window.sightingMarker = L.marker([latitude, longitude]).addTo(map);
-            }
+            addSightingMarker(latitude, longitude);
             // pan to input lat and long
             map.setView(
               [latitude, longitude],
