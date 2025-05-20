@@ -122,40 +122,53 @@ body,
 }
 
 @media only screen and (max-width: 600px) {
-    #locationInformationButton {
-        width: 45px;
-        height: 45px;
-        background-color: rgb(255, 254, 254);
-        /* position: absolute */
-        position: fixed;
-        bottom: 110px;
-        left: 10px;
-        /* bring your own prefixes */
-        z-index: 1000;
-        border-radius: 5px;
-        border-style: solid;
-        border-width: 2px;
-        border-color: rgb(169, 169, 169);
-    }
-
-    #locationInformationContainer {
-        padding-left: 2em;
-        padding-right: 2em;
-        display: none;
-        /* width: 200px;
-                height: 100px; */
-        background-color: rgb(255, 254, 254);
-        /* position: absolute */
-        position: fixed;
-        bottom: 170px;
-        left: 10px;
-        /* bring your own prefixes */
-        z-index: 1000;
-        border-radius: 5px;
-        border-style: solid;
-        border-width: 2px;
-        border-color: rgb(169, 169, 169);
-    }
+    #locationInformationControl {
+            position: fixed;
+            bottom: 110px;
+            left: 20px;
+            background: white;
+            overflow: hidden;
+            font-family: sans-serif;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            z-index: 5000;
+            border-radius: 5px;
+            border-style: solid;
+            border-width: 2px;
+            border-color: rgb(169, 169, 169);
+        }
+    
+        #locationInformationButton {
+            background: #f4f4f4;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    
+        #locationInformationButton img {
+            width: 45px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+    
+        #locationInformationContainer {
+            display: none;
+            background: white;
+            border-top: 1px solid #ccc;
+        }
+    
+        #locationInformationContainer #output {
+            display: block;
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+    
+        #locationInformationControl:hover #locationInformationContainer {
+            display: block;
+        }
+    
+        #locationInformationControl:hover #locationInformationButton {
+            display: block;
+        }
 
     #sightingsCountBar {
         width: 100%;
@@ -266,8 +279,6 @@ body,
         padding: 8px 12px;
         cursor: pointer;
     }
-
-
 
     #locationInformationControl:hover #locationInformationContainer {
         display: block;
