@@ -50,7 +50,7 @@
         </button>
         <p class="mt-3 w-[75%] mx-auto">Submissions will be added to your collections page and will contribute to the
           explore
-          page</p>
+          page.</p>
       </div>
       <div id="submitIdentificationContainer"
         class="text-gray-600 mt-6 bg-white rounded-lg shadow p-4 mb-6 text-center  hidden">
@@ -379,6 +379,7 @@
         // Submission functionality
 
         let mapInitialized = false;
+        let map;
 
         const yesButton = document.getElementById("yesButton");
         let submissionModal = document.getElementById("submissionModal");
@@ -396,7 +397,7 @@
         });
 
         function initializeMap() {
-          const map = L.map('map', {
+          map = L.map('map', {
             minZoom: 1,
             maxZoom: 21
           }).fitWorld();
@@ -430,11 +431,27 @@
             document.getElementById('sightingLatitude').value = lat;
             document.getElementById('sightingLongitude').value = lng;
 
+            // if there is a sightingMarker in the window, update its coord position, else set and add to map
             if (window.sightingMarker) {
               window.sightingMarker.setLatLng(pointClicked.latlng);
             } else {
               window.sightingMarker = L.marker(pointClicked.latlng).addTo(map);
             }
+          });
+
+          let coordinateInputTimeout;
+          // Add listener to coordinate inputs to trigger map zoom/marker placement after typing
+          document.getElementById("sightingLatitude").addEventListener("input", function () {
+            clearTimeout(coordinateInputTimeout);
+            coordinateInputTimeout = setTimeout(() => {
+              addCoordinateMarkerToMap();
+            }, 1000)
+          });
+          document.getElementById("sightingLongitude").addEventListener("input", function () {
+            clearTimeout(coordinateInputTimeout);
+            coordinateInputTimeout = setTimeout(() => {
+              addCoordinateMarkerToMap();
+            }, 1000)
           });
         }
 
@@ -452,10 +469,44 @@
           const lng = position.coords.longitude;
           document.getElementById('sightingLatitude').value = lat;
           document.getElementById('sightingLongitude').value = lng;
+
+          // Add marker based on your coordinate position
+          if (window.sightingMarker) {
+            window.sightingMarker.setLatLng([lat, lng]);
+          } else {
+            window.sightingMarker = L.marker([lat, lng]).addTo(map);
+          }
+          // pan to input lat and long
+          map.setView(
+            [lat, lng],
+            16
+          );
+        }
+
+        // add lat long marker to map based on input value and pan to it
+        function addCoordinateMarkerToMap() {
+          let latitude = document.getElementById("sightingLatitude").value;
+          let longitude = document.getElementById("sightingLongitude").value;
+          if (latitude != "" && longitude != "") {
+            // Add marker to coordinate location
+            // if there is a sightingMarker in the window, update its coord position, else set and add to map
+            if (window.sightingMarker) {
+              console.log(longitude);
+              window.sightingMarker.setLatLng([latitude, longitude]);
+            } else {
+              console.log(longitude);
+              window.sightingMarker = L.marker([latitude, longitude]).addTo(map);
+            }
+            // pan to input lat and long
+            map.setView(
+              [latitude, longitude],
+              16
+            );
+          }
         }
 
         function getLocationError(err) {
-          alert("Could not access current location.")
+          alert("Could not access current location.");
           console.warn(`ERROR(${err.code}): ${err.message}`);
         }
 
