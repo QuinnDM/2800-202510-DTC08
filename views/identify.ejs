@@ -380,6 +380,7 @@
 
         let mapInitialized = false;
         let map;
+        let coordinateInputTimeout;
 
         const yesButton = document.getElementById("yesButton");
         let submissionModal = document.getElementById("submissionModal");
@@ -430,24 +431,14 @@
             const lng = pointClicked.latlng.lng.toFixed(6);
             document.getElementById('sightingLatitude').value = lat;
             document.getElementById('sightingLongitude').value = lng;
-            
+
             addSightingMarker(lat, lng);
           });
 
-          let coordinateInputTimeout;
           // Add listener to coordinate inputs to trigger map zoom/marker placement after typing
-          document.getElementById("sightingLatitude").addEventListener("input", function () {
-            clearTimeout(coordinateInputTimeout);
-            coordinateInputTimeout = setTimeout(() => {
-              addCoordinateMarkerToMap();
-            }, 1000)
-          });
-          document.getElementById("sightingLongitude").addEventListener("input", function () {
-            clearTimeout(coordinateInputTimeout);
-            coordinateInputTimeout = setTimeout(() => {
-              addCoordinateMarkerToMap();
-            }, 1000)
-          });
+          ["sightingLatitude", "sightingLongitude"].forEach(coordinate => {
+            document.getElementById(coordinate).addEventListener("input", handleCoordinateInput)
+          })
         }
 
         // Add sighting marker to map or update it's position using coordinate info
@@ -484,18 +475,19 @@
         }
 
         // add lat long marker to map based on input value and pan to it
-        function addCoordinateMarkerToMap() {
+        function handleCoordinateInput() {
           let latitude = document.getElementById("sightingLatitude").value;
           let longitude = document.getElementById("sightingLongitude").value;
           if (latitude != "" && longitude != "") {
-            // Add marker to coordinate location
-            // if there is a sightingMarker in the window, update its coord position, else set and add to map
-            addSightingMarker(latitude, longitude);
-            // pan to input lat and long
-            map.setView(
-              [latitude, longitude],
-              16
-            );
+            clearTimeout();
+            coordinateInputTimeout = setTimeout(() => {
+              // add sighting marker to submission map and zoom to it
+              addSightingMarker(latitude, longitude);
+              map.setView(
+                [latitude, longitude],
+                16
+              );
+            })
           }
         }
 
