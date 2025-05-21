@@ -15,11 +15,11 @@ body,
 }
 
 .leaflet-control-container {
-    margin-top: 75px !important;
+    margin-top: 14px !important;
 }
 
 .leaflet-control-zoom {
-    margin-top: 75px !important;
+    margin-top: 14px !important;
 }
 
 /* Style all labels inside the layer control */
