@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                     + `<div class='infoContainer'><h3 class='bold'>Latitude: </h3><p> ${lat}</p></div>`
                     + `<div class='infoContainer'><h3 class='bold'>Longitude: </h3><p> ${lon}</p></div>`
                     + `<div class='infoContainer'><h3 class='bold'>Temperature: </h3><p> ${weatherData.temperature}°C</p></div>`
-                    + `<div class='infoContainer'><h3 class='bold'>Weather: </h3><p> ${weatherData.description}</p></div>`;
+                    + `<div class='infoContainer'><h3 class='bold'>Weather: </h3><p style="text-transform: capitalize"> ${weatherData.description}</p></div>`;
             })
             .catch(err => {
                 document.getElementById("output").innerText = "Failed to fetch weather data.";
@@ -169,6 +169,10 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // retrieve user's location information every 5 minutes
     setInterval(getLocation, 300000);
+
+    function toTitleCase() {
+
+    }
 
     const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 
