@@ -28,8 +28,14 @@
       <!-- Login Tab -->
       <div id="Login" class="tabcontent mt-6 block">
         <h2 class="text-2xl font-bold text-center mb-6">Login</h2>
-        <% if (typeof error !== 'undefined') { %>
-        <div class="text-red-500 text-center mb-4"><%= error %></div>
+        <% if (typeof error !== 'undefined' && error) { %>
+          <% if (typeof success !== 'undefined' && success) { %>
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded">
+              <p><%= error %></p>
+            </div>
+          <% } else { %>
+            <div class="text-red-500 text-center mb-4"><%= error %></div>
+          <% } %>
         <% } %>
         <form action="/login" method="POST" class="space-y-4">
           <div>
@@ -54,6 +60,22 @@
               placeholder="Enter your password"
             />
           </div>
+          <div class="flex items-center">
+            <input
+              type="checkbox"
+              id="remember_me"
+              name="remember_me"
+              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label for="remember_me" class="ml-2 block text-sm text-gray-700">
+              Remember me
+            </label>
+          </div>
+          <div class="flex justify-end">
+            <a href="/forgot-password" class="text-sm text-blue-600 hover:underline">
+              Forgot password?
+            </a>
+          </div>
           <button
             type="submit"
             class="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600"
@@ -67,9 +89,9 @@
             <hr class="flex-grow border-t border-gray-300" />
           </div>
           <!-- Social Login Buttons -->
-          <button
+          <a
+            href="/auth/google"
             class="w-full bg-white text-gray-700 p-2 border rounded-lg hover:bg-gray-50 flex items-center justify-center space-x-2"
-            disabled
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -97,10 +119,10 @@
               ></path>
             </svg>
             <span>Log in with Google</span>
-          </button>
-          <button
+          </a>
+          <!-- <a
+            href="/auth/apple"
             class="w-full bg-white text-gray-700 p-2 border rounded-lg hover:bg-gray-50 flex items-center justify-center space-x-2"
-            disabled
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -115,7 +137,7 @@
               ></path>
             </svg>
             <span>Log in with Apple</span>
-          </button>
+          </a> -->
         </form>
       </div>
 
@@ -139,6 +161,17 @@
             />
           </div>
           <div>
+            <label for="username" class="block text-gray-700">Username</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              required
+              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Choose a username"
+            />
+          </div>
+          <div>
             <label for="password" class="block text-gray-700">Password</label>
             <input
               type="password"
@@ -147,6 +180,17 @@
               required
               class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter your password"
+            />
+          </div>
+          <div>
+            <label for="confirmPassword" class="block text-gray-700">Confirm Password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              required
+              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Confirm your password"
             />
           </div>
           <button
@@ -185,6 +229,27 @@
 
       // Show the first tab by default
       document.getElementsByClassName("tabcontent")[0].style.display = "block";
+      
+      // Check for saved credentials on page load
+      document.addEventListener('DOMContentLoaded', function() {
+        const savedEmail = localStorage.getItem('rememberedEmail');
+        if (savedEmail) {
+          document.getElementById('email').value = savedEmail;
+          document.getElementById('remember_me').checked = true;
+        }
+      });
+      
+      // Add event listener for the login form
+      document.querySelector('#Login form').addEventListener('submit', function(e) {
+        const rememberMe = document.getElementById('remember_me').checked;
+        const email = document.getElementById('email').value;
+        
+        if (rememberMe) {
+          localStorage.setItem('rememberedEmail', email);
+        } else {
+          localStorage.removeItem('rememberedEmail');
+        }
+      });
     </script>
   </body>
 </html>
