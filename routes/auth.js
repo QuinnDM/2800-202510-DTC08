@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
+const passport = require("passport");
 
 // Login page
 router.get("/login", (req, res) => {
@@ -82,6 +83,66 @@ router.post("/login", async (req, res) => {
     });
   }
 });
+
+router.get(
+  "/auth/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+  })
+);
+
+router.get(
+  "/auth/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: "/login",
+    session: false,
+  }),
+  async function (req, res) {
+    try {
+      // Set up session
+      req.session.user = req.user;
+
+      // Update last login time
+      await User.findByIdAndUpdate(req.user._id, {
+        lastLoginAt: new Date(),
+      });
+
+      // Redirect to home page
+      res.redirect("/");
+    } catch (error) {
+      console.error("Google auth callback error:", error);
+      res.redirect("/login");
+    }
+  }
+);
+
+// Apple OAuth routes
+// router.get("/auth/apple", passport.authenticate("apple"));
+
+// router.post(
+//   "/auth/apple/callback",
+//   passport.authenticate("apple", {
+//     failureRedirect: "/login",
+//     session: false,
+//   }),
+//   async function (req, res) {
+//     try {
+//       // Set up session
+//       req.session.user = req.user;
+
+//       // Update last login time
+//       await User.findByIdAndUpdate(req.user._id, {
+//         lastLoginAt: new Date(),
+//       });
+
+//       // Redirect to home page
+//       res.redirect("/");
+//     } catch (error) {
+//       console.error("Apple auth callback error:", error);
+//       res.redirect("/login");
+//     }
+//   }
+// );
 
 // Registration page
 router.get("/register", (req, res) => {
@@ -178,6 +239,8 @@ router.post("/register", async (req, res) => {
     });
   }
 });
+
+
 
 // Logout route - clear remember me token
 router.get("/logout", async (req, res) => {

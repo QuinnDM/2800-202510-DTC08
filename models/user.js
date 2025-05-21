@@ -19,6 +19,19 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  // Social login IDs
+  googleId: {
+    type: String,
+    sparse: true,
+  },
+  appleId: {
+    type: String,
+    sparse: true,
+  },
+  profilePicture: {
+    type: String,
+    trim: true,
+  },
   // Added personal information fields
   firstName: {
     type: String,

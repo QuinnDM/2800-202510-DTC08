@@ -6,6 +6,10 @@ const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
+const passport = require('passport');
+
+// Initialize passport configuration
+require('./passport-config')(passport);
 
 // Import User model
 const User = require("./models/user");
@@ -48,6 +52,11 @@ app.use(
   })
 );
 app.use(checkRememberToken);
+
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use(express.static("public"));
 app.set("views", "./views");
 app.set("view engine", "ejs");
