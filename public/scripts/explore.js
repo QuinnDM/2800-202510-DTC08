@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     map.whenReady(async () => {
         jawgStreetMap.addTo(map)
         await loadSightings("/sightings");
+        createYourSightingsLayer();
         displayTotalSightingsCount();
         insertLayerControlSeparator();
         styleDropDownLayers();
@@ -276,17 +277,42 @@ document.addEventListener("DOMContentLoaded", async function () {
         return null;
     }
 
-    // Zoom to extent of sitings
+    const yourSightingsFeatureGroup = L.featureGroup();
+
+    // Create a layer for your sightings to use for zoom
+    async function createYourSightingsLayer() {
+        try {
+            const yourSightings = "/yourSightings"
+            response = await fetch(yourSightings);
+
+            if (response.status === 401) {
+                console.log("User not logged in. Cannot fetch user sightings.");
+                return;
+            }
+
+            data = await response.json();
+            data.forEach(sighting => {
+                const [lng, lat] = sighting.location.coordinates;
+                let sightingMarker = L.marker([lat, lng]);
+                yourSightingsFeatureGroup.addLayer(sightingMarker);
+            });
+        } catch (err) {
+            console.error("Failed to load user sightings:", err.message)
+        }
+    }
+
+    // Zoom to extent of your sightings
     async function zoomToYourSightings() {
         const yourSightingsButton = document.getElementById("yourSightings");
         yourSightingsButton.addEventListener("click", function () {
-            if (overlayMaps["Birds"] && overlayMaps["Birds"].getLayers().length > 0) {
-                map.fitBounds(overlayMaps["Birds"].getBounds());
+            if (yourSightingsFeatureGroup.getLayers().length > 0) {
+                map.fitBounds(yourSightingsFeatureGroup.getBounds());
             } else {
-                console.warn("Sightings layer is not loaded or empty.");
+                console.warn("Cannot zoom to your sightings. User is either not logged in or has no submitted sightings.");
             }
         });
     }
+
     zoomToYourSightings();
 
     // Displays the total count of total sighting contributions from all user
@@ -328,6 +354,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     async function displayYourSightingsCount() {
         try {
             const response = await fetch("/yourSightings");
+            // handle user not being logged in
+            if (response.status === 401) {
+                console.log("User not logged in. Cannot fetch user sightings.");
+            }
             const data = await response.json();
             let yourSightingsCount = 0;
             if (Array.isArray(data)) {
@@ -351,8 +381,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             controlContainer.insertBefore(separator, controlContainer.children[3]);
         }
     }
-
-
 });
 
 // Implement toggle for the location information popup
