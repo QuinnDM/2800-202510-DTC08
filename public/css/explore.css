@@ -335,11 +335,24 @@ body,
         justify-content: center;
     }
 
+    .highlighted {
+        color: #2f855a;
+        /* Text color */
+        /* text-shadow: 0 0 2px #2f855a; */
+        /* Shadow to add a subtle glow */
+        font-weight: 700;
+        /* transition: color 0.2s ease, text-shadow 0.2s ease; */
+    }
+
     #yourSightingsButton {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
+    }
+
+    #yourSightingsButton:hover {
+        transform: scale(1.1);
     }
 
     .sightings {
