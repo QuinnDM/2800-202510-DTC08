@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     jawgStreetMap.addTo(map)
 
-    map.whenReady( async () => {
+    map.whenReady(async () => {
         jawgStreetMap.addTo(map)
         await loadSightings("/sightings");
         displayTotalSightingsCount();
@@ -102,10 +102,12 @@ document.addEventListener("DOMContentLoaded", async function () {
         const resetButton = document.querySelector('.leaflet-control-geosearch .reset');
         if (resetButton) {
             resetButton.style.position = 'absolute';
-            resetButton.style.top = '4px';
-            resetButton.style.right = '10px';
+            resetButton.style.right = '5px';
+            resetButton.style.height = "30px"
             resetButton.style.backgroundColor = 'white';
             resetButton.style.border = 'none';
+            resetButton.style.fontWeight = 'bold'
+            resetButton.style.width = "30px"
         }
     }
 
@@ -214,7 +216,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             // Create heat maps for the various layers. 
             addHeatMap(coordinateArrayBirds, "Birds HM");
             addHeatMap(coordinateArrayPlants, "Plants HM");
-            
+
             return overlayMaps["Birds"];
         } catch (err) {
             console.error('Failed to load sightings:', err);
@@ -233,7 +235,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     // colour sighting markers according to species
     function colourMarkerIcon(colour) {
         markerIcon = L.icon({
-            iconUrl: `../images/marker-icon-${colour}.png`, 
+            iconUrl: `../images/marker-icon-${colour}.png`,
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
             iconSize: [25, 41],
             iconAnchor: [12, 41],
@@ -328,9 +330,9 @@ document.addEventListener("DOMContentLoaded", async function () {
             const response = await fetch("/yourSightings");
             const data = await response.json();
             let yourSightingsCount = 0;
-            if (Array.isArray(data)){
+            if (Array.isArray(data)) {
                 yourSightingsCount = data.length;
-            } 
+            }
             let yourSightingsElement = document.getElementById("yourSightingsCount");
             yourSightingsElement.innerText = yourSightingsCount;
         } catch (err) {
