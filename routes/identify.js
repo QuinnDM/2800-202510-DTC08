@@ -70,6 +70,32 @@ router.post("/upload", upload.single("image"), async (req, res) => {
   }
 });
 
+//If the user wishes to remove an image it gets removed from cloudinary
+router.post('/delete-image', async (req, res) => {
+  try {
+    const { imageUrl } = req.body;
+    
+    if (!imageUrl) {
+      return res.status(400).json({ error: 'Image URL is required' });
+    }
+    const urlParts = imageUrl.split('/');
+    const publicIdWithExtension = urlParts.slice(-2).join('/');
+    const publicId = publicIdWithExtension.split('.')[0];
+    
+    const result = await cloudinary.uploader.destroy(publicId);
+    
+    if (result.result === 'ok') {
+      return res.status(200).json({ message: 'Image deleted successfully' });
+    } else {
+      return res.status(400).json({ error: 'Failed to delete image' });
+    }
+  } catch (error) {
+    console.error('Error deleting image:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 // Step 2: Identify species using Gemini API endpoint
 router.post("/identify", async (req, res) => {
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;

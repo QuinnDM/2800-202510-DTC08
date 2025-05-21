@@ -2,14 +2,30 @@ const express = require("express");
 const session = require("express-session");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
+const passport = require('passport');
+
+// Initialize passport configuration
+require('./passport-config')(passport);
 
 // Import User model
 const User = require("./models/user");
 const Sighting = require("./models/sighting");
 const DailyFeature = require("./models/dailyFeature");
+
+// IMPORTANT: Import auth routes first to access checkRememberToken
+const { router: authRoutes, checkRememberToken } = require("./routes/auth");
+
+// Import routes
+// const authRoutes = require("./routes/auth");
+const identifyRoutes = require("./routes/identify");
+const articlesRoutes = require("./routes/articles");
+const collectionsRoutes = require("./routes/collections");
+const settingsRoutes = require("./routes/settings");
+const exploreRoutes = require("./routes/explore");
 
 const app = express();
 const port = 3000;
@@ -25,6 +41,9 @@ mongoose
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+// Use cookie-parser before session middleware
+app.use(cookieParser());
 app.use(
   session({
     secret: "your-secret-key",
@@ -32,17 +51,15 @@ app.use(
     saveUninitialized: false,
   })
 );
+app.use(checkRememberToken);
+
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use(express.static("public"));
 app.set("views", "./views");
 app.set("view engine", "ejs");
-
-// Import routes
-const authRoutes = require("./routes/auth");
-const identifyRoutes = require("./routes/identify");
-const articlesRoutes = require("./routes/articles");
-const collectionsRoutes = require("./routes/collections");
-const settingsRoutes = require("./routes/settings");
-const exploreRoutes = require("./routes/explore");
 
 // Use routes
 app.use(authRoutes);
@@ -154,6 +171,34 @@ app.get("/yourSightings", async (req, res) => {
     res.json(sightings);
   } else {
     return res.status(401).json({ error: "User not authenticated" });
+  }
+});
+
+app.get("/user-sighting-counts", async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+
+  try {
+    const userId = req.session.user._id;
+    
+    const birdCount = await Sighting.countDocuments({ 
+      userId: userId,
+      taxonomicGroup: "bird"
+    });
+    
+    const plantCount = await Sighting.countDocuments({ 
+      userId: userId,
+      taxonomicGroup: "plant"
+    });
+
+    res.json({
+      birdsSighted: birdCount,
+      plantsSighted: plantCount
+    });
+  } catch (error) {
+    console.error("Error getting user sighting counts:", error);
+    res.status(500).json({ error: "Failed to get sighting counts" });
   }
 });
 
