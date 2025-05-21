@@ -51,9 +51,12 @@
         try {
           const response = await fetch("/stats");
           if (!response.ok) throw new Error("Failed to fetch stats");
-          const { birds, plants } = await response.json();
-          document.getElementById("birdStats").innerText = birds;
-          document.getElementById("plantStats").innerText = plants;
+          const stats = await response.json();
+          
+          document.getElementById("birdsIdentified").innerText = stats.birdsIdentified || 0;
+          document.getElementById("plantsIdentified").innerText = stats.plantsIdentified || 0;
+          document.getElementById("birdsSighted").innerText = stats.birdsSighted || 0;
+          document.getElementById("plantsSighted").innerText = stats.plantsSighted || 0;
         } catch (error) {
           console.error("Load Stats Error:", error);
         }

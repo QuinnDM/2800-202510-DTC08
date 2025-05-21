@@ -20,15 +20,31 @@ router.get("/collection", (req, res) => {
 router.get("/stats", async (req, res) => {
   try {
     if (!req.session.user) {
-      return res.json({ birds: 0, plants: 0 });
+      return res.json({ 
+        birds: 0, 
+        plants: 0,
+      });
     }
 
-    const user = await User.findById(req.session.user._id);
+    const [user, sightingCounts] = await Promise.all([
+      User.findById(req.session.user._id),
+      fetch(`${req.protocol}://${req.get('host')}/user-sighting-counts`, {
+        headers: {
+          Cookie: req.headers.cookie
+        }
+      }).then(res => res.json())
+    ]);
+
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    res.json(user.stats || { birds: 0, plants: 0 });
+    res.json({
+      birdsIdentified: user.stats?.birds || 0,
+      plantsIdentified: user.stats?.plants|| 0,
+      birdsSighted: sightingCounts.birdsSighted || 0,
+      plantsSighted: sightingCounts.plantsSighted || 0
+    });
   } catch (error) {
     console.error("Stats error:", error);
     res.status(500).json({ error: "Failed to fetch stats" });
@@ -42,9 +58,12 @@ router.post("/update-stats", async (req, res) => {
       return res.status(401).json({ error: "Not authenticated" });
     }
 
-    const { type } = req.body;
+    const { type, action } = req.body;
     if (!type || (type !== "bird" && type !== "plant")) {
       return res.status(400).json({ error: "Invalid species type" });
+    }
+    if (!action || (action !== "identify" && action !== "sight")) {
+      return res.status(400).json({ error: "Invalid action type" });
     }
 
     const user = await User.findById(req.session.user._id);
@@ -54,15 +73,17 @@ router.post("/update-stats", async (req, res) => {
 
     // Initialize stats if they don't exist
     if (!user.stats) {
-      user.stats = { birds: 0, plants: 0 };
+      user.stats = { 
+        birdsIdentified: 0, 
+        plantsIdentified: 0,
+        birdsSighted: 0,
+        plantsSighted: 0
+      };
     }
 
-    // Increment the appropriate counter
-    if (type === "bird") {
-      user.stats.birds += 1;
-    } else {
-      user.stats.plants += 1;
-    }
+    // Update the appropriate counter
+    const statField = `${type}s${action === 'identify' ? 'Identified' : 'Sighted'}`;
+    user.stats[statField] += 1;
 
     await user.save();
     res.json(user.stats);

@@ -174,6 +174,34 @@ app.get("/yourSightings", async (req, res) => {
   }
 });
 
+app.get("/user-sighting-counts", async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+
+  try {
+    const userId = req.session.user._id;
+    
+    const birdCount = await Sighting.countDocuments({ 
+      userId: userId,
+      taxonomicGroup: "bird"
+    });
+    
+    const plantCount = await Sighting.countDocuments({ 
+      userId: userId,
+      taxonomicGroup: "plant"
+    });
+
+    res.json({
+      birdsSighted: birdCount,
+      plantsSighted: plantCount
+    });
+  } catch (error) {
+    console.error("Error getting user sighting counts:", error);
+    res.status(500).json({ error: "Failed to get sighting counts" });
+  }
+});
+
 // Submit a sighting
 app.post("/submitSighting", async (req, res) => {
   if (req.session.user) {
