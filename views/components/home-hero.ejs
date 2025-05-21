@@ -1,7 +1,6 @@
 <div class="md:w-1/2 mx-auto">
   <h2 class="text-2xl md:text-3xl font-bold mb-4">
-    Welcome<% if (typeof user !== 'undefined' && user) { %>, <%= user.email ||
-    user.username %><% } %>!
+    Welcome<% if (typeof user !== 'undefined' && user) { %>, <%= user.email || user.username %><% } %>!
   </h2>
   <p class="text-lg mb-6">Discover the wonders of nature around you.</p>
 </div>
@@ -10,14 +9,29 @@
     <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">
       📈 Your Stats
     </h3>
-    <div class="flex justify-between">
-      <div class="text-center">
-        <p class="text-sm text-gray-500">Birds Identified</p>
-        <p class="text-2xl font-bold text-green-600" id="birdStats">0</p>
+    <div class="grid grid-cols-2 gap-4">
+      <!-- Birds Column -->
+      <div class="space-y-4">
+        <div class="text-center">
+          <p class="text-sm text-gray-500">Birds Identified</p>
+          <p class="text-2xl font-bold text-green-600" id="birdsIdentified">0</p>
+        </div>
+        <div class="text-center">
+          <p class="text-sm text-gray-500">Birds Sighted</p>
+          <p class="text-2xl font-bold text-green-500" id="birdsSighted">0</p>
+        </div>
       </div>
-      <div class="text-center">
-        <p class="text-sm text-gray-500">Plants Identified</p>
-        <p class="text-2xl font-bold text-blue-500" id="plantStats">0</p>
+      
+      <!-- Plants Column -->
+      <div class="space-y-4">
+        <div class="text-center">
+          <p class="text-sm text-gray-500">Plants Identified</p>
+          <p class="text-2xl font-bold text-blue-600" id="plantsIdentified">0</p>
+        </div>
+        <div class="text-center">
+          <p class="text-sm text-gray-500">Plants Sighted</p>
+          <p class="text-2xl font-bold text-blue-500" id="plantsSighted">0</p>
+        </div>
       </div>
     </div>
   </div>

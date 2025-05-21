@@ -305,6 +305,20 @@
             };
             // scroll down to have the identification results and submission in view
             submissionDiv.scrollIntoView({ behavior: "smooth", block: "center" });
+            const statsResponse = await fetch("/update-stats", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                type: sightingData.taxonomicGroup,
+                action: "identify"
+              })
+            });
+            
+            if (!statsResponse.ok) {
+              console.error("Failed to update stats");
+            }
           } catch (error) {
             console.error("Error:", error);
             resultDiv.innerHTML = `
@@ -328,18 +342,6 @@
           }
         });
 
-        // Load stats
-        async function loadStats() {
-          try {
-            const response = await fetch("/stats");
-            if (!response.ok) throw new Error("Failed to fetch stats");
-            const { birds, plants } = await response.json();
-            // We're not displaying stats on this page, but we'll keep this function
-            // in case we want to add it later
-          } catch (error) {
-            console.error("Load Stats Error:", error);
-          }
-        }
 
         // Adds the identification to sightings collection in the database
         async function submitSighting() {
