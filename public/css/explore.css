@@ -179,9 +179,6 @@ body,
         bottom: 79px;
         z-index: 100;
         transform: translate(-50%, -50%);
-        /* display: flex; */
-        /* align-items: center;
-        justify-content: space-evenly; */
         box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
     }
 
@@ -395,12 +392,6 @@ body,
     width: 100%;
     object-fit: contain;
 }
-
-/* To change marker popup style */
-/* .leaflet-popup .leaflet-popup-content-wrapper .leaflet-popup-content {
-    margin-left: 0px;
-    margin-right: 0px;
-} */
 
 .filterControl {
     position: fixed;
