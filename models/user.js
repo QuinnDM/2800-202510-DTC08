@@ -72,8 +72,12 @@ const userSchema = new mongoose.Schema({
     },
     plants: {
       type: Number,
-      default: 0,
+      default: 0
     },
+    points: {
+      type: Number,
+      default: 0
+    }
   },
   collections: [
     {
