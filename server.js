@@ -2,40 +2,34 @@ const express = require("express");
 const session = require("express-session");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
-const bcrypt = require("bcrypt");
-const cloudinary = require("cloudinary").v2;
-const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
-const vision = require('@google-cloud/vision');
+const passport = require('passport');
 
-// Initialize the Vision API client (add after other middleware)
-
-// Replace the existing /identify endpoint with this:
-
+// Initialize passport configuration
+require('./passport-config')(passport);
 
 // Import User model
 const User = require("./models/user");
 const Sighting = require("./models/sighting");
+const DailyFeature = require("./models/dailyFeature");
+
+// IMPORTANT: Import auth routes first to access checkRememberToken
+const { router: authRoutes, checkRememberToken } = require("./routes/auth");
+
+// Import routes
+// const authRoutes = require("./routes/auth");
+const identifyRoutes = require("./routes/identify");
+const articlesRoutes = require("./routes/articles");
+const collectionsRoutes = require("./routes/collections");
+const settingsRoutes = require("./routes/settings");
+const exploreRoutes = require("./routes/explore");
 
 const app = express();
 const port = 3000;
 
-const visionClient = new vision.ImageAnnotatorClient({
-  credentials: {
-    type: 'service_account',
-    project_id: process.env.GOOGLE_CLOUD_PROJECT_ID,
-    private_key_id: process.env.GOOGLE_CLOUD_PRIVATE_KEY_ID,
-    private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
-    client_id: process.env.GOOGLE_CLOUD_CLIENT_ID,
-    auth_uri: process.env.GOOGLE_CLOUD_AUTH_URI,
-    token_uri: process.env.GOOGLE_CLOUD_TOKEN_URI,
-    auth_provider_x509_cert_url: process.env.GOOGLE_CLOUD_AUTH_PROVIDER_CERT_URL,
-    client_x509_cert_url: process.env.GOOGLE_CLOUD_CLIENT_CERT_URL
-  }
-});
 // MongoDB Connection using .env
 mongoose
   .connect(process.env.MONGODB_URI)
@@ -46,7 +40,10 @@ mongoose
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json()); // Added JSON parser for API endpoints
+app.use(bodyParser.json());
+
+// Use cookie-parser before session middleware
+app.use(cookieParser());
 app.use(
   session({
     secret: "your-secret-key",
@@ -54,514 +51,94 @@ app.use(
     saveUninitialized: false,
   })
 );
+app.use(checkRememberToken);
+
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use(express.static("public"));
 app.set("views", "./views");
 app.set("view engine", "ejs");
 
-// Configure Cloudinary for uploading image
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// Use routes
+app.use(authRoutes);
+app.use(identifyRoutes);
+app.use(articlesRoutes);
+app.use(collectionsRoutes);
+app.use(settingsRoutes);
+app.use(exploreRoutes);
 
-// Set up Multer for file uploads
-const upload = multer({ dest: "uploads/" });
-
-// Step 1: Upload image to cloudinary and get imageURL in return
-app.post("/upload", upload.single("image"), async (req, res) => {
+// Function to get daily feature based on current date
+async function getDailyFeature() {
   try {
-    // Upload image to Cloudinary
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "species_identification",
+    // Get the current date and use it as a seed for selection
+    const today = new Date();
+    const dateString = `${today.getFullYear()}-${
+      today.getMonth() + 1
+    }-${today.getDate()}`;
+
+    // Count total features
+    const count = await DailyFeature.countDocuments();
+    if (count === 0) return null;
+
+    // Create a deterministic "random" index based on the date
+    // This ensures the same feature is shown all day, but changes daily
+    const hash = dateString.split("").reduce((acc, char) => {
+      return acc + char.charCodeAt(0);
+    }, 0);
+
+    const index = hash % count;
+
+    // Get the feature at this index
+    return await DailyFeature.findOne().skip(index);
+  } catch (error) {
+    console.error("Error getting daily feature:", error);
+    return null;
+  }
+}
+
+app.get("/", async (req, res) => {
+  try {
+    // Use the date-based function to get today's feature
+    const dailyFeature = await getDailyFeature();
+
+    res.render("index", {
+      title: "Nature Nexus - Home",
+      user: req.session.user || null,
+      currentPage: "home",
+      dailyFeature: dailyFeature, // Pass the daily feature to the template
     });
-    const imageUrl = result.secure_url; // Public URL
-    res.json({ imageUrl });
   } catch (error) {
-    console.error("Cloudinary Error:", error);
-    res.status(500).json({ error: "Failed to upload image" });
-  }
-});
-
-// Routes
-app.get("/", (req, res) => {
-  res.render("index", {
-    title: "Nature Nexus - Home",
-    user: req.session.user || null,
-    currentPage: "home",
-  });
-});
-
-app.get("/index", (req, res) => {
-  res.render("index", {
-    title: "Nature Nexus - Home",
-    user: req.session.user || null,
-    currentPage: "home",
-  });
-});
-
-app.get("/explore", (req, res) => {
-  res.render("explore", {
-    title: "Nature Nexus - Explore",
-    error: null,
-    currentPage: "explore",
-    user: req.session.user || null,
-  });
-});
-
-app.get("/login", (req, res) => {
-  res.render("login", {
-    title: "Nature Nexus - Login",
-    error: null,
-    currentPage: "login",
-  });
-});
-
-app.get("/openweathermap/:lat/:lon", async (req, res) => {
-  try {
-    const { lat, lon } = req.params;
-    const openweathermapAPI = process.env.OPENWEATHERMAP_API_KEY;
-    const openweathermapUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.OPENWEATHERMAP_API_KEY}`;
-    const weatherRes = await fetch(openweathermapUrl);
-    const weatherData = await weatherRes.json();
-    res.json(weatherData);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch weather data" });
-  }
-});
-
-app.get("/tiles/:z/:x/:y", async (req, res) => {
-  const { z, x, y } = req.params;
-  const tileUrl = `https://tile.jawg.io/jawg-streets/${z}/${x}/${y}.png?access-token=${process.env.JAWG_API}`;
-  try {
-    const tileRes = await fetch(tileUrl);
-
-    if (!tileRes.ok) {
-      console.error(
-        `Tile fetch failed (${tileRes.status}): ${tileRes.statusText}`
-      );
-      const errorText = await tileRes.text();
-      console.error("Tile error response:", errorText);
-      return res.status(500).send("Tile service returned an error.");
-    }
-
-    const contentType = tileRes.headers.get("content-type");
-    const buffer = await tileRes.arrayBuffer();
-
-    res.set("Content-Type", contentType || "image/png");
-    res.send(Buffer.from(buffer));
-  } catch (err) {
-    console.error("Tile fetch threw error:", err);
-    res.status(500).send("Internal fetch error.");
-  }
-});
-
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    const user = await User.findOne({ email });
-    if (user && (await bcrypt.compare(password, user.password))) {
-      req.session.user = user;
-      res.redirect("/");
-    } else {
-      res.render("login", {
-        title: "Nature Nexus - Login",
-        error: "Invalid email or password",
-        currentPage: "login",
-      });
-    }
-  } catch (err) {
-    console.error("Login error:", err);
-    res.render("login", {
-      title: "Nature Nexus - Login",
-      error: "An error occurred",
-      currentPage: "login",
+    console.error("Error fetching daily feature:", error);
+    res.render("index", {
+      title: "Nature Nexus - Home",
+      user: req.session.user || null,
+      currentPage: "home",
+      dailyFeature: null, // Pass null if there's an error
     });
   }
 });
 
-app.get("/register", (req, res) => {
-  res.render("login", {
-    title: "Nature Nexus - Register",
-    error: null,
-    currentPage: "register",
-  });
-});
+app.get("/index", async (req, res) => {
+  try {
+    // Use the same date-based function for consistency
+    const dailyFeature = await getDailyFeature();
 
-app.post("/register", async (req, res) => {
-  const { email, password } = req.body;
-  console.log("Registration attempt:", { email, password: "***" });
-  if (!email || !password) {
-    console.log("Missing email or password");
-    return res.render("login", {
-      title: "Nature Nexus - Register",
-      error: "Email and password are required",
-      currentPage: "register",
+    res.render("index", {
+      title: "Nature Nexus - Home",
+      user: req.session.user || null,
+      currentPage: "home",
+      dailyFeature: dailyFeature,
     });
-  }
-  try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      console.log("Email already registered:", email);
-      res.render("login", {
-        title: "Nature Nexus - Register",
-        error: "Email already registered",
-        currentPage: "register",
-      });
-    } else {
-      const saltRounds = process.env.SALT_ROUND
-        ? parseInt(process.env.SALT_ROUND)
-        : 10;
-      const hashedPassword = await bcrypt.hash(password, saltRounds);
-      console.log("Password hashed successfully");
-      const newUser = new User({
-        email,
-        password: hashedPassword,
-        stats: { birds: 0, plants: 0 },
-        collections: [],
-      });
-      const savedUser = await newUser.save();
-      console.log("User saved to MongoDB:", savedUser._id);
-      res.redirect("/login");
-    }
-  } catch (err) {
-    console.error("Registration error:", err);
-    res.render("login", {
-      title: "Nature Nexus - Register",
-      error: `Registration failed: ${err.message}`,
-      currentPage: "register",
+  } catch (error) {
+    console.error("Error fetching daily feature:", error);
+    res.render("index", {
+      title: "Nature Nexus - Home",
+      user: req.session.user || null,
+      currentPage: "home",
+      dailyFeature: null,
     });
-  }
-});
-
-app.get("/collections", (req, res) => {
-  res.render("collection", {
-    title: "Nature Nexus - Collections",
-    user: req.session.user || null,
-    currentPage: "collections",
-  });
-});
-
-app.get("/collection", (req, res) => {
-  if (req.session.user) {
-    res.render("collection", {
-      title: "Nature Nexus - Collection",
-      user: req.session.user,
-      currentPage: "collections",
-    });
-  } else {
-    res.redirect("/login");
-  }
-});
-
-app.get("/logout", (req, res) => {
-  req.session.destroy(() => {
-    res.redirect("/login");
-  });
-});
-
-// Added identify route
-app.get("/identify", (req, res) => {
-  res.render("identify", {
-    title: "Nature Nexus - Identify",
-    user: req.session.user || null,
-    currentPage: "identify",
-  });
-});
-
-// Step 2: Identify species using Gemini API endpoint
-app.post("/identify", async (req, res) => {
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`;
-  
-  try {
-    const { imageUrl } = req.body;
-    if (!imageUrl) {
-      return res.status(400).json({ error: "Image URL is required" });
-    }
-
-    console.log(`Analyzing image: ${imageUrl}`);
-    
-    // First, use Vision API to get basic labels and web entities
-    const [labelResult] = await visionClient.labelDetection(imageUrl);
-    const labels = labelResult.labelAnnotations;
-    const [webResult] = await visionClient.webDetection(imageUrl);
-    const webEntities = webResult.webDetection?.webEntities || [];
-    
-    // Prepare the Gemini prompt with Vision API results as context
-    const geminiRequest = {
-      contents: [
-        {
-          parts: [
-            {
-              text: `You are an expert biologist and bird watcher. Analyze this image and the following context:
-              
-              Vision API detected labels: ${labels.slice(0, 5).map(l => l.description).join(', ')}
-              Web entities found: ${webEntities.slice(0, 3).map(e => e.description).join(', ')}
-              
-              If it's a bird, provide:
-              1. Type: "bird"
-              2. Common Name: [bird's common name]
-              3. Scientific Name: [bird's scientific name]
-              4. Family: [bird family]
-              5. Habitat: [typical habitat]
-              6. Conservation Status: [if known]
-              7. Interesting Facts: [2-3 interesting facts]
-
-              If it's a plant, provide:
-              1. Type: "plant"
-              2. Common Name: [plant's common name]
-              3. Scientific Name: [plant's scientific name]
-              4. Family: [plant family]
-              5. Native Region: [if known]
-              6. Uses: [common uses if any]
-              7. Interesting Facts: [2-3 interesting facts]
-
-              If the image doesn't clearly show a bird or plant, or if you're uncertain, respond with:
-              1. Type: "unknown"
-
-              Format your response ONLY as a JSON object like this:
-              {
-                "type": "bird" or "plant" or "unknown",
-                "commonName": "Common name of species",
-                "scientificName": "Scientific name of species",
-                "confidence": 0.95,
-                "family": "Family name",
-                "habitat": "Typical habitat",
-                "conservationStatus": "Status if known",
-                "interestingFacts": ["Fact 1", "Fact 2"],
-                "details": "Brief description about the species",
-                "visionLabels": ["label1", "label2"] // top 3 labels from Vision API
-              }
-
-              Respond ONLY with this JSON object and nothing else. No markdown, no code blocks, just pure JSON.`
-            }
-          ]
-        }
-      ]
-    };
-
-    // Call Gemini API
-    const response = await fetch(GEMINI_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(geminiRequest),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Gemini API failed: ${response.status} - ${errorText}`);
-    }
-
-    const data = await response.json();
-
-    // Extract the JSON response from Gemini
-    let geminiResponse;
-    try {
-      const responseText = data.candidates[0].content.parts[0].text;
-      // Remove markdown code blocks if present
-      const cleanedResponse = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-      geminiResponse = JSON.parse(cleanedResponse);
-    } catch (parseError) {
-      console.error("Error parsing Gemini response:", parseError);
-      throw new Error("Failed to parse Gemini response");
-    }
-
-    // Enhance the response with Vision API data
-    const enhancedResponse = {
-      ...geminiResponse,
-      visionLabels: labels.slice(0, 3).map(label => ({
-        description: label.description,
-        score: label.score
-      })),
-      webEntities: webEntities.slice(0, 3).map(entity => ({
-        description: entity.description,
-        score: entity.score
-      }))
-    };
-
-    res.json(enhancedResponse);
-    
-  } catch (error) {
-    console.error('Error analyzing image:', error.message);
-    res.status(500).json({ 
-      type: 'error', 
-      details: error.message,
-      error: "Failed to identify species" 
-    });
-  }
-});
-
-// Updated bird details endpoint to use Gemini's enhanced response
-app.post("/bird-details", async (req, res) => {
-  try {
-    const { 
-      commonName, 
-      scientificName, 
-      family, 
-      habitat, 
-      conservationStatus, 
-      interestingFacts,
-      details
-    } = req.body;
-    
-    const birdDetails = {
-      commonName: commonName || "Unknown Bird",
-      scientificName: scientificName || "Unknown Species",
-      family: family || "Unknown Family",
-      habitat: habitat || "Habitat information not available",
-      conservationStatus: conservationStatus || "Unknown",
-      interestingFacts: interestingFacts || ["No additional facts available"],
-      description: details || "No description available",
-      sightings: []
-    };
-
-    res.json(birdDetails);
-  } catch (error) {
-    console.error("Bird details error:", error);
-    res.status(500).json({ error: "Failed to fetch bird details" });
-  }
-});
-
-// Updated plant details endpoint to use Gemini's enhanced response
-app.post("/plant-details", async (req, res) => {
-  try {
-    const { 
-      commonName, 
-      scientificName, 
-      family, 
-      nativeRegion, 
-      uses,
-      interestingFacts,
-      details
-    } = req.body;
-    
-    const plantDetails = {
-      commonName: commonName || "Unknown Plant",
-      scientificName: scientificName || "Unknown Species",
-      family: family || "Unknown Family",
-      nativeRegion: nativeRegion || "Unknown",
-      uses: uses || "Unknown",
-      interestingFacts: interestingFacts || ["No additional facts available"],
-      description: details || "No description available",
-      confidence: 0.85
-    };
-
-    res.json(plantDetails);
-  } catch (error) {
-    console.error("Plant details error:", error);
-    res.status(500).json({ error: "Failed to fetch plant details" });
-  }
-});
-
-// Get user stats
-app.get("/stats", async (req, res) => {
-  try {
-    if (!req.session.user) {
-      return res.json({ birds: 0, plants: 0 });
-    }
-
-    const user = await User.findById(req.session.user._id);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    res.json(user.stats || { birds: 0, plants: 0 });
-  } catch (error) {
-    console.error("Stats error:", error);
-    res.status(500).json({ error: "Failed to fetch stats" });
-  }
-});
-
-// Update user stats
-app.post("/update-stats", async (req, res) => {
-  try {
-    if (!req.session.user) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
-
-    const { type } = req.body;
-    if (!type || (type !== "bird" && type !== "plant")) {
-      return res.status(400).json({ error: "Invalid species type" });
-    }
-
-    const user = await User.findById(req.session.user._id);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    // Initialize stats if they don't exist
-    if (!user.stats) {
-      user.stats = { birds: 0, plants: 0 };
-    }
-
-    // Increment the appropriate counter
-    if (type === "bird") {
-      user.stats.birds += 1;
-    } else {
-      user.stats.plants += 1;
-    }
-
-    await user.save();
-    res.json(user.stats);
-  } catch (error) {
-    console.error("Update stats error:", error);
-    res.status(500).json({ error: "Failed to update stats" });
-  }
-});
-
-// Get user collections
-app.get("/api/collections", async (req, res) => {
-  try {
-    if (!req.session.user) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
-
-    const user = await User.findById(req.session.user._id);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    res.json(user.collections || []);
-  } catch (error) {
-    console.error("Collections error:", error);
-    res.status(500).json({ error: "Failed to fetch collections" });
-  }
-});
-
-// Create a new collection
-app.post("/api/collections", async (req, res) => {
-  try {
-    if (!req.session.user) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
-
-    const { name } = req.body;
-    if (!name) {
-      return res.status(400).json({ error: "Collection name is required" });
-    }
-
-    const user = await User.findById(req.session.user._id);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    // Initialize collections if they don't exist
-    if (!user.collections) {
-      user.collections = [];
-    }
-
-    // Add the new collection
-    user.collections.push({
-      name,
-      items: [],
-    });
-
-    await user.save();
-    res.json(user.collections);
-  } catch (error) {
-    console.error("Create collection error:", error);
-    res.status(500).json({ error: "Failed to create collection" });
   }
 });
 
@@ -593,7 +170,35 @@ app.get("/yourSightings", async (req, res) => {
     const sightings = await Sighting.find({ userId: req.session.user._id });
     res.json(sightings);
   } else {
-    return res.status(404).json({ error: "User not found" });
+    return res.status(401).json({ error: "User not authenticated" });
+  }
+});
+
+app.get("/user-sighting-counts", async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+
+  try {
+    const userId = req.session.user._id;
+    
+    const birdCount = await Sighting.countDocuments({ 
+      userId: userId,
+      taxonomicGroup: "bird"
+    });
+    
+    const plantCount = await Sighting.countDocuments({ 
+      userId: userId,
+      taxonomicGroup: "plant"
+    });
+
+    res.json({
+      birdsSighted: birdCount,
+      plantsSighted: plantCount
+    });
+  } catch (error) {
+    console.error("Error getting user sighting counts:", error);
+    res.status(500).json({ error: "Failed to get sighting counts" });
   }
 });
 
@@ -605,76 +210,52 @@ app.post("/submitSighting", async (req, res) => {
         userId: req.session.user._id,
         username: req.session.user.username,
         species: req.body.species,
-        description: req.body.description || '',
+        description: req.body.description || "",
         location: {
           type: "Point",
           coordinates: req.body.coordinates, // [lng, lat]
         },
-        photoUrl: req.body.photoUrl || '',
+        photoUrl: req.body.photoUrl || "",
         timestamp: new Date(req.body.timestamp),
         taxonomicGroup: req.body.taxonomicGroup,
-        userDescription: req.body.userDescription
+        userDescription: req.body.userDescription,
       });
       const newSightingSaved = await newSighting.save();
-      res.status(201).json({ message: "Sighting saved", data: newSightingSaved });
+      res
+        .status(201)
+        .json({ message: "Sighting saved", data: newSightingSaved });
     } catch (err) {
       res.status(500).json({ error: "Failed to save sighting" });
     }
   } else {
-    return res.status(404).json({ error: "User not found. You must be logged in to submit a sighting." });
+    return res.status(404).json({
+      error: "User not found. You must be logged in to submit a sighting.",
+    });
   }
 });
 
-// Settings page route
-app.get("/settings", (req, res) => {
-  res.render("settings", {
-    title: "Nature Nexus - Settings",
-    user: req.session.user || null,
-    currentPage: "settings",
-  });
-});
-
-// Article routes
-app.get("/articles/getting-started", (req, res) => {
-  res.render("articles/getting-started", {
-    title: "Getting Started with Bird Watching - Nature Nexus",
-    user: req.session.user || null,
-    currentPage: "articles",
-  });
-});
-
-app.get("/articles/bird-identification-tips", (req, res) => {
-  res.render("articles/bird-identification-tips", {
-    title: "Bird Identification Tips - Nature Nexus",
-    user: req.session.user || null,
-    currentPage: "articles",
-  });
-});
-
-app.get("/articles/bird-photography-fundamentals", (req, res) => {
-  res.render("articles/bird-photography-fundamentals", {
-    title: "Bird Photography Fundamentals - Nature Nexus",
-    user: req.session.user || null,
-    currentPage: "articles",
-  });
-});
-
-// Migration guide article route
-app.get("/articles/migration-guide", (req, res) => {
-  res.render("articles/migration-guide", {
-    title: "Seasonal Bird Migration Guide",
-    user: req.session.user || null,
-    currentPage: "articles",
-  });
-});
-
-// Journal guide article route
-app.get("/articles/journal-guide", (req, res) => {
-  res.render("articles/journal-guide", {
-    title: "Creating Your Bird Watching Journal",
-    user: req.session.user || null,
-    currentPage: "articles",
-  });
+// Add a route to manually refresh the daily feature (useful for testing)
+app.get("/refresh-daily-feature", async (req, res) => {
+  try {
+    const dailyFeature = await getDailyFeature();
+    res.json({
+      success: true,
+      message: "Daily feature refreshed",
+      feature: dailyFeature
+        ? {
+            type: dailyFeature.type,
+            commonName: dailyFeature.commonName,
+            scientificName: dailyFeature.scientificName,
+          }
+        : null,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to refresh daily feature",
+      error: error.message,
+    });
+  }
 });
 
 // Start Server

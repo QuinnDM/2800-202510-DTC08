@@ -12,6 +12,8 @@
       content="black-translucent"
     />
     <title><%= title %></title>
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon" />
+
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="bg-green-50 text-gray-800 flex flex-col min-h-screen">
@@ -58,7 +60,299 @@
         <% } %>
       </div>
     </div>
+      <!-- App Settings -->
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 class="text-xl font-semibold mb-4">App Settings</h3>
 
+          <!-- Notification Settings -->
+          <div class="pt-4 border-t">
+            <h4 class="font-medium mb-2">Notifications</h4>
+
+            <div class="space-y-2">
+              <div class="flex items-center">
+                <input
+                  type="checkbox"
+                  id="notif_new_species"
+                  class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                />
+                <label for="notif_new_species" class="ml-2 block text-gray-700"
+                  >New species in your area</label
+                >
+              </div>
+
+              <div class="flex items-center">
+                <input
+                  type="checkbox"
+                  id="notif_migration"
+                  class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                />
+                <label for="notif_migration" class="ml-2 block text-gray-700"
+                  >Migration alerts</label
+                >
+              </div>
+
+              <div class="flex items-center">
+                <input
+                  type="checkbox"
+                  id="notif_events"
+                  class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                />
+                <label for="notif_events" class="ml-2 block text-gray-700"
+                  >Local bird watching events</label
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Privacy Settings -->
+          <div class="pt-4 border-t">
+            <h4 class="font-medium mb-2">Privacy</h4>
+
+            <div class="space-y-2">
+              <div class="flex items-center">
+                <input
+                  type="checkbox"
+                  id="share_location"
+                  class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                />
+                <label for="share_location" class="ml-2 block text-gray-700"
+                  >Share my location for bird sightings</label
+                >
+              </div>
+
+              <div class="flex items-center">
+                <input
+                  type="checkbox"
+                  id="share_sightings"
+                  class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                />
+                <label for="share_sightings" class="ml-2 block text-gray-700"
+                  >Share my sightings with community</label
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button
+          id="saveSettings"
+          class="mt-6 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition"
+        >
+          Save Settings
+        </button>
+      </div>
+
+
+          <div class="pt-4 border-t">
+            <p class="text-gray-600 mb-2">
+              Permanently delete your account and all data
+            </p>
+            <button
+              id="deleteAccount"
+              class="bg-red-100 text-red-700 py-2 px-4 rounded-lg hover:bg-red-200 transition"
+            >
+              Delete Account
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- About Section -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-xl font-semibold mb-4">About</h3>
+
+        <div class="space-y-4">
+          <p><strong>App Version:</strong> 1.0.0</p>
+          <p>
+            <strong>Terms of Service:</strong>
+            <a href="/terms" class="text-blue-600 hover:underline">View</a>
+          </p>
+          <p>
+            <strong>Privacy Policy:</strong>
+            <a href="/privacy" class="text-blue-600 hover:underline">View</a>
+          </p>
+          <p>
+            <strong>Contact Support:</strong>
+            <a
+              href="mailto:support@naturenexus.com"
+              class="text-blue-600 hover:underline"
+              >support@naturenexus.com</a
+            >
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Navigation -->
     <%- include('partials/footer') %>
+    
+    <script>
+      // Settings functionality
+      document.addEventListener("DOMContentLoaded", () => {
+        // Load saved settings
+        loadSettings();
+        
+        // Save settings button
+        document
+          .getElementById("saveSettings")
+          .addEventListener("click", () => {
+            saveSettings();
+          });
+
+        // Export data button
+        document.getElementById("exportData").addEventListener("click", () => {
+          exportUserData();
+        });
+        
+        // Import data input
+        document
+          .getElementById("importFile")
+          .addEventListener("change", (event) => {
+            importUserData(event.target.files[0]);
+          });
+          
+          // Delete account button
+          document
+          .getElementById("deleteAccount")
+          .addEventListener("click", () => {
+            confirmAccountDeletion();
+          });
+        });
+        
+        // Load user settings
+        function loadSettings() {
+          // In a real app, you would fetch these from your server
+        // For demo purposes, we'll load from localStorage
+        try {
+          const settings =
+            JSON.parse(localStorage.getItem("userSettings")) || {};
+
+          // Theme
+          const theme = settings.theme || "light";
+          document.getElementById("theme").value = theme;
+          
+          // Notifications
+          document.getElementById("notif_new_species").checked =
+          settings.notif_new_species || false;
+          document.getElementById("notif_migration").checked =
+          settings.notif_migration || false;
+          document.getElementById("notif_events").checked =
+            settings.notif_events || false;
+            
+            // Privacy
+            document.getElementById("share_location").checked =
+            settings.share_location || false;
+          document.getElementById("share_sightings").checked =
+            settings.share_sightings || false;
+        } catch (error) {
+          console.error("Error loading settings:", error);
+        }
+      }
+
+      // Save user settings
+      function saveSettings() {
+        try {
+          const settings = {
+            theme: document.getElementById("theme").value,
+            notif_new_species:
+              document.getElementById("notif_new_species").checked,
+            notif_migration: document.getElementById("notif_migration").checked,
+            notif_events: document.getElementById("notif_events").checked,
+            share_location: document.getElementById("share_location").checked,
+            share_sightings: document.getElementById("share_sightings").checked,
+          };
+
+          // Save to localStorage (in a real app, you would send to your server)
+          localStorage.setItem("userSettings", JSON.stringify(settings));
+
+          // Show success message
+          alert("Settings saved successfully!");
+        } catch (error) {
+          console.error("Error saving settings:", error);
+          alert("Failed to save settings. Please try again.");
+        }
+      }
+
+      // Export user data
+      function exportUserData() {
+        // In a real app, you would fetch all user data from your server
+        // For demo purposes, we'll create a mock export
+        try {
+          const userData = {
+            profile: {
+              email:
+                '<%= typeof user !== "undefined" && user ? (user.email || user.username) : "Guest" %>',
+              joinDate: "2025-01-01",
+            },
+            stats: {
+              birds: 0,
+              plants: 0,
+            },
+            collections: [],
+            settings: JSON.parse(localStorage.getItem("userSettings")) || {},
+          };
+
+          // Create and download a JSON file
+          const dataStr = JSON.stringify(userData, null, 2);
+          const dataBlob = new Blob([dataStr], { type: "application/json" });
+          const url = URL.createObjectURL(dataBlob);
+
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "nature-nexus-data.json";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        } catch (error) {
+          console.error("Error exporting data:", error);
+          alert("Failed to export data. Please try again.");
+        }
+      }
+
+      // Import user data
+      function importUserData(file) {
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          try {
+            const userData = JSON.parse(event.target.result);
+
+            // In a real app, you would validate and process the imported data
+            console.log("Imported data:", userData);
+
+            // For demo purposes, we'll just import settings
+            if (userData.settings) {
+              localStorage.setItem(
+                "userSettings",
+                JSON.stringify(userData.settings)
+              );
+              loadSettings();
+              alert("Settings imported successfully!");
+            }
+          } catch (error) {
+            console.error("Error importing data:", error);
+            alert("Failed to import data. Invalid file format.");
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      // Confirm account deletion
+      function confirmAccountDeletion() {
+        if (
+          confirm(
+            "Are you sure you want to delete your account? This action cannot be undone."
+          )
+        ) {
+          // In a real app, you would send a request to your server to delete the account
+          alert(
+            "This is a demo. In a real application, your account would be deleted."
+          );
+        }
+      }
+    </script>
+
   </body>
 </html>

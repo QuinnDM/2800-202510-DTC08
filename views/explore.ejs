@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Explore</title>
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon" />
+
     <link rel="stylesheet" href="css/explore.css">
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,7 +25,7 @@
     <%- include('partials/header') %>
         <div id="locationInformationControl">
             <div id="locationInformationButton"></div>
-            <div id="locationInformationContainer"> 
+            <div id="locationInformationContainer">
                 <p id="output"></p>
             </div>
         </div>
@@ -55,17 +57,21 @@
             <div id="observationHeader">
                 <p>Sightings:</p>
             </div>
-            <div class="sightings">
-                <p>In View: </p>
-                <p id="visibleSightings"></p>
-            </div>
-            <div id="yourSightings">
-                <p>Yours: </p>
-                <p id="yourSightingsCount"></p>
-            </div>
-            <div class="sightings">
-                <p>Total: </p>
-                <p id="totalSightingsCount"></p>
+            <div id="sightingCountsContainer">
+                <div class="sightings">
+                    <p>In View: </p>
+                    <p id="visibleSightings"></p>
+                </div>
+                <div id="yourSightings">
+                    <button id="yourSightingsButton">
+                        <span class="highlighted">Yours: </span>
+                        <span class="highlighted" id="yourSightingsCount"></span>
+                    </button>
+                </div>
+                <div class="sightings">
+                    <p>Total: </p>
+                    <p id="totalSightingsCount"></p>
+                </div>
             </div>
         </div>
         <%- include('partials/footer') %>
