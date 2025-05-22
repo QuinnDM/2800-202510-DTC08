@@ -1,31 +1,94 @@
-<header class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-sm shadow-md z-50 border-b border-green-100">
+<header
+  class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-sm shadow-md z-50 border-b border-green-100"
+>
   <div class="container mx-auto px-4 py-3 flex justify-between items-center">
     <!-- Logo -->
     <a href="/" class="flex items-center group">
-      <svg class="w-8 h-8 text-green-600 group-hover:text-green-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <!-- <svg class="w-8 h-8 text-green-600 group-hover:text-green-700 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-      </svg>
-      <span class="ml-2 text-xl font-bold text-green-800 group-hover:text-green-700 transition">Nature Nexus</span>
+      </svg> -->
+      <img
+        src="/images/logo.png"
+        alt="Nature Nexus Logo"
+        class="w-10 h-10 rounded-full object-cover shadow-md"
+      />
+      <span
+        class="ml-2 text-xl font-bold text-green-800 group-hover:text-green-700 transition"
+      >
+        Nature Nexus
+      </span>
     </a>
-    
+
     <!-- Navigation -->
     <div class="flex items-center space-x-6">
       <nav class="hidden md:flex items-center space-x-6">
-        <a href="/" class="text-gray-700 hover:text-green-600 font-medium transition hover:-translate-y-0.5">Home</a>
-        <a href="/explore" class="text-gray-700 hover:text-green-600 font-medium transition hover:-translate-y-0.5">Explore</a>
-        <a href="/identify" class="text-gray-700 hover:text-green-600 font-medium transition hover:-translate-y-0.5">Identify</a>
-        <a href="/collection" class="text-gray-700 hover:text-green-600 font-medium transition hover:-translate-y-0.5">My Collection</a>
-        <a href="/settings" class="text-gray-700 hover:text-green-600 font-medium transition hover:-translate-y-0.5">Settings</a>
+        <a
+          href="/"
+          class="text-gray-700 hover:text-green-600 font-medium transition hover:-translate-y-0.5"
+          >Home</a
+        >
+        <a
+          href="/explore"
+          class="text-gray-700 hover:text-green-600 font-medium transition hover:-translate-y-0.5"
+          >Explore</a
+        >
+        <a
+          href="/identify"
+          class="text-gray-700 hover:text-green-600 font-medium transition hover:-translate-y-0.5"
+          >Identify</a
+        >
+        <a
+          href="/collection"
+          class="text-gray-700 hover:text-green-600 font-medium transition hover:-translate-y-0.5"
+          >My Collection</a
+        >
+        <a
+          href="/settings"
+          class="text-gray-700 hover:text-green-600 font-medium transition hover:-translate-y-0.5"
+          >Settings</a
+        >
       </nav>
 
-      <% if (currentPage !== 'settings') { %>
-        <% if (typeof user !== 'undefined' && user) { %>
-          <a href="/logout" class="bg-gradient-to-r from-green-500 to-red-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transform transition duration-300 ease-in-out font-medium">Logout</a>
-        <% } else { %>
-          <a href="/login" class="bg-gradient-to-r from-blue-500 to-green-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transform transition duration-300 ease-in-out font-medium">Login</a>
-        <% } %>
+      <!-- Mobile menu button -->
+      <div class="md:hidden">
+        <button id="mobile-menu-button" class="text-gray-700 hover:text-green-600 focus:outline-none">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Desktop auth buttons -->
+      <% if (typeof user !== 'undefined' && user) { %>
+        <a href="/logout" class="hidden md:block bg-gradient-to-r from-green-500 to-red-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transform transition duration-300 ease-in-out font-medium">Logout</a>
+      <% } else { %>
+        <a href="/login" class="hidden md:block bg-gradient-to-r from-blue-500 to-green-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transform transition duration-300 ease-in-out font-medium">Login</a>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Mobile menu (hidden by default) -->
+  <div id="mobile-menu" class="hidden md:hidden bg-white/95 backdrop-blur-sm border-t border-green-100">
+    <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+      <a href="/" class="text-gray-700 hover:text-green-600 font-medium py-2 transition">Home</a>
+      <a href="/explore" class="text-gray-700 hover:text-green-600 font-medium py-2 transition">Explore</a>
+      <a href="/identify" class="text-gray-700 hover:text-green-600 font-medium py-2 transition">Identify</a>
+      <a href="/collection" class="text-gray-700 hover:text-green-600 font-medium py-2 transition">My Collection</a>
+      <a href="/settings" class="text-gray-700 hover:text-green-600 font-medium py-2 transition">Settings</a>
+      <% if (typeof user !== 'undefined' && user) { %>
+        <a href="/logout" class="bg-gradient-to-r from-green-500 to-red-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transform transition duration-300 ease-in-out font-medium text-center my-2">Logout</a>
+      <% } else { %>
+        <a href="/login" class="bg-gradient-to-r from-blue-500 to-green-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transform transition duration-300 ease-in-out font-medium text-center my-2">Login</a>
       <% } %>
     </div>
   </div>
 </header>
+
+<script>
+  // Toggle mobile menu
+  document.getElementById('mobile-menu-button').addEventListener('click', function() {
+    const menu = document.getElementById('mobile-menu');
+    menu.classList.toggle('hidden');
+  });
+</script>
