@@ -417,6 +417,15 @@ router.post("/reset-password/:token", async (req, res) => {
   }
 });
 
+// check if the user is logged in
+router.get("/check-login", (req, res) => {
+  if (req.session.user) {
+    res.status(200).send();
+  } else {
+    return res.status(401).json({ error: "User not authenticated." });
+  }
+});
+
 // Check remember token middleware
 // Add this middleware to your app.js to check for remember_token on every request
 const checkRememberToken = async (req, res, next) => {
