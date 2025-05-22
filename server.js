@@ -170,7 +170,7 @@ app.get("/yourSightings", async (req, res) => {
     const sightings = await Sighting.find({ userId: req.session.user._id });
     res.json(sightings);
   } else {
-    return res.status(404).json({ error: "User not found" });
+    return res.status(401).json({ error: "User not authenticated" });
   }
 });
 

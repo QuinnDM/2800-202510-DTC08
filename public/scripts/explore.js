@@ -16,9 +16,10 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     jawgStreetMap.addTo(map)
 
-    map.whenReady( async () => {
+    map.whenReady(async () => {
         jawgStreetMap.addTo(map)
         await loadSightings("/sightings");
+        createYourSightingsLayer();
         displayTotalSightingsCount();
         insertLayerControlSeparator();
         styleDropDownLayers();
@@ -102,10 +103,12 @@ document.addEventListener("DOMContentLoaded", async function () {
         const resetButton = document.querySelector('.leaflet-control-geosearch .reset');
         if (resetButton) {
             resetButton.style.position = 'absolute';
-            resetButton.style.top = '4px';
-            resetButton.style.right = '10px';
+            resetButton.style.right = '5px';
+            resetButton.style.height = "30px"
             resetButton.style.backgroundColor = 'white';
             resetButton.style.border = 'none';
+            resetButton.style.fontWeight = 'bold'
+            resetButton.style.width = "30px"
         }
     }
 
@@ -151,7 +154,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                     + `<div class='infoContainer'><h3 class='bold'>Latitude: </h3><p> ${lat}</p></div>`
                     + `<div class='infoContainer'><h3 class='bold'>Longitude: </h3><p> ${lon}</p></div>`
                     + `<div class='infoContainer'><h3 class='bold'>Temperature: </h3><p> ${weatherData.temperature}°C</p></div>`
-                    + `<div class='infoContainer'><h3 class='bold'>Weather: </h3><p> ${weatherData.description}</p></div>`;
+                    + `<div class='infoContainer'><h3 class='bold'>Weather: </h3><p style="text-transform: capitalize"> ${weatherData.description}</p></div>`;
             })
             .catch(err => {
                 document.getElementById("output").innerText = "Failed to fetch weather data.";
@@ -166,6 +169,10 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // retrieve user's location information every 5 minutes
     setInterval(getLocation, 300000);
+
+    function toTitleCase() {
+
+    }
 
     const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
 
@@ -214,7 +221,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             // Create heat maps for the various layers. 
             addHeatMap(coordinateArrayBirds, "Birds HM");
             addHeatMap(coordinateArrayPlants, "Plants HM");
-            
+
             return overlayMaps["Birds"];
         } catch (err) {
             console.error('Failed to load sightings:', err);
@@ -233,7 +240,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     // colour sighting markers according to species
     function colourMarkerIcon(colour) {
         markerIcon = L.icon({
-            iconUrl: `../images/marker-icon-${colour}.png`, 
+            iconUrl: `../images/marker-icon-${colour}.png`,
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
             iconSize: [25, 41],
             iconAnchor: [12, 41],
@@ -274,17 +281,42 @@ document.addEventListener("DOMContentLoaded", async function () {
         return null;
     }
 
-    // Zoom to extent of sitings
+    const yourSightingsFeatureGroup = L.featureGroup();
+
+    // Create a layer for your sightings to use for zoom
+    async function createYourSightingsLayer() {
+        try {
+            const yourSightings = "/yourSightings"
+            response = await fetch(yourSightings);
+
+            if (response.status === 401) {
+                console.log("User not logged in. Cannot fetch user sightings.");
+                return;
+            }
+
+            data = await response.json();
+            data.forEach(sighting => {
+                const [lng, lat] = sighting.location.coordinates;
+                let sightingMarker = L.marker([lat, lng]);
+                yourSightingsFeatureGroup.addLayer(sightingMarker);
+            });
+        } catch (err) {
+            console.error("Failed to load user sightings:", err.message)
+        }
+    }
+
+    // Zoom to extent of your sightings
     async function zoomToYourSightings() {
         const yourSightingsButton = document.getElementById("yourSightings");
         yourSightingsButton.addEventListener("click", function () {
-            if (overlayMaps["Birds"] && overlayMaps["Birds"].getLayers().length > 0) {
-                map.fitBounds(overlayMaps["Birds"].getBounds());
+            if (yourSightingsFeatureGroup.getLayers().length > 0) {
+                map.fitBounds(yourSightingsFeatureGroup.getBounds());
             } else {
-                console.warn("Sightings layer is not loaded or empty.");
+                console.warn("Cannot zoom to your sightings. User is either not logged in or has no submitted sightings.");
             }
         });
     }
+
     zoomToYourSightings();
 
     // Displays the total count of total sighting contributions from all user
@@ -326,11 +358,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     async function displayYourSightingsCount() {
         try {
             const response = await fetch("/yourSightings");
+            // handle user not being logged in
+            if (response.status === 401) {
+                console.log("User not logged in. Cannot fetch user sightings.");
+            }
             const data = await response.json();
             let yourSightingsCount = 0;
-            if (Array.isArray(data)){
+            if (Array.isArray(data)) {
                 yourSightingsCount = data.length;
-            } 
+            }
             let yourSightingsElement = document.getElementById("yourSightingsCount");
             yourSightingsElement.innerText = yourSightingsCount;
         } catch (err) {
@@ -349,8 +385,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             controlContainer.insertBefore(separator, controlContainer.children[3]);
         }
     }
-
-
 });
 
 // Implement toggle for the location information popup
