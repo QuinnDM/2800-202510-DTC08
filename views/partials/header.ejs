@@ -18,12 +18,13 @@
         <a href="/collection" class="text-gray-700 hover:text-green-600 font-medium transition hover:-translate-y-0.5">My Collection</a>
         <a href="/settings" class="text-gray-700 hover:text-green-600 font-medium transition hover:-translate-y-0.5">Settings</a>
       </nav>
-      
-      <!-- Always visible login/logout button -->
-      <% if (typeof user !== 'undefined' && user) { %>
-        <a href="/logout" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition font-medium shadow hover:scale-105 transform transition duration-300 ease-in-out">Logout</a>
-      <% } else { %>
-        <a href="/login" class="bg-gradient-to-r from-blue-500 to-green-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transform transition duration-300 ease-in-out font-medium">Login</a>
+
+      <% if (currentPage !== 'settings') { %>
+        <% if (typeof user !== 'undefined' && user) { %>
+          <a href="/logout" class="bg-gradient-to-r from-green-500 to-red-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transform transition duration-300 ease-in-out font-medium">Logout</a>
+        <% } else { %>
+          <a href="/login" class="bg-gradient-to-r from-blue-500 to-green-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transform transition duration-300 ease-in-out font-medium">Login</a>
+        <% } %>
       <% } %>
     </div>
   </div>
