@@ -306,8 +306,16 @@
               </div>
             `;
 
-            // Show submission button
-            submissionDiv.classList.remove("hidden");
+            // Show submission container or ask the user to login depending on login status
+            const checkLoginResponse = await fetch("/check-login");
+            if (checkLoginResponse.ok) {
+              submissionDiv.classList.remove("hidden");
+            } else {
+              submissionDiv.innerHTML = "<p class='mb-4'>Please login to submit your sighting. Submitted sightings will appear in your Collections page and on the Explore page.</p><a href='/login'class='bg-gradient-to-r from-blue-500 to-green-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transform transition duration-300 ease-in-out font-medium'>Login</a>";
+              submissionDiv.classList.remove("hidden");
+            }
+
+
 
             // Store sighting data for potential submission
             sightingData = {
