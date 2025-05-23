@@ -375,11 +375,6 @@ body,
     }
 }
 
-/* #yourSightings:hover {
-    background-color: rgb(16, 122, 56);
-    transform: scale(1.03);
-} */
-
 #yourSightings:active {
     transform: scale(0.97);
 }
