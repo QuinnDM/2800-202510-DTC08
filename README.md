@@ -33,7 +33,7 @@ Nature Nexus addresses the disconnect between urban residents and their natural 
 
 - **Frontend**: React Native, Tailwind CSS
 - **Backend**: Node.js, Express, PostgreSQL
-- **AI Integration**: TensorFlow Lite, Vision API
+- **AI Integration**:  Google Cloud Vision API, Gemini API
 - **Mapping**: Mapbox, Leaflet
 - **Authentication**: OAuth 2.0, JWT
 
@@ -43,7 +43,7 @@ Nature Nexus addresses the disconnect between urban residents and their natural 
 
 Example:
 
-1. Open the app on your mobile device or visit `https://naturenexus.app/`.
+1. Open the app on your mobile device or visit `https://nature-nexus-txv8.onrender.com/`.
 2. Sign in or sign up to access personalized features, or;
 3. Browse local biodiversity data without signing in.
 4. Take a photo of a species you've encountered to identify and document it.
@@ -54,32 +54,68 @@ Example:
 
 ```
 nature-nexus/
-├── assets/
-│   ├── icons/
-│   ├── species-samples/
-│   └── app-images/
-├── components/
-│   ├── core/
-│   ├── maps/
-│   ├── camera/
-│   └── species/
-├── screens/
-│   ├── Home.js
-│   ├── Identify.js
-│   ├── Map.js
-│   ├── Quests.js
-│   ├── Profile.js
-│   └── Settings.js
-├── services/
-│   ├── api.js
+├── models/
+│   ├── dailyFeature.js
+│   ├── sighting.js
+│   └── user.js
+├── node_modules/
+├── public/
+│   ├── css/
+│   │   └── explore.css
+│   ├── images/
+│   │   ├── autumnbird.avif
+│   │   ├── bird1.avif
+│   │   ├── bird1.jpg
+│   │   ├── bird2.avif
+│   │   ├── bird2.jpg
+│   │   ├── bird3.avif
+│   │   ├── bird3.jpg
+│   │   ├── bird4.avif
+│   │   ├── bird4.jpg
+│   │   ├── bird5.avif
+│   │   ├── bird5.jpg
+│   │   ├── birdsnow.avif
+│   │   ├── favicon.ico
+│   │   ├── logo.png
+│   │   ├── marker-icon-blue.png
+│   │   ├── marker-icon-green.png
+│   │   ├── satellite.png
+│   │   ├── springbird.avif
+│   │   ├── streetmap.png
+│   │   ├── summerbird.avif
+│   │   └── winterbird.avif
+│   └── scripts/
+│       └── explore.js
+├── routes/
+│   ├── articles.js
 │   ├── auth.js
-│   ├── visionAI.js
-│   └── location.js
-├── database/
-│   ├── schema.sql
-│   └── migrations/
+│   ├── collections.js
+│   ├── explore.js
+│   ├── identify.js
+│   └── settings.js
+├── uploads/
+├── views/
+│   ├── articles/
+│   ├── components/
+│   ├── partials/
+│   ├── about.ejs
+│   ├── collection.ejs
+│   ├── explore.ejs
+│   ├── forgot-password.ejs
+│   ├── identity.ejs
+│   ├── index.ejs
+│   ├── login.ejs
+│   ├── reset-password.ejs
+│   └── settings.ejs
+├── .env
+├── .gitignore
+├── nodemon.json
+├── package-lock.json
+├── package.json
+├── passport-config.js
 ├── README.md
-└── .gitignore
+├── server.js
+└── tailwind.config.js
 ```
 
 ---
