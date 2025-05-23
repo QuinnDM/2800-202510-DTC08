@@ -18,4 +18,19 @@ router.get("/about", (req, res) => {
   });
 });
 
+router.get("/terms", (req, res) => {
+  res.render("terms", {
+    title: "Terms of Service - Nature Nexus",
+    user: req.session.user || null,
+    currentPage: "terms",
+  });
+});
+router.get("/privacy", (req, res) => {
+  res.render("privacy", {
+    title: "Privacy Policy - Nature Nexus",
+    user: req.session.user || null,
+    currentPage: "privacy",
+  });
+});
+
 module.exports = router;
