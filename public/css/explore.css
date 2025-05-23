@@ -321,7 +321,6 @@ body,
     #yourSightings {
         width: 120px;
         max-width: 150px;
-        background-color: none;
         color: #718096;
         font-size: 20px;
         font-weight: 600;
@@ -356,7 +355,6 @@ body,
     }
 
     .sightings {
-        background-color: none;
         font-size: 20px;
         font-weight: 600;
         color: #718096;
