@@ -2,7 +2,9 @@
 
 ## Overview
 
-Nature Nexus connects urban dwellers with the biodiversity around them by simplifying species identification and observation. This app helps users document and share wildlife sightings in cities, creating valuable data for conservation efforts while building community around urban nature appreciation. Key features include:
+Nature Nexus connects urban dwellers with the biodiversity around them by simplifying species identification and observation. This app helps users document and share wildlife sightings in cities, creating valuable data for conservation efforts while building community around urban nature appreciation. 
+
+Key features include:
 
 - AI-powered photo identification
 - Seasonal biodiversity heatmaps
@@ -31,22 +33,92 @@ Nature Nexus addresses the disconnect between urban residents and their natural 
 
 ## Technologies Used
 
-- **Frontend**: React Native, Tailwind CSS
-- **Backend**: Node.js, Express, PostgreSQL
-- **AI Integration**: TensorFlow Lite, Vision API
-- **Mapping**: Mapbox, Leaflet
+- **Frontend**: Tailwind CSS
+- **Backend**: Node.js, Express, MongoDB, Cloudinary
+- **AI Integration**:  Google Cloud Vision API, Gemini API
+- **Mapping**: JAWP
 - **Authentication**: OAuth 2.0, JWT
 
 ---
 
 ## Usage
 
-Example:
+### The required installs:
+a. Language(s):
 
-1. Open the app on your mobile device or visit `https://naturenexus.app/`.
-2. Sign in or sign up to access personalized features, or;
-3. Browse local biodiversity data without signing in.
-4. Take a photo of a species you've encountered to identify and document it.
+      Node.js (v18 or later recommended)
+
+      npm (comes with Node.js)
+
+b. IDEs:
+
+      Visual Studio Code (recommended)
+
+      Any other code editor of your choice
+
+c. Database(s):
+
+      MongoDB (local installation or MongoDB Atlas cloud instance)
+
+d. Other software:
+
+      Git for version control
+
+      Cloudinary account for image uploads (recommended for production)
+
+### 3rd party APIs and frameworks:
+      Google Cloud Vision API (for AI-powered species identification)
+
+      Gemini API (for advanced AI features, if enabled)
+
+      Tailwind CSS (already included in the repo)
+
+      JAWP (for mapping; already included)
+
+      Express, Mongoose, Passport, and other npm dependencies (installed via npm install)
+
+### API keys requirement
+      Google Cloud Vision API key
+
+      Gemini API key (if using Gemini features)
+
+      MongoDB connection string (local or Atlas)
+
+      Cloudinary API credentials (for image uploads)
+
+- Create a .env file in the root directory and add your keys as follows:
+
+```
+MONGODB_URI=your_mongodb_connection_string
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+GOOGLE_CLOUD_VISION_API_KEY=your_google_api_key
+GEMINI_API_KEY=your_gemini_api_key
+SESSION_SECRET=your_session_secret
+```
+### command line instructions:
+
+Step 1: Clone the repository:
+
+  git clone https://github.com/yourusername/nature-nexus.git
+  cd nature-nexus
+
+Step 2: Install dependencies:
+
+  npm install express mongoose cors dotenv mongodb bcrypt ejs express-session session-file-store multer cloudinary cookie-parser passport passport-google-oauth20
+
+Step 3: Set up your .env file with the required API keys and credentials (see above).
+
+Step 4: Install MongoDB (if running locally) and ensure it is running.
+
+Step 5: Set up Cloudinary for image hosting.
+
+Step 6: Start the development server:
+
+  npm run dev
+  or
+  node server.js
 
 ---
 
@@ -54,32 +126,68 @@ Example:
 
 ```
 nature-nexus/
-├── assets/
-│   ├── icons/
-│   ├── species-samples/
-│   └── app-images/
-├── components/
-│   ├── core/
-│   ├── maps/
-│   ├── camera/
-│   └── species/
-├── screens/
-│   ├── Home.js
-│   ├── Identify.js
-│   ├── Map.js
-│   ├── Quests.js
-│   ├── Profile.js
-│   └── Settings.js
-├── services/
-│   ├── api.js
+├── models/
+│   ├── dailyFeature.js
+│   ├── sighting.js
+│   └── user.js
+├── node_modules/
+├── public/
+│   ├── css/
+│   │   └── explore.css
+│   ├── images/
+│   │   ├── autumnbird.avif
+│   │   ├── bird1.avif
+│   │   ├── bird1.jpg
+│   │   ├── bird2.avif
+│   │   ├── bird2.jpg
+│   │   ├── bird3.avif
+│   │   ├── bird3.jpg
+│   │   ├── bird4.avif
+│   │   ├── bird4.jpg
+│   │   ├── bird5.avif
+│   │   ├── bird5.jpg
+│   │   ├── birdsnow.avif
+│   │   ├── favicon.ico
+│   │   ├── logo.png
+│   │   ├── marker-icon-blue.png
+│   │   ├── marker-icon-green.png
+│   │   ├── satellite.png
+│   │   ├── springbird.avif
+│   │   ├── streetmap.png
+│   │   ├── summerbird.avif
+│   │   └── winterbird.avif
+│   └── scripts/
+│       └── explore.js
+├── routes/
+│   ├── articles.js
 │   ├── auth.js
-│   ├── visionAI.js
-│   └── location.js
-├── database/
-│   ├── schema.sql
-│   └── migrations/
+│   ├── collections.js
+│   ├── explore.js
+│   ├── identify.js
+│   └── settings.js
+├── uploads/
+├── views/
+│   ├── articles/
+│   ├── components/
+│   ├── partials/
+│   ├── about.ejs
+│   ├── collection.ejs
+│   ├── explore.ejs
+│   ├── forgot-password.ejs
+│   ├── identity.ejs
+│   ├── index.ejs
+│   ├── login.ejs
+│   ├── reset-password.ejs
+│   └── settings.ejs
+├── .env
+├── .gitignore
+├── nodemon.json
+├── package-lock.json
+├── package.json
+├── passport-config.js
 ├── README.md
-└── .gitignore
+├── server.js
+└── tailwind.config.js
 ```
 
 ---
@@ -112,64 +220,9 @@ Team Members:
 
 ---
 
-## Resources
-
-- Species database initial seed from Global Biodiversity Information Facility (GBIF)
-- AI model trained on iNaturalist dataset
-
 ## Contact
 
 - Ben Le - lechiben@gmail.com
 - Mason Young - masonyoung1997@gmail.com
 - Quinn Desforge Major - QuinnDesforgeMajor@gmail.com
 - Andrei Chepakovich - andreichepakovich@gmail.com
-
-## Acknowledgements
-
-- <a href="https://www.gbif.org/">Global Biodiversity Information Facility</a>
-- <a href="https://www.inaturalist.org/">iNaturalist</a>
-- <a href="https://www.tensorflow.org/">TensorFlow</a>
-
-## Attribution
-
-Used in server.js file
-/**
- * Used to fetch the map tiles from Jawg while keeping the API key a secret in the .env file.
- * Generated by ChatGPT 4o
- *
- * @author https://chat.openai.com/
- */
-app.get("/tiles/:z/:x/:y", async (req, res) => {
-  const { z, x, y } = req.params;
-  const r = ""; // use '@2x' for retina if needed
-  const tileUrl = `https://tile.jawg.io/jawg-streets/${z}/${x}/${y}${r}.png?access-token=${process.env.JAWG_API}`;
-
-  try {
-    const tileRes = await fetch(tileUrl);
-
-    if (!tileRes.ok) {
-      console.error(`Tile fetch failed (${tileRes.status}): ${tileRes.statusText}`);
-      const errorText = await tileRes.text();
-      console.error("Tile error response:", errorText);
-      return res.status(500).send("Tile service returned an error.");
-    }
-
-    const contentType = tileRes.headers.get("content-type");
-    const buffer = await tileRes.arrayBuffer();
-
-    res.set("Content-Type", contentType || "image/png");
-    res.send(Buffer.from(buffer));
-  } catch (err) {
-    console.error("Tile fetch threw error:", err);
-    res.status(500).send("Internal fetch error.");
-  }
-});
-
-Used in explore.js
-// Prevent users from being able to pan outside of the map's bounds
-/* credit to rob.m's stackflow answer to prevent user from being able to pan out of map bounds
-https://stackoverflow.com/questions/22155017/can-i-prevent-panning-leaflet-map-out-of-the-worlds-edge*/
-map.setMaxBounds(bounds);
-map.on('drag', function () {
-    map.panInsideBounds(bounds, { animate: false });
-})
