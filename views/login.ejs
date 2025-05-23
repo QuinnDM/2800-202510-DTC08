@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login & Register Tabs</title>
-    <link rel="stylesheet" href="/styles.css" />
+    <!-- <link rel="stylesheet" href="/styles.css" /> -->
     <link rel="icon" href="/images/favicon.ico" type="image/x-icon" />
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -54,7 +54,7 @@
         <% } %>
         <form action="/login" method="POST" class="space-y-4">
           <div>
-            <label class="block text-gray-700">Email</label>
+            <label class="block text-gray-700">Email<span class="text-red-500">*</span></label>
             <input
               type="email"
               id="email"
@@ -65,7 +65,7 @@
             />
           </div>
           <div>
-            <label class="block text-gray-700">Password</label>
+            <label class="block text-gray-700">Password<span class="text-red-500">*</span></label>
             <input
               type="password"
               id="password"
@@ -164,7 +164,7 @@
         <% } %>
         <form action="/register" method="POST" class="space-y-4">
           <div>
-            <label for="email" class="block text-gray-700">Email</label>
+            <label for="email" class="block text-gray-700">Email<span class="text-red-500">*</span></label>
             <input
               type="email"
               id="email"
@@ -176,7 +176,7 @@
             />
           </div>
           <div>
-            <label for="username" class="block text-gray-700">Username</label>
+            <label for="username" class="block text-gray-700">Username<span class="text-red-500">*</span></label>
             <input
               type="text"
               id="username"
@@ -187,7 +187,7 @@
             />
           </div>
           <div>
-            <label for="password" class="block text-gray-700">Password</label>
+            <label for="password" class="block text-gray-700">Password<span class="text-red-500">*</span></label>
             <input
               type="password"
               id="password"
@@ -198,7 +198,7 @@
             />
           </div>
           <div>
-            <label for="confirmPassword" class="block text-gray-700">Confirm Password</label>
+            <label for="confirmPassword" class="block text-gray-700">Confirm Password<span class="text-red-500">*</span></label>
             <input
               type="password"
               id="confirmPassword"

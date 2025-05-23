@@ -43,20 +43,24 @@
       <div id="identificationResult" class="text-center text-gray-600 px-2">
         Results will appear here after identification.
       </div>
-      <div id="submitIdentificationContainer" class="text-gray-600 mt-6 bg-white rounded-lg shadow p-4 mb-6 mx-2 text-center hidden">
+      <div id="submitIdentificationContainer"
+        class="text-gray-600 mt-6 bg-white rounded-lg shadow p-4 mb-6 mx-2 text-center hidden">
         <p><strong>Would you like to submit your sighting?</strong></p>
         <div class="flex gap-4">
-          <button id="yesButton" class="flex-1 bg-green-600 mt-4 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition"
+          <button id="yesButton"
+            class="flex-1 bg-green-600 mt-4 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition"
             onclick="submissionModal.showModal()">
             Yes
           </button>
-          <button id="noButton" class="flex-1 bg-red-600 mt-4 text-white py-3 px-4 rounded-lg hover:bg-red-700 transition"
+          <button id="noButton"
+            class="flex-1 bg-red-600 mt-4 text-white py-3 px-4 rounded-lg hover:bg-red-700 transition"
             onclick="resetPage()">
             No
           </button>
         </div>
-        <p class="mt-3 w-full md:w-[75%] mx-auto">Submissions will be added to your collections page and will contribute to the
-          explore page</p>
+        <p class="mt-3 w-full md:w-[75%] mx-auto">Submissions will be added to your Collections page and will contribute
+          to the
+          Explore page.</p>
       </div>
       <div role="alert" id="submissionSuccessAlert" class="hidden fixed top-0 left-1/2 transform -translate-x-1/2 -translate-y-full
       transition-transform duration-700 z-[9000] w-full max-w-md shadow-lg ease-in-out">
@@ -74,19 +78,22 @@
           </form>
           <h3 class="text-2xl md:text-3xl font-bold mt-4 mb-5 mx-auto text-center underline">Sighting Information</h3>
           <div id="descriptionDiv" class="gap-y-4">
-            <form class="space-y-4 md:space-y-6">
+            <form id="submissionInputsForm" class="space-y-4 md:space-y-6">
               <div class="text-center mx-auto">
                 <h3 class="text-center mx-auto text-xl md:text-2xl font-bold mb-3">Description</h3>
                 <textarea name="description" id="description" maxlength="150"
                   placeholder="Please describe your sighting (e.g. location, observations, etc.)"
-                  class="border-2 border-green-600 rounded w-full p-2"></textarea>
+                  class="border border-green-600 rounded w-full p-2"></textarea>
               </div>
+              <hr class="solid">
               <div class="text-center mx-auto">
-                <h3 class="text-xl md:text-2xl font-bold mb-3">Time & Date</h3>
+                <h3 class="text-xl md:text-2xl font-bold mb-3">Time & Date<span class="text-red-500">*</span></h3>
                 <input name="sightingTime" id="sightingTime" type="datetime-local" required class="w-full max-w-xs">
               </div>
+              <hr class="solid">
               <div>
-                <h3 class="text-center mx-auto text-xl md:text-2xl font-bold">Location</h3>
+                <h3 class="text-center mx-auto text-xl md:text-2xl font-bold">Location<span
+                    class="text-red-500">*</span></h3>
                 <div class="text-center mx-auto">
                   <p id="useCurrentLocation"
                     class="py-3 md:py-4 font-semibold text-base md:text-lg text-green-600 hover:underline cursor-pointer">
@@ -105,19 +112,30 @@
                   </div>
                 </div>
                 <h3 class="text-center mx-auto underline text-lg md:text-xl font-semibold my-3 md:my-4">OR</h3>
-                <div>
+                <div class="mb-3">
                   <div class="text-center mx-auto font-semibold">
                     <p class="text-base md:text-lg">Click on the map to choose a sighting location</p>
                   </div>
                   <div id="map" class="mx-auto mt-3 md:mt-4" style="height: 250px; width: 100%;"></div>
                 </div>
-                <!-- class="mx-auto mt-4 rounded border border-green-600" -->
-                <button id="submissionButton"
-                  class="text-lg md:text-xl text-center font-semibold w-full md:w-1/2 bg-gradient-to-r from-blue-500 to-green-500 text-white py-2 md:py-3 px-4 md:px-6 rounded-full shadow-lg hover:scale-105 transform transition duration-300 ease-in-out block mt-4 md:mt-5 mx-auto"
-                  onclick="submitSighting()">
-                  Submit
-                </button>
+                <hr class="solid">
+                <div class="relative flex justify-center mt-4">
+                  <button id="submissionButton"
+                    class="text-lg md:text-xl w-1/2 text-center font-semibold bg-gradient-to-r from-blue-500 to-green-500 text-white py-2 md:py-3 px-4 md:px-6 rounded-full shadow-lg hover:scale-105 transform transition duration-300 ease-in-out z-10">
+                    Submit
+                  </button>
+                  <button type="reset"
+                    class="absolute left-1/2 translate-x-[190%] ml-4 mt-1 text-lg md:text-xl font-semibold bg-gray-300 text-black py-2 md:py-3 px-4 md:px-6 rounded-full shadow hover:bg-gray-400 transition duration-300 ease-in-out">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" width="20px" height="20px"
+                      viewBox="0 0 1920 1920">
+                      <path
+                        d="M960 0v213.333c411.627 0 746.667 334.934 746.667 746.667S1371.627 1706.667 960 1706.667 213.333 1371.733 213.333 960c0-197.013 78.4-382.507 213.334-520.747v254.08H640V106.667H53.333V320h191.04C88.64 494.08 0 720.96 0 960c0 529.28 430.613 960 960 960s960-430.72 960-960S1489.387 0 960 0"
+                        fill-rule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
               </div>
+
             </form>
           </div>
         </div>
@@ -149,18 +167,18 @@
 
           // Hide the submission container
           document.getElementById("submitIdentificationContainer").classList.add("hidden");
-          
+
           // Clear the identification results
-          document.getElementById("identificationResult").innerHTML = 
+          document.getElementById("identificationResult").innerHTML =
             "Results will appear here after identification.";
-          
+
           // Clear the image preview and input
           document.getElementById("imagePreview").classList.add("hidden");
           document.getElementById("imageInput").value = "";
-          
+
           // Reset any stored sighting data
           sightingData = null;
-          
+
           // Scroll back to the top of the form
           document.querySelector("main").scrollIntoView({ behavior: "smooth" });
         }
@@ -261,7 +279,7 @@
                     <div class="flex justify-center items-center mt-1">
                       <span class="inline-block px-2 py-1 text-xs font-semibold rounded 
                         ${identification.confidence > 0.8 ? 'bg-green-100 text-green-800' :
-                          identification.confidence > 0.5 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">
+                identification.confidence > 0.5 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">
                         ${(identification.confidence * 100).toFixed(0)}% Confidence
                       </span>
                     </div>
@@ -299,8 +317,16 @@
               </div>
             `;
 
-            // Show submission button
-            submissionDiv.classList.remove("hidden");
+            // Show submission container or ask the user to login depending on login status
+            const checkLoginResponse = await fetch("/check-login");
+            if (checkLoginResponse.ok) {
+              submissionDiv.classList.remove("hidden");
+            } else {
+              submissionDiv.innerHTML = "<p class='mb-4'>Please login to submit your sighting. Submitted sightings will appear in your Collections page and on the Explore page.</p><a href='/login'class='bg-gradient-to-r from-blue-500 to-green-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transform transition duration-300 ease-in-out font-medium'>Login</a>";
+              submissionDiv.classList.remove("hidden");
+            }
+
+
 
             // Store sighting data for potential submission
             sightingData = {
@@ -326,7 +352,7 @@
                 action: "identify"
               })
             });
-            
+
             if (!statsResponse.ok) {
               console.error("Failed to update stats");
             }
