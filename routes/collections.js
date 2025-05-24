@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/user");
 const Sighting = require("../models/sighting");
+const { validateUserStats } = require("../utilities/sighting-util");
 
 // User collection page (requires login)
 router.get("/collection", (req, res) => {
@@ -68,6 +69,28 @@ router.get("/user-sightings", async (req, res) => {
   }
 });
 
+router.get("/user-species-count", async (req, res) => {
+  try {
+    const userId = req.session.user._id;
+    const birdSpecies = await Sighting.distinct("species", {
+      userId: userId,
+      taxonomicGroup: "bird"
+    });
+
+    const plantSpecies = await Sighting.distinct("species", {
+      userId: userId,
+      taxonomicGroup: "plant"
+    });
+
+    console.log(`Bird Species: ${birdSpecies}`);
+    console.log(`Plant Species: ${plantSpecies}`);
+    res.json({ count: birdSpecies.length + plantSpecies.length });
+  } catch (error) {
+    console.error("Unable to fetch user unique species sightings:", error);
+    res.status(500).json({ error: "Failed to fetch user unique species sightings" });
+  }
+});
+
 router.post("/validate-stats", async (req, res) => {
   try {
     // Check to see if user is logged in
@@ -76,27 +99,15 @@ router.post("/validate-stats", async (req, res) => {
     }
 
     // Look for user in DB
-    const user = await User.findById(req.session.user._id);
+    const user = req.session.user._id;
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Initialize stats if they don't exist
-    if (!user.stats) {
-      user.stats = { birds: 0, plants: 0, points: 0 };
-    }
-
-    // Initialize individual stats if they are missing
-    const missingFields = ["birds", "plants", "points"].filter(field => !Object.keys(user.stats).includes(field));
-    for (const field of missingFields) {
-      user.stats[field] = 0;
-    }
-
-    // Update DB
-    await user.save();
-    res.json(user.stats);
+    const stats = await validateUserStats(user);
+    res.json(stats);
   } catch (error) {
-    console.error("Update stats error:", error);
+    console.error("Validate stats error:", error);
     res.status(500).json({ error: "Failed to validate stats" });
   }
 });
