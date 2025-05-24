@@ -19,6 +19,9 @@ const DailyFeature = require("./models/dailyFeature");
 // IMPORTANT: Import auth routes first to access checkRememberToken
 const { router: authRoutes, checkRememberToken } = require("./routes/auth");
 
+// Import utilities
+const { getUserSightingCounts } = require("./utilities/sighting-util");
+
 // Import routes
 // const authRoutes = require("./routes/auth");
 const identifyRoutes = require("./routes/identify");
@@ -74,9 +77,8 @@ async function getDailyFeature() {
   try {
     // Get the current date and use it as a seed for selection
     const today = new Date();
-    const dateString = `${today.getFullYear()}-${
-      today.getMonth() + 1
-    }-${today.getDate()}`;
+    const dateString = `${today.getFullYear()}-${today.getMonth() + 1
+      }-${today.getDate()}`;
 
     // Count total features
     const count = await DailyFeature.countDocuments();
@@ -180,22 +182,8 @@ app.get("/user-sighting-counts", async (req, res) => {
   }
 
   try {
-    const userId = req.session.user._id;
-    
-    const birdCount = await Sighting.countDocuments({ 
-      userId: userId,
-      taxonomicGroup: "bird"
-    });
-    
-    const plantCount = await Sighting.countDocuments({ 
-      userId: userId,
-      taxonomicGroup: "plant"
-    });
-
-    res.json({
-      birdsSighted: birdCount,
-      plantsSighted: plantCount
-    });
+    const counts = await getUserSightingCounts(req.session.user._id);
+    res.json(counts);
   } catch (error) {
     console.error("Error getting user sighting counts:", error);
     res.status(500).json({ error: "Failed to get sighting counts" });
@@ -243,10 +231,10 @@ app.get("/refresh-daily-feature", async (req, res) => {
       message: "Daily feature refreshed",
       feature: dailyFeature
         ? {
-            type: dailyFeature.type,
-            commonName: dailyFeature.commonName,
-            scientificName: dailyFeature.scientificName,
-          }
+          type: dailyFeature.type,
+          commonName: dailyFeature.commonName,
+          scientificName: dailyFeature.scientificName,
+        }
         : null,
     });
   } catch (error) {

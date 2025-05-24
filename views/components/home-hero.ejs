@@ -1,6 +1,7 @@
 <div class="md:w-1/2 mx-auto">
   <h2 class="text-2xl md:text-3xl font-bold mb-4">
-    Welcome<% if (typeof user !== 'undefined' && user) { %>, <%= user.email || user.username %><% } %>!
+    Welcome<% if (typeof user !=='undefined' && user) { %>, <%= user.email || user.username %>
+        <% } %>!
   </h2>
   <p class="text-lg mb-6">Discover the wonders of nature around you.</p>
 </div>
@@ -9,7 +10,7 @@
     <h3 class="text-xl font-semibold mb-6 flex items-center gap-2">
       📊 Your Nature Stats
     </h3>
-    
+
     <!-- Sighted Section -->
     <div>
       <h4 class="text-lg font-medium mb-4 flex items-center gap-2">
@@ -28,12 +29,10 @@
       </div>
     </div>
   </div>
-  
+
   <!-- Identify Button -->
-  <a
-    href="/identify"
-    class="block mb-5 text-center w-full bg-gradient-to-r from-blue-500 to-green-500 text-white py-3 px-6 rounded-full shadow-lg hover:scale-105 transform transition duration-300 ease-in-out flex items-center justify-center gap-2"
-  >
+  <a href="/identify"
+    class="mb-5 text-center w-full bg-gradient-to-r from-blue-500 to-green-500 text-white py-3 px-6 rounded-full shadow-lg hover:scale-105 transform transition duration-300 ease-in-out flex items-center justify-center gap-2">
     <span class="text-xl">🌿</span>
     <span>Identify Something New</span>
   </a>

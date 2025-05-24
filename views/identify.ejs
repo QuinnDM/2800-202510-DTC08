@@ -100,15 +100,15 @@
                     Use your current location</p>
                 </div>
                 <div class="flex flex-col md:flex-row md:space-x-5 space-y-2 md:space-y-0 justify-center items-center">
-                  <div id="latitude">
+                  <div id="latitude" class="w-[265px]">
                     <label class="py-2 md:py-4 font-semibold">Latitude:</label>
                     <input name="sightingLatitude" id="sightingLatitude" type="number"
-                      class="border border-green-600 rounded px-2 w-full" placeholder="e.g. 49.2587" required>
+                      class="border border-green-600 rounded px-2 w-full" step="any" placeholder="e.g. 49.2587" required>
                   </div>
-                  <div id="longitude">
+                  <div id="longitude" class="w-[265px]">
                     <label class="py-2 md:py-4 font-semibold">Longitude:</label>
                     <input name="sightingLongitude" id="sightingLongitude" type="number"
-                      class="border border-green-600 rounded px-2 w-full" placeholder="e.g. -123.1211" required>
+                      class="border border-green-600 rounded px-2 w-full" step="any" placeholder="e.g. -123.1211" required>
                   </div>
                 </div>
                 <h3 class="text-center mx-auto underline text-lg md:text-xl font-semibold my-3 md:my-4">OR</h3>
@@ -120,7 +120,7 @@
                 </div>
                 <hr class="solid">
                 <div class="relative flex justify-center mt-4">
-                  <button id="submissionButton"
+                  <button id="submissionButton" onclick="submitSighting()"
                     class="text-lg md:text-xl w-1/2 text-center font-semibold bg-gradient-to-r from-blue-500 to-green-500 text-white py-2 md:py-3 px-4 md:px-6 rounded-full shadow-lg hover:scale-105 transform transition duration-300 ease-in-out z-10">
                     Submit
                   </button>
@@ -135,7 +135,6 @@
                   </button>
                 </div>
               </div>
-
             </form>
           </div>
         </div>
